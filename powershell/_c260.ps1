@@ -1,13 +1,23 @@
 <#
-.DESCRIPTION
-   This short script calls ffmpeg to convert a recording made using gaming GPU into a constant frame rate editor
-   friendly file for DaVinci Resolve.
+    This script calls ffmpeg and converts an mp4 recorded by GPU  
+    to dnxhd constant frame rate 60 editor friendly file ready for 
+    DaVinci Resolve.
+    
+    To use navigate to your recordings folder in Windows Explorer, in 
+    the explorer search bar type powershell.exe to open powershell in 
+    current directory. You'll want to edit the line in the code that 
+    points to your ffmpeg exe.
 
-   It takes a single argument that is the file name, error checks if no file is given and checks if the file was
-   already run through the script.
+    Then you can run the script using ./c260 nameofrecording. This will 
+    create a file of the same name with mxf extension. You may need to
+    alter your execution policy in order to run the script, I suggest
+    modifying scope process to bypass for simply running the script
+    occasionally. When giving file name to script in powershell don't
+    include extension .mp4.
 
-.TODO
-    Add file scanning for newly added files, if not converted then convert for batch conversion.
+    I take no responsibility for use of this script. It's useful for me
+    but feel free to use it for your own purposes.
+          
 #>
 
 IF ($args.count -eq 0) {
@@ -15,14 +25,21 @@ IF ($args.count -eq 0) {
     Exit
 }
 
-$FILE_IN=$args[0] + ".mp4"
-$FILE_OUT=$FILE_IN + "_constant60.mxf"
+$FILE_IN = $args[0] + ".mp4"
+$FILE_OUT = $FILE_IN + "_constant60.mxf"
+# CHANGE THIS TO POINT TO YOUR FFMEG EXE
+$DIREXE = "PATH\TO\ffmpeg.exe"
+
+IF (![System.IO.File]::Exists($FILE_IN)) {
+    Write-Host "Error... that file does not exist... exiting script"
+    Exit
+}
 
 IF ([System.IO.File]::Exists($FILE_OUT)) {
     Write-Host "File was already converted... exiting script."
     Exit
 }
 
-Write-Host "Converting $FILE_IN to constant frame rate edit friendly file $FILE_OUT"
+Write-Host "Converting $FILE_IN to cfr 60 edit friendly file $FILE_OUT"
 
-F:\zz_Programs\ffmpeg\bin\ffmpeg.exe -i $FILE_IN -c:v dnxhd -b:v 290M -c:a pcm_s16le -r 60 $FILE_OUT
+& $DIREXE -i $FILE_IN -c:v dnxhd -b:v 290M -c:a pcm_s16le -r 60 $FILE_OUT
