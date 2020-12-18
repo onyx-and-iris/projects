@@ -1,14 +1,14 @@
 <#
     This script calls ffmpeg and converts an mp4 recorded by GPU  
     to dnxhd constant frame rate 60 editor friendly file ready for 
-    DaVinci Resolve.
+    DaVinci Resolve or other editor.
     
-    To use navigate to your recordings folder in Windows Explorer, in 
+    First, edit the line in the code that points to your ffmpeg exe.
+    Then navigate to your recordings folder in Windows Explorer, in 
     the explorer search bar type powershell.exe to open powershell in 
-    current directory. You'll want to edit the line in the code that 
-    points to your ffmpeg exe.
+    current directory.
 
-    Then you can run the script using ./c260 nameofrecording. This will 
+    Then you can run the script using ./_c260 nameofrecording. This will 
     create a file of the same name with mxf extension. You may need to
     alter your execution policy in order to run the script, I suggest
     modifying scope process to bypass for simply running the script
