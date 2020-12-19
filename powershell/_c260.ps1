@@ -25,8 +25,10 @@ IF ($args.count -eq 0) {
     Exit
 }
 
-$FILE_IN = $args[0] + ".mp4"
-$FILE_OUT = $FILE_IN + "_constant60.mxf"
+
+$FILENAME = $args[0]
+$FILE_IN = $FILENAME + ".mp4"
+$FILE_OUT = $FILENAME + "_constant60.mxf"
 # CHANGE THIS TO POINT TO YOUR FFMEG EXE
 $DIREXE = "PATH\TO\ffmpeg.exe"
 
