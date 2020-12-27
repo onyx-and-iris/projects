@@ -2,7 +2,7 @@
 
 : <<'END'
 DESCRIPTION:
-Runner for batch_conversion.sh.
+Runner for batch_convert.sh.
 This bash script calls ffmpeg to convert an mp4 file to an editor friendly mxf file. It tests if the file extension was given.
 It also tests if the file exists and whether or not it has already been converted.
 USE:
