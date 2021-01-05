@@ -1,0 +1,5 @@
+# Enable vi editing in bash and readline
+set editing-mode vi
+
+# Press F12 to clear terminal
+"\e[24~":'clear\n'
