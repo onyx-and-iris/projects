@@ -1,1 +1,2 @@
-Stop-Job one_play, two_play, one_convert, two_convert, mics
+Stop-Job play_top, play_front, rec_top, rec_front `
+, rec__mics
