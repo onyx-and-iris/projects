@@ -28,6 +28,19 @@ kind = 'potato'
 # Ensure that Voicemeeter is launched
 # voicemeeter.launch(kind)
 
+
+def update_db(upd, macro):
+  print("{}{}".format("Updating value for row: ", macro))
+  val = int(upd == True)
+
+  sql = 'UPDATE macros1 SET value = ? WHERE macro = ?'
+  data = [
+  (val),(macro)
+  ]
+  
+  con.execute(sql, data)
+  con.commit()
+  
 # strip 0,1,4 mute both mics to everywhere
 # strip 4 = mics_louder
 def mute_mics(mute):
@@ -37,25 +50,19 @@ def mute_mics(mute):
       'in-1': dict(mute=True),
       'in-4': dict(mute=True)
     })
-    #update db
-    sql= 'UPDATE macros1 SET value = 1 WHERE macro = "mute_mics"'
-    with con:
-      con.execute(sql)
     
     print("Mics muted")
-
+    
   else:
     oai.apply({
       'in-0': dict(mute=False),
       'in-1': dict(mute=False),
       'in-4': dict(mute=False)
     })
-    #update db
-    sql= 'UPDATE macros1 SET value = 0 WHERE macro = "mute_mics"'
-    with con:
-      con.execute(sql)
-      
+        
     print("Mics unmuted")
+
+  update_db(mute, 'mute_mics')
 
 # vban 0,1 off disable mic to game but keep to disc
 # out bus 2,7 off to disable disc + mics to stream
@@ -65,11 +72,6 @@ def only_discord(odisc):
     oai.set("vban.outstream[1].on", 0)
     oai.outputs[2].mute = True
     oai.outputs[7].mute = True
-    
-    #update db
-    sql = 'UPDATE macros1 SET value = 1 WHERE macro = "only_discord"'
-    with con:
-      con.execute(sql)
       
     print("Only discord enabled")
   else:
@@ -77,13 +79,10 @@ def only_discord(odisc):
     oai.set("vban.outstream[1].on", 1)
     oai.outputs[2].mute = False
     oai.outputs[7].mute = False
-    
-    #update db
-    sql = 'UPDATE macros1 SET value = 0 WHERE macro = "only_discord"'
-    with con:
-      con.execute(sql)
       
     print("Only discord disabled")
+      
+  update_db(odisc, 'only_discord')
     
 # bus 0,1 muted stops mics to game, discord
 # bus 3 left unmuted allowed mics_louder to stream
@@ -97,11 +96,7 @@ def only_stream(ostream):
       'in-3': dict(gain=-3),
       'in-6': dict(gain=-3)
     })
-    #update db
-    sql= 'UPDATE macros1 SET value = 1 WHERE macro = "only_stream"'
-    with con:
-      con.execute(sql)
-    
+  
     print("Only Stream Enabled")
 
   else:
@@ -112,12 +107,10 @@ def only_stream(ostream):
       'in-3': dict(gain=0),
       'in-6': dict(gain=0)
     })
-    #update db
-    sql= 'UPDATE macros1 SET value = 0 WHERE macro = "only_stream"'
-    with con:
-      con.execute(sql)
       
     print("Only Stream Disabled")
+    
+  update_db(ostream, 'only_stream')
  
 # A1, B3 off stops mics_louder to streamlabs/gamecaster and iris stream
 # B1, B2 strip on and bus 0,1 out opened allows mics_louder over vban.
@@ -129,10 +122,6 @@ def sound_test(sound_t):
       'out-5': dict(mute=False),
       'out-6': dict(mute=False)
     })
-    #update db
-    sql= 'UPDATE macros1 SET value = 1 WHERE macro = "sound_test"'
-    with con:
-      con.execute(sql)
     
     print("Mic Test Enabled")
 
@@ -142,12 +131,10 @@ def sound_test(sound_t):
       'out-5': dict(mute=True),
       'out-6': dict(mute=True)
     })
-    #update db
-    sql= 'UPDATE macros1 SET value = 0 WHERE macro = "sound_test"'
-    with con:
-      con.execute(sql)
-      
+     
     print("Mic Test Disabled")
+    
+  update_db(sound_t, 'sound_test')
   
 def only_onyx(oonyx):
   pass
@@ -156,16 +143,15 @@ def only_iris(oiris):
   pass
 
 # mute game pcs to stream for start scene
+# perhaps add call to subprocess to notify when stream goes live
 def start():
-    oai.inputs[2].mute = True
-    oai.inputs[3].mute = True
+  start = True
+  oai.inputs[2].mute = True
+  oai.inputs[3].mute = True
     
-    #update db
-    sql= 'UPDATE macros1 SET value = 1 WHERE macro = "start"'
-    with con:
-      con.execute(sql)
+  update_db(start, 'start')
       
-    print("Start scene enabled.. ready to go live!")
+  print("Start scene enabled.. ready to go live!")
   
 def reset():
   print("This is the reset function")
@@ -189,17 +175,15 @@ def reset():
   })
   
   # reset the db
-  sql = [
-  'UPDATE macros1 SET value = 1 WHERE macro = "mute_mics"',
-  'UPDATE macros1 SET value = 0 WHERE macro = "only_discord"',
-  'UPDATE macros1 SET value = 1 WHERE macro = "only_stream"',
-  'UPDATE macros1 SET value = 0 WHERE macro = "sound_test"',
-  'UPDATE macros1 SET value = NULL WHERE macro = "start"'
+  sql = 'UPDATE macros1 SET value = ? WHERE macro = ?'
+  data = [
+    (1, "mute_mics"), (0, "only_discord"), (1, "only_stream"), 
+    (0, "sound_test"), ("NULL", "start")
   ]
-  with con:
-    for command in sql:
-      con.execute(command)
-
+ 
+  con.executemany(sql, data)
+  con.commit()
+  
 #####################################
       
 with voicemeeter.remote(kind) as oai:
@@ -265,6 +249,7 @@ with voicemeeter.remote(kind) as oai:
   # mute both game pcs to stream
   elif args.start:
     start()
-    
+  
+  # reset db to default profile  
   else:
     reset()
