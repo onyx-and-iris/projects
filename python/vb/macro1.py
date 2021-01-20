@@ -1,7 +1,7 @@
 # Our current layer 1 vb macros translated into python using this awesome wrapper:
 # https://github.com/chvolkmann/voicemeeter-remote-python
 # todo: layer 2 and 3
-
+import subprocess
 import sqlite3 as sl
 import voicemeeter
 import argparse
@@ -28,9 +28,22 @@ kind = 'potato'
 # Ensure that Voicemeeter is launched
 # voicemeeter.launch(kind)
 
+# subprocess runs vban_sendtext which can be cloned and compiled from:
+# https://github.com/quiniouben/vban
+# run through the WSL shell
+class send_vbantext():
+  def mic_test(upd):
+    if upd:
+      subprocess.Popen("wsl " + "~/scripts/send_vbantext.sh -sound_t onyx 1 &>/dev/null")
+      subprocess.Popen("wsl " + "~/scripts/send_vbantext.sh -sound_t iris 1 &>/dev/null")
+      
+      print("Mic Test Enabled")
+    else:
+      subprocess.Popen("wsl " + "~/scripts/send_vbantext.sh -sound_t onyx 0 &>/dev/null")
+      subprocess.Popen("wsl " + "~/scripts/send_vbantext.sh -sound_t iris 0 &>/dev/null")
+      print("Mic Test Disabled")    
 
 def update_db(upd, macro):
-  print("{}{}".format("Updating value for row: ", macro))
   val = int(upd == True)
 
   sql = 'UPDATE macros1 SET value = ? WHERE macro = ?'
@@ -40,6 +53,7 @@ def update_db(upd, macro):
   
   con.execute(sql, data)
   con.commit()
+  print("Database updated")
   
 # strip 0,1,4 mute both mics to everywhere
 # strip 4 = mics_louder
@@ -114,16 +128,14 @@ def only_stream(ostream):
  
 # A1, B3 off stops mics_louder to streamlabs/gamecaster and iris stream
 # B1, B2 strip on and bus 0,1 out opened allows mics_louder over vban.
-# vban_text required here to set mics to open (not PTT) on game pcs
 def sound_test(sound_t):
+  macro = 'sound_test'
   if sound_t:
     oai.apply({
       'in-4': dict(A1=False, B1=True, B2=True, B3=False, mute=False),
       'out-5': dict(mute=False),
       'out-6': dict(mute=False)
     })
-    
-    print("Mic Test Enabled")
 
   else:
     oai.apply({
@@ -131,10 +143,9 @@ def sound_test(sound_t):
       'out-5': dict(mute=True),
       'out-6': dict(mute=True)
     })
-     
-    print("Mic Test Disabled")
-    
-  update_db(sound_t, 'sound_test')
+  
+  send_vbantext.mic_test(sound_t)
+  update_db(sound_t, macro)
   
 def only_onyx(oonyx):
   pass
