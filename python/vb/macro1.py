@@ -5,6 +5,7 @@ import subprocess
 import sqlite3 as sl
 import voicemeeter
 import argparse
+import midipad
 
 # create or connect to db
 con = sl.connect('macros.db')
@@ -26,7 +27,7 @@ args = parser.parse_args()
 kind = 'potato'
 
 # Ensure that Voicemeeter is launched
-# voicemeeter.launch(kind)
+#voicemeeter.launch(kind)
 
 # subprocess runs vban_sendtext which can be cloned and compiled from:
 # https://github.com/quiniouben/vban
@@ -43,28 +44,36 @@ class send_vbantext():
       subprocess.Popen("wsl " + "~/scripts/send_vbantext.sh -sound_t iris 0 &>/dev/null")
       print("Mic Test Disabled")    
 
-def update_db(upd, macro):
-  val = int(upd == True)
 
-  sql = 'UPDATE macros1 SET value = ? WHERE macro = ?'
-  data = [
-  (val),(macro)
-  ]
-  
-  con.execute(sql, data)
-  con.commit()
-  print("Database updated")
+class updates():
+  def update_db(upd, macro):
+    val = int(upd == True)
+
+    sql = 'UPDATE macros1 SET value = ? WHERE macro = ?'
+    data = [
+    (val),(macro)
+    ]
+    
+    con.execute(sql, data)
+    con.commit()
+    print("Database updated")
+    
+  def update_Button_State(macro, upd):
+    # Send midi signal to macropad
+    with midipad.getType(macro, upd) as oai_midi:
+      oai_midi.upd_type()  
+
   
 # strip 0,1,4 mute both mics to everywhere
 # strip 4 = mics_louder
 def mute_mics(mute):
+  macro = 'mute_mics'
   if mute:
     oai.apply({
       'in-0': dict(mute=True),
       'in-1': dict(mute=True),
       'in-4': dict(mute=True)
     })
-    
     print("Mics muted")
     
   else:
@@ -73,14 +82,15 @@ def mute_mics(mute):
       'in-1': dict(mute=False),
       'in-4': dict(mute=False)
     })
-        
     print("Mics unmuted")
 
-  update_db(mute, 'mute_mics')
+  updates.update_Button_State(macro, mute)
+  updates.update_db(mute, macro)
 
 # vban 0,1 off disable mic to game but keep to disc
 # out bus 2,7 off to disable disc + mics to stream
 def only_discord(odisc):
+  macro = 'only_discord'
   if odisc:
     oai.set("vban.outstream[0].on", 0)
     oai.set("vban.outstream[1].on", 0)
@@ -95,13 +105,15 @@ def only_discord(odisc):
     oai.outputs[7].mute = False
       
     print("Only discord disabled")
-      
-  update_db(odisc, 'only_discord')
+
+  updates.update_Button_State(macro, odisc)      
+  updates.update_db(odisc, 'only_discord')
     
 # bus 0,1 muted stops mics to game, discord
 # bus 3 left unmuted allowed mics_louder to stream
 # minor 3db pad on games + disc for speaking to stream
 def only_stream(ostream):
+  macro = 'only_stream'
   if ostream:
     oai.apply({
       'out-5': dict(mute=True),
@@ -123,8 +135,9 @@ def only_stream(ostream):
     })
       
     print("Only Stream Disabled")
-    
-  update_db(ostream, 'only_stream')
+
+  updates.update_Button_State(macro, ostream)    
+  updates.update_db(ostream, 'only_stream')
  
 # A1, B3 off stops mics_louder to streamlabs/gamecaster and iris stream
 # B1, B2 strip on and bus 0,1 out opened allows mics_louder over vban.
@@ -145,22 +158,31 @@ def sound_test(sound_t):
     })
   
   send_vbantext.mic_test(sound_t)
-  update_db(sound_t, macro)
-  
+  updates.update_Button_State(macro, sound_t)
+  updates.update_db(sound_t, macro)
+
+# only for updates. SOLO done through DAW
 def only_onyx(oonyx):
-  pass
-  
+  macro = 'only_onyx'
+  updates.update_Button_State(macro, oonyx)
+  updates.update_db(oonyx, macro)
+
+# only for updates. SOLO done through DAW
 def only_iris(oiris):
-  pass
+  macro = 'only_iris'
+  updates.update_Button_State(macro, oiris)
+  updates.update_db(oiris, macro)
 
 # mute game pcs to stream for start scene
 # perhaps add call to subprocess to notify when stream goes live
 def start():
+  macro = 'start'
   start = True
   oai.inputs[2].mute = True
   oai.inputs[3].mute = True
-    
-  update_db(start, 'start')
+
+  updates.update_Button_State(macro, start)    
+  updates.update_db(start, macro)
       
   print("Start scene enabled.. ready to go live!")
   
@@ -189,8 +211,10 @@ def reset():
   sql = 'UPDATE macros1 SET value = ? WHERE macro = ?'
   data = [
     (1, "mute_mics"), (0, "only_discord"), (1, "only_stream"), 
-    (0, "sound_test"), ("NULL", "start")
+    (0, "sound_test"), (0, "start")
   ]
+#  use midi on/off states + db to track button states
+#  updates.update_Button_State(macro, mute)   
  
   con.executemany(sql, data)
   con.commit()
@@ -199,7 +223,7 @@ def reset():
       
 with voicemeeter.remote(kind) as oai:
   oai.show()
-  
+
   # mics_mute
   if args.mm:
     mute=True
@@ -252,10 +276,28 @@ with voicemeeter.remote(kind) as oai:
     sound_test(sound_t)
     
   elif args.oo:
-    pass
+    oonyx = True
+    
+    #check db
+    sql = 'SELECT value FROM macros1 WHERE macro = "only_onyx"'
+    with con:
+    # bit dirty but quick and works.
+      if(list(con.execute(sql))[0][0]):
+        oonyx = False
+      
+    only_onyx(oonyx)
     
   elif args.oi:
-    pass
+    oiris = True
+    
+    #check db
+    sql = 'SELECT value FROM macros1 WHERE macro = "only_onyx"'
+    with con:
+    # bit dirty but quick and works.
+      if(list(con.execute(sql))[0][0]):
+        oonyx = False    
+    
+    only_iris(oiris)
     
   # mute both game pcs to stream
   elif args.start:
