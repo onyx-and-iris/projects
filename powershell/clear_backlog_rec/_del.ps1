@@ -7,7 +7,7 @@ $path_rec = "PATH\TO\RECORDINGS"
 $backlog = (Get-Date).AddDays(-14)
 $filetypes = ('*.mp4', '*.mkv')  
 
-$logfile = "E:\scripts\cronjobs\monitor_streamvids\logfile.txt"
+$logfile = "PATH\TO\logfile.log"
 
 
 # set excludes and modify log based on parameters
@@ -33,5 +33,7 @@ ForEach ($file in $(Get-ChildItem -Recurse $path_rec -Include $filetypes -File |
 }; if (-not $count) { Invoke-Expression $write_tolog } else {
   
   "$count files cleared from backlog" | Add-Content $logfile
+}
+
 
 exit
