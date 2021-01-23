@@ -45,4 +45,4 @@ IF ([System.IO.File]::Exists($FILE_OUT)) {
 
 Write-Host "Converting $FILE_IN to cfr 60 edit friendly file $FILE_OUT"
 
-& $DIREXE -i $FILE_IN -c:v dnxhd -b:v 290M -c:a pcm_s16le -r 60 $FILE_OUT
+& $DIREXE -i $FILE_IN -c:v dnxhd -b:v 290M -r 60 $FILE_OUT

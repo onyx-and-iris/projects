@@ -1,7 +1,7 @@
 # This script monitors the folder we save all of our recordings to
 # and deletes mp4 and mkv files older than two weeks.
 # excludes and logs altered (according to code) with parameters
-param([switch]$dualstreams,[switch]$reviews)
+param([switch]$cleanup,[switch]$dualstreams,[switch]$reviews)
 
 $path_rec = "PATH\TO\RECORDINGS"
 $backlog = (Get-Date).AddDays(-14)
@@ -12,6 +12,13 @@ $logfile = "PATH\TO\logfile.log"
 
 # set excludes and modify log based on parameters
 if ( $PSBoundParameters.Values.Count -eq 0 ) {
+  # log cronjob and execute cleanup
+  "[$(Get-Date)] Running CRONJOB:" | Add-Content $logfile
+  
+  $excludes = "_saved"
+  $write_tolog = 'Add-Content -Path $logfile -Value "No recordings older than 14 days"'
+}
+  elseif ( $cleanup ) {
   $excludes = "_saved"
   $write_tolog = 'Add-Content -Path $logfile -Value "No recordings older than 14 days"'
 } elseif ( $dualstreams ) {
