@@ -65,20 +65,17 @@ class updates():
       oai_midi.upd_type()  
 
   def reset_Button_State(self, data_cur, data_def):  
-    print("DATA DEFAULT:")
     # reverse each element in list
     reversed = [x[::-1] for x in data_def]
-    print(reversed)
-    print("DATA CURRENT:")
-    print(data_cur)
-    print("COMPARE")
+
+    # get pairs that do not match (data_cur - data_def)
     toUpdate = [x[::-1] for x in data_cur if x not in reversed]
-    print(toUpdate)
+
 
     for a, b in toUpdate:
-      print("{} is {}".format(b, a))
+      # switch 1 = 0, 0 = 1  
       switch = 1 - a
-      print("Now switching it to {}".format(switch))
+
       updates.update_Button_State(b, switch)
       time.sleep(0.5)
 
