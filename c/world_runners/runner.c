@@ -1,34 +1,27 @@
-#include <stdio.h>
 #include <getopt.h>
 #include <stdlib.h>
 #include <string.h>
+#include "functions.h"
 
-#define OPTSTR "ngu"
+#define OPTSTR "ngu:"
 
 #define N 1
 #define BUFF 32
- 
-typedef struct { 
-    char *name; 
-    char *country;
-    int age; 
-    char *event; 
-    int pb; 
-} athlete;
 
-void getStats( athlete *x );
 int updStat( athlete *x, int upd );
 void addRecord( athlete *x );
+int readAllRecords ( athlete *x, FILE *records ); 
 
 int main( int argc, char *argv[] ) { 
     int opt;
-    int i, j, k, l, m = 0;
+    int i = 0;
     int upd = 0;
-    athlete *runner;
+    // *runner over athlete for better form. no need to cast.
+    athlete *runner = malloc(N * sizeof(*runner)); 
+    // initialize file pointer
+    FILE *records = NULL;
 
-    runner = (athlete *)malloc(N * sizeof(athlete));
-
-    // Initialise structs
+    // Initialise struct elements
     for(i = 0; i < N; i++) {
         runner[i].name = (char *)malloc(BUFF * sizeof(char)); 
         runner[i].country = (char *)malloc(BUFF * sizeof(char));
@@ -41,26 +34,27 @@ int main( int argc, char *argv[] ) {
         switch(opt) {
             // new record
             case 'n':
-                for(j = 0; j < N; j++) {
-                    fprintf(stdout, "Setting details for athlete %i\n", j);
-                    addRecord( &runner[j] );
-                    fprintf(stdout, "Getting details for athlete %i\n", j);
-                    getStats( &runner[j] );
+                for(i = 0; i < N; i++) {
+                    fprintf(stdout, "Setting details for athlete %i\n", i);
+                    addRecord( &runner[i] );
+                    fprintf(stdout, "Getting details for athlete %i\n", i);
+
+                    // write to and then read from file
+                    writeRecord ( &runner[i], records );
+                    readRecord ( &runner[i], records );
                 }
 
                 break;
             // get stats
             case 'g': 
                 fprintf(stdout, "Get stats:\n");
-                for(k = 0; k < N; k++) 
-                    getStats( &runner[k] );
-
+                readAllRecords( &runner[i], records );
+                
                 break;
             // update age
             case 'u':
                 upd = atoi(optarg);
-                for(l = 0; l < N; l++) 
-                    fprintf(stdout, "Age updated to:%i\n", updStat( &runner[l] , upd ));
+                fprintf(stdout, "Age updated to:%i\n", updStat( &runner[i] , upd ));
 
                 break;
 
@@ -70,22 +64,16 @@ int main( int argc, char *argv[] ) {
     }
     
     // free up memory
-    free(runner);
-
     for(i = 0; i < N; i++) {
         free((char *)runner[i].name);
         free((char *)runner[i].country);
         free((char *)runner[i].event);
     }    
 
+    free(runner);
+
     return 0;
 } 
-
-void getStats( athlete *x ) { 
-    fprintf(stdout, "Name of athlete: %s\nCountry:%s\n", x->name, x->country);
-    fprintf(stdout, "Age of athlete: %i\nMain event: %s\n", x->age, x->event);
-    fprintf(stdout, "PB:%i\n", x->pb);
-}  
 
 int updStat( athlete *x, int upd ) { 
     fprintf(stdout, "Age before: %i\n", x->age);
@@ -95,9 +83,8 @@ int updStat( athlete *x, int upd ) {
 
 void addRecord( athlete *x ) {
     int age;
-    int pb;
+    float pb;
     char line[BUFF];
-    char *l = line;
     size_t l_size = BUFF;
 
     fprintf(stdout, "Please enter athlete name:\n");
@@ -118,9 +105,29 @@ void addRecord( athlete *x ) {
     fflush(stdin);
 
     fprintf(stdout, "Please enter athlete pb:\n");
-    if(fscanf(stdin, "%i", &pb) == 1)
+    if(fscanf(stdin, "%f", &pb) == 1)
         x->pb = pb;
     fflush(stdin);
 
-    free(l);
+    free(line);
+}
+
+int readAllRecords ( athlete *x, FILE *records ) {
+    records = fopen("records", "rb");    
+    rewind(records);
+
+    while (1) {
+        fread(x, sizeof(x), 1, records);
+
+        fprintf(stdout, "Name of athlete: %s\nCountry: %s\n"
+    "Age of athlete: %i\n\nMain event: %s\n" 
+    "PB:%.2f\n", x->name, x->country, x->age, x->event,  x->pb);
+
+        if (feof(records))
+            break;
+
+        fclose(records);
+    }
+
+    return 0;
 }
