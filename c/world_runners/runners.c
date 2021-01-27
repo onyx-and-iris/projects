@@ -43,6 +43,7 @@ int main ( int argc, char *argv[] ) {
 
             break;
 
+            // get records
             case 'g':
                 db = fopen( "db.dat", "rb" );
                 fprintf( stdout, "\n\nLet's get some records!\n" );
