@@ -1,8 +1,12 @@
+#define H_BITPAD_H
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #define OPTSTR "g"
 
 #define FALSE 0
 #define TRUE 1
-#define PROMPT 1
 
 typedef enum {
     BASIC, BANANA, POTATO
