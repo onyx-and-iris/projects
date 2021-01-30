@@ -36,7 +36,7 @@ if ( $PSBoundParameters.Values.Count -eq 0 ) {
 $count = 0
 ForEach ($file in $(Get-ChildItem -Recurse $path_rec -Include $filetypes -File | Where-Object {$_.PSParentPath -notmatch $excludes -and $_.CreationTime -lt $backlog})) {
   $count += $file.count
-  Remove-Item $file -Verbose 4>> $logfile 
+  Remove-Item $file -Verbose | Add-Content $logfile
 }; if (-not $count) { Invoke-Expression $write_tolog } else {
   
   "$count files cleared from backlog" | Add-Content $logfile
