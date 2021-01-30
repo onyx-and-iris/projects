@@ -1,45 +1,33 @@
-#include <stdio.h>
+#include "runners.h"
+
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFF 32
+#ifndef H_RUNNERS_H
+#include <stdio.h>
+#endif
 
-typedef struct runner {
-    char *name;
-    int age;
-    char *country;
-    char *event;
-    float pb;
-    struct runner *next;
-} runner;
-
-runner *init();
-void trimNewline( char * );
-runner *createRecord( char * );
-int getRecord( runner * );
-void cleanup( runner * );
-
-int writeToFile( runner * );
-runner *readFromFile();
 
 int main ( void ) {
     runner *_initialized = NULL;
     int numRecords = 0;
-
+/*
     _initialized = readFromFile();
 
     // if not readfromfile then initialize via user input
     if(!_initialized)
         _initialized = init();
+*/
+    _initialized = init();
 
     // run the entire linked list
     numRecords = getRecord( _initialized );
 
-    printf("%d number of records in linked list\n", numRecords);
-
+    printf("%d records in linked list\n", numRecords);
+/*
     if(writeToFile( _initialized ) == numRecords)
         fprintf(stdout, "%i records written succesfully\n", numRecords);
-
+*/
     // free memory
     cleanup( _initialized );
 
@@ -50,33 +38,6 @@ void trimNewline( char * str ) {
     int len = strlen(str);
 
     if( str[len-1] == '\n' ) str[len-1] = '\0';
-}
-
-runner *readFromFile() {
-    runner *i = NULL;
-
-    return i;
-}
-
-int writeToFile( runner * x ) {
-    int count = 0;
-    runner *i = NULL;
-    FILE *records = fopen("records.dat", "wb");
-
-    if(records != NULL) {
-        for(i = x; x->next != NULL; i = i->next)
-            if(fwrite(i, sizeof(*i), 1, records) == 1) {
-                fprintf(stdout, "Written record for %s to file\n", i->name);
-
-                ++count;                
-            }
-
-        fclose(records);
-    } else {
-        fprintf(stderr, "Error opening records.dat!\n");
-    }
-
-    return count;
 }
 
 runner *init() {
