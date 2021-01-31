@@ -7,6 +7,7 @@ import sqlite3 as sl
 import voicemeeter
 import argparse
 import midipad
+import keypress
 
 # create or connect to db
 con = sl.connect('macros.db')
@@ -69,14 +70,13 @@ class updates():
     reversed = [x[::-1] for x in data_def]
 
     # get pairs that do not match (data_cur - data_def)
-    toUpdate = [x[::-1] for x in data_cur if x not in reversed]
-
+    toUpdate = [x] for x in data_cur if x not in reversed]
 
     for a, b in toUpdate:
       # switch 1 = 0, 0 = 1  
-      switch = 1 - a
+      switch = 1 - b
 
-      updates.update_Button_State(b, switch)
+      updates.update_Button_State(a, switch)
       time.sleep(0.5)
 
 class macros():
@@ -194,7 +194,10 @@ class macros():
 
     updates.update_Button_State(self.macro, start)    
     updates.update_db(self.macro, start)
-        
+    
+    with keypress.sendkey(self.macro) as oai_key:
+      oai_key.action()  
+
     print("Start scene enabled.. ready to go live!")
     
   def reset(self):
@@ -326,7 +329,7 @@ with voicemeeter.remote(kind) as oai:
     
   # mute both game pcs to stream
   elif args.start:
-    start = True
+    start = None
     macro = macros("start") 
     macro.start()
   

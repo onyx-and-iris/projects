@@ -25,9 +25,6 @@ class sendkey:
         keyboard.press(run)
         time.sleep(0.5)
         keyboard.release(run)
-        
-    exit
-
     
   def __exit__(self, exc_type, exc_val, exc_tb):
     return None
