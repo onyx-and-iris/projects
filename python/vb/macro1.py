@@ -70,7 +70,7 @@ class updates():
     reversed = [x[::-1] for x in data_def]
 
     # get pairs that do not match (data_cur - data_def)
-    toUpdate = [x] for x in data_cur if x not in reversed]
+    toUpdate = [x for x in data_cur if x not in reversed]
 
     for a, b in toUpdate:
       # switch 1 = 0, 0 = 1  
