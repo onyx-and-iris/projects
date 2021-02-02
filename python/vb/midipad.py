@@ -13,7 +13,7 @@ class updateButtonState:
     "mute_mics": 50, "only_discord": 51, "only_stream": 52, "sound_test":53,
     "solo_onyx":54, "solo_iris":55, "start":56,
     # layer2
-    "brb": 60, "onyx_only": 61, "iris_only": 62, "dual":63,
+    "brb": 60, "onyx_only": 61, "iris_only": 62, "dual_scene":63,
     "onyx_big":64, "iris_big":65, "end":66,
     # layer3    
     "start_gc": 70, "onyx_solo": 71, "brb_gc": 72, "end_gc":73,
@@ -78,7 +78,7 @@ class getType:
       "mute_mics", "only_discord", "only_stream", "solo_onyx", "solo_iris"
     ]
     self.push = [
-      "sound_test", "start", "brb", "onyx_only", "iris_only", "dual", "onyx_big", "iris_big", "end",
+      "sound_test", "start", "brb", "onyx_only", "iris_only", "dual_scene", "onyx_big", "iris_big", "end",
       "start_gc", "onyx_solo", "brb_gc", "end_gc", "iris_solo", "reset"
     ]    
 
@@ -86,13 +86,10 @@ class getType:
     upd = updateButtonState()
 
     if self.macro == "sound_test":
-      print(("{} {}").format(self.macro, self.switch))
       upd.sound_t(self.midiout, self.macro, self.switch)
     elif self.macro in self.two_pos:
-      print(("{} is of type two_pos").format(self.macro))
       upd.two_pos(self.midiout, self.macro)
     elif self.macro in self.push:
-      print(("{} is of type push").format(self.macro))
       upd.push(self.midiout, self.macro)
     
   def __exit__(self, exc_type, exc_val, exc_tb):

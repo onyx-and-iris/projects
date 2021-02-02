@@ -3,7 +3,6 @@
 # todo: layer 3
 
 import time
-import subprocess
 #import sqlite3 as sl
 import voicemeeter
 import argparse
