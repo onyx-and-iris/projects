@@ -24,9 +24,6 @@ If (-Not [System.IO.File]::Exists($path)) {
 $list_s = Get-ChildItem -Recurse -path $source
 $list_d = Get-ChildItem -Recurse -path $destination
 
-Write-Host $list_s
-Write-Host $list_d
-
 # difference list
 Try {
 	ForEach ($file in (Compare-Object -ReferenceObject $list_s -DifferenceObject $list_d -PassThru | `
