@@ -1,6 +1,5 @@
 import pickle
 import argparse
-import sys
 from pathlib import Path
 
 class fileOps:
@@ -24,10 +23,11 @@ class fileOps:
                 self.db = pickle.load(records)
                 records.close
 
-        except EOFError:
-            return self.db
         except IOError:
             self.createEmpty()
+
+        except EOFError:
+            pass
 
         return self.db
 
