@@ -24,7 +24,7 @@ If (-Not [System.IO.File]::Exists($path)) {
 
 
 if($vps) {
-	$destination = "~/scp/ebooks2"
+	$destination = "~/scp/ebooks"
 	$_getremotelist = "ssh vps 'ls -A1 ${destination}'"	
 	
 	# full list of files in source and destination
