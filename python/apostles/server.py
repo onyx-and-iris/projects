@@ -77,6 +77,6 @@ if __name__ == '__main__':
             fileIO = apostles.fileOps()
             fileIO.writeTofile(text)
 
-            # server data to client
+            # serve data to client
             serve_text.serve()
 
