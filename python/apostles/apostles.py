@@ -52,6 +52,44 @@ class parseHtml:
 
         return text
 
+    def american_standard(self):
+        # remove all javascript and stylesheet code
+        for script in self.soup(['script', 'style']):
+            script.extract()
+
+        # remove tags with these id
+        self.soup.find(id='textname').decompose()
+        self.soup.find(id='toprightad').decompose()
+
+        # split chapter/verse into separate lines
+        for a in self.soup.find_all('a'):
+            a.replace_with("\n" + a.text + " ")
+        
+        text = self.soup.find(id='textboundingbox').text.strip()
+
+        return text
+
+    def world_english(self):
+        # remove all javascript and stylesheet code
+        for script in self.soup(['script', 'style']):
+            script.extract()
+
+        # remove tags with these id
+        self.soup.find(id='textname').decompose()
+        self.soup.find(id='toprightad').decompose()
+
+        # remove any hyperlinks
+        for link in soup.findAll('a', href=True):
+            link.extract()
+
+        # split chapter/verse into separate lines
+        for a in self.soup.find_all('a'):
+            a.replace_with("\n" + a.text + " ")
+
+        text = self.soup.find(id='textboundingbox').text.strip()
+
+        return text
+
 
 class fileOps:
     def writeTofile(self, text):
