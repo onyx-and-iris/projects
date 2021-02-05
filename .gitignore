@@ -1,4 +1,7 @@
 **/*.db
 **/*.log
+
+**/__pycache__
+
 .vscode/
 venv_*/
