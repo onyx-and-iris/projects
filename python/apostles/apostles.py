@@ -79,7 +79,7 @@ class parseHtml:
         self.soup.find(id='toprightad').decompose()
 
         # remove any hyperlinks
-        for link in soup.findAll('a', href=True):
+        for link in self.soup.findAll('a', href=True):
             link.extract()
 
         # split chapter/verse into separate lines
