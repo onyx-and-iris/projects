@@ -44,21 +44,21 @@ if __name__ == '__main__':
         'mark': "http://www.earlychristianwritings.com/text/mark-kjv.html",
         'luke': "http://www.earlychristianwritings.com/text/luke-kjv.html",
         'john': "http://www.earlychristianwritings.com/text/john-kjv.html"
-                                                    }
+    }
 
     url_as = {
         'matthew': "http://www.earlychristianwritings.com/text/matthew-asv.html",
         'mark': "http://www.earlychristianwritings.com/text/mark-asv.html",
         'luke': "http://www.earlychristianwritings.com/text/luke-asv.html",
         'john': "http://www.earlychristianwritings.com/text/john-asv.html"
-                                                        }
+    }
 
     url_we = {
         'matthew': "http://www.earlychristianwritings.com/text/matthew-web.html",
         'mark': "http://www.earlychristianwritings.com/text/mark-web.html",
         'luke': "http://www.earlychristianwritings.com/text/luke-web.html",
-                                                        'john': "http://www.earlychristianwritings.com/text/john-web.html"        
-                                                            }
+        'john': "http://www.earlychristianwritings.com/text/john-web.html"        
+    }
                     
     version = {}
     version['king_james'] = url_kj
