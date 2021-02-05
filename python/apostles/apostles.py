@@ -55,16 +55,16 @@ class parseHtml:
 
 class fileOps:
     def writeTofile(self, text):
-        john_txt = "book.txt"
+        book_txt = "book.txt"
 
         while True:
             try:
-                with open(john_txt, "w") as textfile:
+                with open(book_txt, "w") as textfile:
                     textfile.write(text)
                     textfile.close()
                     break
             except IOError:
-                textfile = open(john_txt, "x")
+                textfile = open(book_txt, "x")
                 textfile.close()
 
 

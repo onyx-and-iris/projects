@@ -1,23 +1,43 @@
 import argparse
 import socket
 
-def send_req(request):
-    # mapped in local hosts file
-    HOST = 'X.X.X.X'
-    PORT = 60000
+class retrieve_text:
+    def __enter__(self):
+        return self
 
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    except socket.error:
-        print('Failed to create socket')
-        sys.exit()
-    print('Socket Created')
+    def __init__(self):
+        # mapped in local hosts file
+        self.HOST = 'x.x.x.x'
+        self.PORT = 60000
 
-    s.connect((HOST,PORT))
-    
-    s.send(request.encode())
-    
-    s.close
+        try:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        except socket.error:
+            print('Failed to create socket')
+            sys.exit()
+        print('Socket Created')
+
+        self.s.connect((self.HOST,self.PORT))
+
+    def send_req(self, request):
+        self.s.send(request.encode())
+        reponse = self.s.recv(1024).decode('utf-8')
+        print(reponse)
+
+    def wait_reply(self):
+        data = self.s.recv(1024).decode('utf-8')
+        while data:
+            with open("book.txt", "a") as book_txt:
+                book_txt.write(data)
+
+            data = self.s.recv(1024).decode('utf-8')
+        
+        book_txt.close()
+
+    def __exit__(self, type, value, traceback):
+        self.s.close()
+        print('Socket Closed')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -40,7 +60,10 @@ if __name__ == '__main__':
         print(f'No such version, available options:\n'
         f'king_james\namerican_standard\nworld_english\n')
     
-    if request:
-        send_req(request)
-    else:
-        print(f'Failed to generate request string... exiting')
+    with retrieve_text() as retrieve:
+        if request:
+            retrieve.send_req(request)
+        else:
+            print(f'Failed to generate request string... exiting')
+
+        retrieve.wait_reply()
