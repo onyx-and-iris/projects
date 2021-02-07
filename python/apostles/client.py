@@ -28,7 +28,7 @@ class retrieve_text:
 
     def __init__(self):
         # mapped in local hosts file
-        self.HOST = 'vps.onyxandiris.online'
+        self.HOST = 'oai.vps'
         self.PORT = 60000
 
     def send_req(self, request):
