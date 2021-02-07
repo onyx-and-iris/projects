@@ -4,8 +4,8 @@ if [ $# -eq 0 ]; then
         exit
 fi
 
-IP1=X.X.X.X
-IP2=Y.Y.Y.Y
+IP1='onyx.local'
+IP2='iris.local'
 
 sound_test () {
         if [[ "$1" == "onyx" ]]; then
