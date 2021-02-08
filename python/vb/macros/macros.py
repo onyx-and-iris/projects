@@ -95,8 +95,6 @@ if __name__ == '__main__':
 
     if arg_isTrue:
       if arg == 'reset':
-        macro = layerOne.macros('reset', 0)
-        macro.reset(macros)
         macro = layerTwo.macros('reset', 0)
         macro.reset(macros)
 
