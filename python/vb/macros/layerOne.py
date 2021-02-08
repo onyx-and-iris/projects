@@ -18,33 +18,20 @@ class send_vbantext:
       commands.VBAN_SendText('onyx.local', unset_t, 6980, 'sound_t')
       commands.VBAN_SendText('iris.local', unset_t, 6980, 'sound_t')  
 
-class updates:
-  def __init__(self):
-    """ map macro names to logical IDS """
-    self.button_map = [
-    ('mute_mics', 0), ('only_discord', 1), ('only_stream', 2),
-    ('sound_test', 10), ('solo_onyx', 11), ('solo_iris', 12),
-    ('reset', 72)
-    ]    
-    
-  def Button_State(self, macro, upd):
-    for macro_name, logical_id in self.button_map:
-      if macro_name == macro:
-        commands.button_setState(logical_id, upd)
-        
-        break
 
-  def reset_Button_State(self, data_def):
-    """ set values from default macros dict """
-    for arg, data in data_def['layer1'].items():
-      self.Button_State(data[0], data[1])
-    
 class macros:
   def __init__(self, macro, switch):
     self.macro = macro
     self.switch = switch
+
     
-    self.update = updates()
+    """ map macro names to logical IDS """
+    self.button_map = {
+    'mute_mics': 0, 'only_discord': 1, 'only_stream': 2,
+    'sound_test': 10, 'solo_onyx': 11, 'solo_iris': 12,
+    'reset': 72
+    }
+    self.logical_id = self.button_map[self.macro]
     
   # strip 0,1,4 mute both mics to everywhere
   # strip 4 = mics_louder    
@@ -68,7 +55,7 @@ class macros:
         })
         print("Mics unmuted")
 
-      self.update.Button_State(self.macro, self.switch)
+      oai.button_state(self.logical_id, self.switch)
       
     return self.switch
 
@@ -93,7 +80,7 @@ class macros:
           
         print("Only discord disabled")
 
-      self.update.Button_State(self.macro, self.switch)
+      oai.button_state(self.logical_id, self.switch)
         
     return self.switch
     
@@ -124,7 +111,7 @@ class macros:
         })
         print("Only Stream Disabled")
 
-      self.update.Button_State(self.macro, self.switch)    
+      oai.button_state(self.logical_id, self.switch)   
 
     return self.switch
  
@@ -151,7 +138,7 @@ class macros:
         print("Sound Test Disabled")
 
       send_vbantext.mic_test(self.switch)
-      self.update.Button_State(self.macro, self.switch)
+      oai.button_state(self.logical_id, self.switch)
       
     return self.switch
 
@@ -160,7 +147,7 @@ class macros:
     with voicemeeter.remote('potato') as oai:
       oai.show()
       
-      self.update.Button_State(self.macro, self.switch)
+      oai.button_state(self.logical_id, self.switch)
     
     return self.switch
 
@@ -169,32 +156,7 @@ class macros:
     with voicemeeter.remote('potato') as oai:
       oai.show()
       
-      self.update.Button_State(self.macro, self.switch)
+      oai.button_state(self.logical_id, self.switch)
     
     return self.switch
-
-  def reset(self, default_states):
-    with voicemeeter.remote('potato') as oai:
-      oai.show()
-
-      oai.apply({
-        'in-0': dict(B1=True, mute=True, gain=0),
-        'in-1': dict(B2=True, mute=True, gain=0),
-        'in-2': dict(A1=False, A5=True, mute=True, gain=0),
-        'in-3': dict(A1=True, A5=True, mute=True, gain=0),
-        'in-4': dict(A1=True, B3=True, mute=True, gain=0),
-        'in-5': dict(mute=False, gain=0),
-        'in-6': dict(mute=False, gain=0),
-        'in-7': dict(mute=False, gain=0),
-        'out-0': dict(mute=False, gain=0),
-        'out-1': dict(mute=False, gain=0),
-        'out-2': dict(mute=False, gain=0),
-        'out-3': dict(mute=False, gain=0),
-        'out-4': dict(mute=False, gain=0),
-        'out-5': dict(mute=True, gain=0),
-        'out-6': dict(mute=True, gain=0),
-        'out-7': dict(mute=False, gain=0)
-      })
-      
-      self.update.reset_Button_State(default_states)
       
