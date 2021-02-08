@@ -2,23 +2,21 @@
 # https://github.com/chvolkmann/voicemeeter-remote-python
 # todo: layer 2 and 3
 import voicemeeter
-import keypress
 
 from custom import commands
 
 class send_vbantext:
   def mic_test(upd):
+    """ usage IP, COMMAND, PORT, COMMAND_NAME """ 
     set_t = 'Strip(0).A1=1; Strip(0).A2=1; Strip(0).B1=0; Strip(0).B2=0; Strip(0).mono=1;'
     unset_t = 'Strip(0).A1=0; Strip(0).A2=0; Strip(0).B1=1; Strip(0).B2=1; Strip(0).mono=0;'
     if upd:
-      commands.VBAN_SendText('onyx.local', set_t)
-      commands.VBAN_SendText('iris.local', set_t)
-      
-      print("Mic Test Enabled")
+      commands.VBAN_SendText('onyx.local', set_t, 6980, 'sound_t')
+      commands.VBAN_SendText('iris.local', set_t, 6980, 'sound_t')
+
     else:
-      commands.VBAN_SendText('onyx.local', unset_t)
-      commands.VBAN_SendText('iris.local', unset_t)
-      print("Mic Test Disabled")    
+      commands.VBAN_SendText('onyx.local', unset_t, 6980, 'sound_t')
+      commands.VBAN_SendText('iris.local', unset_t, 6980, 'sound_t')  
 
 class updates:
   def __init__(self):
@@ -26,21 +24,19 @@ class updates:
     self.button_map = [
     ('mute_mics', 0), ('only_discord', 1), ('only_stream', 2),
     ('sound_test', 10), ('solo_onyx', 11), ('solo_iris', 12),
-    ('start', 20), ('reset', 72)
+    ('reset', 72)
     ]    
     
   def Button_State(self, macro, upd):
     for macro_name, logical_id in self.button_map:
       if macro_name == macro:
-        print(f'Macro = {macro_name} Button ID = {logical_id} State = {upd}')
         commands.button_setState(logical_id, upd)
         
         break
 
   def reset_Button_State(self, data_def):
-    """ run lists from default macros dict through button_state function """
+    """ set values from default macros dict """
     for arg, data in data_def['layer1'].items():
-      print(f'{data[0]} {data[1]}')
       self.Button_State(data[0], data[1])
     
 class macros:
@@ -49,8 +45,6 @@ class macros:
     self.switch = switch
     
     self.update = updates()
-    
-    print(f'Switch passed to function in layer1: {self.switch}')
     
   # strip 0,1,4 mute both mics to everywhere
   # strip 4 = mics_louder    
@@ -179,29 +173,10 @@ class macros:
     
     return self.switch
 
-  # mute game pcs to stream for start scene
-  # perhaps add call to subprocess to notify when stream goes live
-  def start(self):
-    with voicemeeter.remote('potato') as oai:
-      oai.show()
-      
-      oai.inputs[2].mute = True
-      oai.inputs[3].mute = True
-
-      self.update.Button_State(self.macro, self.switch)    
-    
-    with keypress.sendkey(self.macro) as oai_key:
-      oai_key.action()  
-
-    print("Start scene enabled.. ready to go live!")
-    
-    return self.switch
-
   def reset(self, default_states):
     with voicemeeter.remote('potato') as oai:
       oai.show()
-      
-      print("Resetting to defaults...")
+
       oai.apply({
         'in-0': dict(B1=True, mute=True, gain=0),
         'in-1': dict(B2=True, mute=True, gain=0),
