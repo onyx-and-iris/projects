@@ -2,13 +2,9 @@
 # https://github.com/boppreh/keyboard
 import time
 import sys
-sys.path.append("..")
-from keyboard import keyboard
+import keyboard
 
 class sendkey:
-  def __enter__(self):
-      return self
-
   def __init__(self, macro):
     self.macro = macro
     
@@ -25,6 +21,3 @@ class sendkey:
         keyboard.press(run)
         time.sleep(0.5)
         keyboard.release(run)
-    
-  def __exit__(self, exc_type, exc_val, exc_tb):
-    return None
