@@ -11,48 +11,95 @@ module VMR
     attach_function :login, :VBVMR_Login, [], :int
     attach_function :logout, :VBVMR_Logout, [], :int
     attach_function :run, :VBVMR_RunVoicemeeter, [:int], :int
+    attach_function :getType, :VBVMR_GetVoicemeeterType, [:pointer], :int
 
     # macro buttons
     attach_function :macro_isDirty, :VBVMR_MacroButton_IsDirty, [], :int
     attach_function :macro_setStatus, :VBVMR_MacroButton_SetStatus, \
     [:long, :float, :long], :long
+
     
     # set/get params
-    attach_function :param_isDirty, :VBVMR_IsParametersDirty, [], :int
-    attach_function :get_paramF, :VBVMR_GetParameterFloat, [:string, :pointer], :int
     attach_function :set_paramF, :VBVMR_SetParameterFloat, [:string, :float], :int
+    attach_function :get_paramF, :VBVMR_GetParameterFloat, [:string, :pointer], :int
+    attach_function :param_isDirty, :VBVMR_IsParametersDirty, [], :int
 
 
     class << self
         def _login
-            """ login then logout and reset parameters """
-            login
-            run(2)
-            VMR.param_isDirty
+            """ login then run: 1 = basic, 2 = banana, 3 = potato """
+            success = login
+
+            if success < 0
+                exit(false)
+            end
+
+            type = self._vbType
+            puts "VB type is #{type}"
+        end
+        
+        def _vbType
+            c_get = FFI::MemoryPointer.new(:int, 1)
+            c_get.put_long(0, 0)
+
+            ret = getType(c_get)
+ 
+            if ret != 0
+                puts "ERROR: CBF failed: #{ret}"
+            else
+                return c_get.get_long(0)
+            end
+            
         end
         
         def _macro_status(logical_id, state, mode=2)
             """ nulogical, state, mode """
-            ret = VMR.macro_isDirty
-            puts "return of macro_isDirty: #{ret}"
-            while TRUE do
-                VMR.macro_setStatus(logical_id, state.to_f, mode)
-                newval = VMR.macro_isDirty
-                puts "return of newval: #{ret}"
-                break if newval != ret
+            puts "Button#{logical_id} = #{state}"
+            ret = macro_setStatus(logical_id, state.to_f, mode)
+            while macro_isDirty != 0 do
                 sleep(0.015)
+            end
+            
+            if ret != 0
+                puts "ERROR: CBF failed: #{ret}"
             end
         end
 
-        def _get_parameter(name)
-            """ VBVMR_GetParameterFloat """
-            c_get = FFI::MemoryPointer.new(:float, 1)
+        def _set_parameter(name, set)
+            """ VBVMR_SetParameterFloat """
+            oldval = _get_parameter(name)
 
-            while VMR.param_isDirty > 0
+            ret = set_paramF(name, set.to_f)
+
+            while true
+                newval = _get_parameter(name)
+                break if oldval != newval
                 sleep(0.015)
             end
 
-            ret = VMR.get_paramF(name, c_get)
+            while param_isDirty !=0
+                sleep(0.015)
+            end
+
+            ret = set_paramF(name, set.to_f)
+            if ret != 0
+                puts "here"
+                puts "ERROR: CBF failed: #{ret}"
+            end
+        end
+        
+        def _get_parameter(name)
+            """ VBVMR_GetParameterFloat """
+            c_get = FFI::MemoryPointer.new(:float, 1)
+            c_get.put_float(0, 0.0)
+
+            get_paramF(name, c_get)
+            oldval = c_get.get_float(0)
+            while param_isDirty != 0
+                sleep(0.015)
+            end
+            ret = get_paramF(name, c_get)
+
             if ret != 0
                 puts "ERROR: CBF failed: #{ret}"
             end
@@ -61,21 +108,32 @@ module VMR
 
             return value
         end
+ 
+        def _special_command(name)
+            _value = 1
 
-        def _set_parameter(name, set)
-            """ VBVMR_SetParameterFloat """
-            ret = VMR.set_paramF(name, set.to_f)
-
-            while VMR.param_isDirty > 0
-                sleep(0.015)
+            if ['Shutdown', 'Show', 'Restart', -
+                 'Reset', 'DialogShow.VBANCHAT'].include? name
+                _command = 'Command.' + name
+            else
+                puts "Command not available!"
             end
 
-            ret = VMR.set_paramF(name, set.to_f)
+            ret = set_paramF(_command, _value)
             if ret != 0
                 puts "ERROR: CBF failed: #{ret}"
             end
         end
-        
+
+        def _recorder(name, value=1)
+            _command = 'recorder.' + name
+            _value = value.to_f
+            ret = set_paramF(_command, _value)
+            if ret != 0
+                puts "ERROR: CBF failed: #{ret}"
+            end
+        end
+
         def _logout
             logout
         end
@@ -83,26 +141,52 @@ module VMR
 end
 
 param = "Strip[0].mute"
+button_ID = 0
 
 VMR._login
 
-####### WORKING #########
-"""
-VMR._macro_status(0, 1)
-sleep(1)
-VMR._macro_status(0, 0)
-sleep(3)
-"""
+VMR._special_command('Show')
 
+puts "Setting button [#{button_ID}] to 1"
+puts "=================================="
+VMR._macro_status(button_ID, 1)
+
+sleep(1)
+
+puts "Setting button [#{button_ID}] to 0"
+puts "=================================="
+VMR._macro_status(button_ID, 0)
+
+sleep(1)
+
+puts "\n\nSetting parameter #{param} to 1"
+puts "=================================="
 VMR._set_parameter(param, 1)
 newvalue = VMR._get_parameter(param)
-puts "value of #{param} = #{newvalue}"
+puts "#{param} = #{newvalue}"
 
-puts "sleeping 1 seconds..."
 sleep(1)
 
+puts "Setting parameter #{param} to 0"
+puts "================================="
 VMR._set_parameter(param, 0)
 newvalue = VMR._get_parameter(param)
-puts "value of #{param} = #{newvalue}"
+puts "#{param} = #{newvalue}"
+
+sleep(1)
+
+# only potato supports the recorder
+if VMR._vbType == 3
+    VMR._recorder('play')
+    sleep(20)
+    VMR._recorder('stop')
+
+    sleep(1)
+end
 
 VMR._logout
+
+
+
+# note _get_parameter working reliably if value set 
+# in script but not if change in GUI
