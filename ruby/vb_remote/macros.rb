@@ -24,8 +24,15 @@ module VMR
     attach_function :get_paramF, :VBVMR_GetParameterFloat, [:string, :pointer], :int
     attach_function :param_isDirty, :VBVMR_IsParametersDirty, [], :int
 
-
+    @cache = Hash(nil)
     class << self
+        attr_accessor :cache
+
+        def _clear_datapipe
+            while param_isDirty !=0 do
+            end
+        end
+
         def _login
             """ login then run: 1 = basic, 2 = banana, 3 = potato """
             success = login
@@ -34,8 +41,10 @@ module VMR
                 exit(false)
             end
 
-            type = self._vbType
+            type = _vbType
             puts "VB type is #{type}"
+
+            _clear_datapipe
         end
         
         def _vbType
@@ -56,9 +65,8 @@ module VMR
             """ nulogical, state, mode """
             puts "Button#{logical_id} = #{state}"
             ret = macro_setStatus(logical_id, state.to_f, mode)
-            while macro_isDirty != 0 do
-                sleep(0.015)
-            end
+
+            _clear_datapipe
             
             if ret != 0
                 puts "ERROR: CBF failed: #{ret}"
@@ -67,37 +75,36 @@ module VMR
 
         def _set_parameter(name, set)
             """ VBVMR_SetParameterFloat """
-            oldval = _get_parameter(name)
+            c_get_old = FFI::MemoryPointer.new(:float, 1)
+            c_get_new = FFI::MemoryPointer.new(:float, 1)
 
-            ret = set_paramF(name, set.to_f)
+            get_paramF(name, c_get_old)
+            oldval = c_get_old.get_float(0)
 
-            while true
-                newval = _get_parameter(name)
+            while true do
+                set_paramF(name, set.to_f)
+                get_paramF(name, c_get_new)
+                newval = c_get_new.get_float(0)
+                  
                 break if oldval != newval
-                sleep(0.015)
+
+                _clear_datapipe
             end
 
-            while param_isDirty !=0
-                sleep(0.015)
-            end
-
-            ret = set_paramF(name, set.to_f)
-            if ret != 0
-                puts "here"
-                puts "ERROR: CBF failed: #{ret}"
-            end
+            get_paramF(name, c_get_new)
+            newval = c_get_new.get_float(0)
         end
         
-        def _get_parameter(name)
-            """ VBVMR_GetParameterFloat """
+        def _write_cache(name)
+            """ Get param then write to cache """
             c_get = FFI::MemoryPointer.new(:float, 1)
             c_get.put_float(0, 0.0)
 
             get_paramF(name, c_get)
             oldval = c_get.get_float(0)
-            while param_isDirty != 0
-                sleep(0.015)
-            end
+
+            _clear_datapipe
+
             ret = get_paramF(name, c_get)
 
             if ret != 0
@@ -106,7 +113,19 @@ module VMR
 
             value = c_get.get_float(0).to_int
 
-            return value
+            VMR.cache.merge!("#{name}": value)
+
+            File.open("cache.dat", "wb") do |f|
+                f.write(Marshal.dump(VMR.cache))
+            end
+        end
+
+        def _get_cache(name)
+            VMR.cache = Marshal.load(File.binread("cache.dat"))
+
+            puts VMR.cache
+
+            return VMR.cache[:"#{name}"]
         end
  
         def _special_command(name)
@@ -162,7 +181,8 @@ sleep(1)
 puts "\n\nSetting parameter #{param} to 1"
 puts "=================================="
 VMR._set_parameter(param, 1)
-newvalue = VMR._get_parameter(param)
+VMR._write_cache(param)
+newvalue = VMR._get_cache(param)
 puts "#{param} = #{newvalue}"
 
 sleep(1)
@@ -170,8 +190,15 @@ sleep(1)
 puts "Setting parameter #{param} to 0"
 puts "================================="
 VMR._set_parameter(param, 0)
-newvalue = VMR._get_parameter(param)
+VMR._write_cache(param)
+newvalue = VMR._get_cache(param)
 puts "#{param} = #{newvalue}"
+
+sleep(1)
+
+puts "Showing VBAN Chat"
+puts "================================="
+VMR._special_command('DialogShow.VBANCHAT')
 
 sleep(1)
 
@@ -183,10 +210,13 @@ if VMR._vbType == 3
 
     sleep(1)
 end
+=end
 
 VMR._logout
 
 
-
-# note _get_parameter working reliably if value set 
-# in script but not if change in GUI
+=begin
+    note _get_parameter working reliably if value set 
+    in script but not if change in GUI
+    special commands are readonly
+=end
