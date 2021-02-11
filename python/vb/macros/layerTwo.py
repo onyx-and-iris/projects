@@ -3,7 +3,7 @@
 # todo: layer 3
 
 import voicemeeter
-import keypress
+import switchscene
 
 from custom import commands
 
@@ -12,8 +12,6 @@ class macros:
   def __init__(self, macro, switch):
     self.macro = macro
     self.switch = switch
-
-    self.sendkey = keypress.sendkey(self.macro)
     
     """ map macro names to logical IDS """
     self.button_map = {
@@ -77,7 +75,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
     
-    self.sendkey.action()
+    switchscene.switch_to(self.macro.upper())
       
     print("Daul Scene enabled")
     
@@ -95,7 +93,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
 
-    self.sendkey.action()
+    switchscene.switch_to(self.macro.upper())
 
     print("Onyx Big scene enabled")
     
@@ -113,7 +111,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
 
-    self.sendkey.action()
+    switchscene.switch_to(self.macro.upper())
       
     print("Iris Big enabled")
     
@@ -130,7 +128,7 @@ class macros:
 
       oai.button_state(self.logical_id, self.switch)    
     
-    self.sendkey.action() 
+    switchscene.switch_to(self.macro.upper()) 
 
     print("Start scene enabled.. ready to go live!")
     
@@ -149,7 +147,7 @@ class macros:
 
       oai.button_state(self.logical_id, self.switch)
 
-    self.sendkey.action()
+    switchscene.switch_to(self.macro.upper())
 
     return self.switch
 
@@ -163,7 +161,7 @@ class macros:
 
       oai.button_state(self.logical_id, self.switch)    
     
-    self.sendkey.action()
+    switchscene.switch_to(self.macro.upper())
 
     print("Start scene enabled.. ready to go live!")
     
