@@ -10,7 +10,7 @@ class fileOps:
   """ save/retrieve states to pickle file """
   def __init__(self, macros):
     self.db = macros
-    self.file_db = 'macros.pkl'
+    self.file_db = 'cache.pkl'
 
   def read_Db(self):
     while True:
