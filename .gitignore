@@ -1,6 +1,9 @@
 **/*.db
 **/*.log
 **/*.pkl
+**/*.toml
+**/*.json
+**/*.dat
 
 **/__pycache__
 
