@@ -13,6 +13,8 @@ class macros:
     self.macro = macro
     self.switch = switch
     
+    self.set_scene = switchscene.obs_sceneswitch()
+    
     """ map macro names to logical IDS """
     self.button_map = {
     'mute_mics': 0, 'only_discord': 1, 'only_stream': 2,
@@ -75,7 +77,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
     
-    switchscene.switch_to(self.macro.upper())
+    self.set_scene.switch_to(self.macro.upper())
       
     print("Daul Scene enabled")
     
@@ -93,7 +95,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
 
-    switchscene.switch_to(self.macro.upper())
+    self.set_scene.switch_to(self.macro.upper())
 
     print("Onyx Big scene enabled")
     
@@ -111,7 +113,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
 
-    switchscene.switch_to(self.macro.upper())
+    self.set_scene.switch_to(self.macro.upper())
       
     print("Iris Big enabled")
     
@@ -128,7 +130,7 @@ class macros:
 
       oai.button_state(self.logical_id, self.switch)    
     
-    switchscene.switch_to(self.macro.upper()) 
+    self.set_scene.switch_to(self.macro.upper()) 
 
     print("Start scene enabled.. ready to go live!")
     
@@ -147,7 +149,7 @@ class macros:
 
       oai.button_state(self.logical_id, self.switch)
 
-    switchscene.switch_to(self.macro.upper())
+    self.set_scene.switch_to(self.macro.upper())
 
     return self.switch
 
@@ -161,7 +163,7 @@ class macros:
 
       oai.button_state(self.logical_id, self.switch)    
     
-    switchscene.switch_to(self.macro.upper())
+    self.set_scene.switch_to(self.macro.upper())
 
     print("Start scene enabled.. ready to go live!")
     
