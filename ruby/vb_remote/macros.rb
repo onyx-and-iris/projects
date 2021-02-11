@@ -1,4 +1,5 @@
 require 'ffi'
+require 'toml'
 
 module VMR
     dll = ['C:\Program Files (x86)\VB\Voicemeeter\VoicemeeterRemote64.dll']
@@ -25,29 +26,34 @@ module VMR
     attach_function :param_isDirty, :VBVMR_IsParametersDirty, [], :int
 
     @cache = Hash(nil)
+    @config = "myconfig.toml"
+
     class << self
         attr_accessor :cache
+        attr_accessor :config
+
+        def _initialize_cache
+            if File.file?(VMR.config)
+                puts "Loading from config file"
+                VMR.cache = (TOML.load_file(VMR.config))
+                puts VMR.cache
+            end
+            """ If no config set to base configuration """
+        end
+
+        def _save_config
+
+        end
+
 
         def _clear_datapipe
+            """ Poll param_isDirty until pipe is clear """
             while param_isDirty !=0 do
             end
         end
 
-        def _login
-            """ login then run: 1 = basic, 2 = banana, 3 = potato """
-            success = login
-
-            if success < 0
-                exit(false)
-            end
-
-            type = _vbType
-            puts "VB type is #{type}"
-
-            _clear_datapipe
-        end
-        
         def _vbType
+            """ get voicemeter version 1 = basic, 2 = banana, 3 = potato """
             c_get = FFI::MemoryPointer.new(:int, 1)
             c_get.put_long(0, 0)
 
@@ -59,6 +65,22 @@ module VMR
                 return c_get.get_long(0)
             end
             
+        end
+
+        def _login
+            """ remote login, get vb type, clear datpipe and initialize cache """
+            success = login
+
+            if success < 0
+                exit(false)
+            end
+
+            type = _vbType
+            puts "VB type is #{type}"
+
+            _clear_datapipe
+
+            _initialize_cache
         end
         
         def _macro_status(logical_id, state, mode=2)
@@ -113,19 +135,22 @@ module VMR
 
             value = c_get.get_float(0).to_int
 
-            VMR.cache.merge!("#{name}": value)
 
+            VMR.cache["#{name}"] = value
+            
             File.open("cache.dat", "wb") do |f|
                 f.write(Marshal.dump(VMR.cache))
             end
         end
 
-        def _get_cache(name)
+        def _load_cache(name = nil, full = 0)
             VMR.cache = Marshal.load(File.binread("cache.dat"))
 
-            puts VMR.cache
-
-            return VMR.cache[:"#{name}"]
+            if name != nil
+                return VMR.cache["#{name}"]
+            elsif full
+                return VMR.cache
+            end
         end
  
         def _special_command(name)
@@ -159,7 +184,9 @@ module VMR
     end
 end
 
-param = "Strip[0].mute"
+
+#########################################
+param = "Strip[1].mute"
 button_ID = 0
 
 VMR._login
@@ -172,7 +199,7 @@ VMR._macro_status(button_ID, 1)
 
 sleep(1)
 
-puts "Setting button [#{button_ID}] to 0"
+puts "\nSetting button [#{button_ID}] to 0"
 puts "=================================="
 VMR._macro_status(button_ID, 0)
 
@@ -182,7 +209,7 @@ puts "\n\nSetting parameter #{param} to 1"
 puts "=================================="
 VMR._set_parameter(param, 1)
 VMR._write_cache(param)
-newvalue = VMR._get_cache(param)
+newvalue = VMR._load_cache(param)
 puts "#{param} = #{newvalue}"
 
 sleep(1)
@@ -191,12 +218,19 @@ puts "Setting parameter #{param} to 0"
 puts "================================="
 VMR._set_parameter(param, 0)
 VMR._write_cache(param)
-newvalue = VMR._get_cache(param)
+newvalue = VMR._load_cache(param)
 puts "#{param} = #{newvalue}"
 
 sleep(1)
 
-puts "Showing VBAN Chat"
+puts "\nParameters set. Current cache:\n"
+puts "================================="
+full_cache = VMR._load_cache(nil, 1)
+puts "#{full_cache}"
+
+sleep(1)
+
+puts "\n\nShowing VBAN Chat"
 puts "================================="
 VMR._special_command('DialogShow.VBANCHAT')
 
@@ -210,7 +244,10 @@ if VMR._vbType == 3
 
     sleep(1)
 end
-=end
+
+puts "\n\nSave settings to config"
+puts "================================="
+VMR._save_config
 
 VMR._logout
 
@@ -219,4 +256,6 @@ VMR._logout
     note _get_parameter working reliably if value set 
     in script but not if change in GUI
     special commands are readonly
+
+    name.gsub(/[\[|\]]/, "|")
 =end
