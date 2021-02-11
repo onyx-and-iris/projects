@@ -38,7 +38,7 @@ class commands:
     header += chr(int('0b00000000',2)) # for subchannels 
     header += chr(int('0b00010000',2)) # UTF8
     header += S_NAME + "\x00" * (16 - len(S_NAME))
-    header += "\x00" * 32 # framecounter
+    header += str(0) + "\x00" * (4-len(str(0))) # framecounter
 
     try:
       rawData = header + text 
