@@ -5,7 +5,6 @@ import pickle
 sys.path.append('../')
 from obswebsocket import obsws, requests
 
-pass_file = "pwd.pkl"
 class obs_sceneswitch:
   def __init__(self):
     self.pass_file = "pwd.pkl"
@@ -13,6 +12,7 @@ class obs_sceneswitch:
   def switch_to(self, name):
     host = "localhost"
     port = 4444
+    password = ''
     
     try:
         with open(self.pass_file, 'rb') as retrieve_pass:
@@ -20,13 +20,12 @@ class obs_sceneswitch:
           retrieve_pass.close()
 
     except FileNotFoundError:
-      create_pass()
-
+      self.create_pass()
+    
     ws = obsws(host, port, password)
     ws.connect()
 
     try:
-        scenes = ws.call(requests.GetSceneList())
         ws.call(requests.SetCurrentScene(name))
 
     except KeyboardInterrupt:
