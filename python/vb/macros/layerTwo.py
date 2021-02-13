@@ -39,7 +39,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)      
 
-    self.sendkey.action()
+    #self.set_scene.switch_to(self.macro.upper())
       
     print("Only Onyx Scene enabled, Iris mic muted")
     
@@ -58,7 +58,7 @@ class macros:
 
       oai.button_state(self.logical_id, self.switch)     
 
-    self.sendkey.action()
+    #self.set_scene.switch_to(self.macro.upper())
       
     print("Only Iris Scene enabled, Iris mic muted")
     
@@ -95,7 +95,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
 
-    self.set_scene.switch_to(self.macro.upper())
+    #self.set_scene.switch_to(self.macro.upper())
 
     print("Onyx Big scene enabled")
     
@@ -113,14 +113,13 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
 
-    self.set_scene.switch_to(self.macro.upper())
+    #self.set_scene.switch_to(self.macro.upper())
       
     print("Iris Big enabled")
     
     return self.switch
     
   # mute game pcs to stream for start scene
-  # perhaps add call to subprocess to notify when stream goes live
   def start(self):
     with voicemeeter.remote('potato') as oai:
       oai.show()
@@ -145,7 +144,7 @@ class macros:
         'in-2': dict(mute=True),
         'in-3': dict(mute=True)
       })
-      print("BRB: mics are muted")
+      print("BRB: game pcs muted")
 
       oai.button_state(self.logical_id, self.switch)
 
