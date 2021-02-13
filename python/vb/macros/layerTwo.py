@@ -5,6 +5,7 @@
 import voicemeeter
 import switchscene
 
+
 from custom import commands
 
 
@@ -13,7 +14,7 @@ class macros:
     self.macro = macro
     self.switch = switch
     
-    self.set_scene = switchscene.obs_sceneswitch()
+    self.set_scene = switchscene.Switchscene()
     
     """ map macro names to logical IDS """
     self.button_map = {
@@ -95,7 +96,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
 
-    #self.set_scene.switch_to(self.macro.upper())
+    self.set_scene.switch_to(self.macro.upper())
 
     print("Onyx Big scene enabled")
     
@@ -113,7 +114,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)
 
-    #self.set_scene.switch_to(self.macro.upper())
+    self.set_scene.switch_to(self.macro.upper())
       
     print("Iris Big enabled")
     
