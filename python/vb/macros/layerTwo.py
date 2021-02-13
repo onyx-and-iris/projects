@@ -40,7 +40,7 @@ class macros:
       
       oai.button_state(self.logical_id, self.switch)      
 
-    #self.set_scene.switch_to(self.macro.upper())
+    self.set_scene.switch_to(self.macro.upper())
       
     print("Only Onyx Scene enabled, Iris mic muted")
     
@@ -59,7 +59,7 @@ class macros:
 
       oai.button_state(self.logical_id, self.switch)     
 
-    #self.set_scene.switch_to(self.macro.upper())
+    self.set_scene.switch_to(self.macro.upper())
       
     print("Only Iris Scene enabled, Iris mic muted")
     
