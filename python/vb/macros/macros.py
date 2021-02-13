@@ -97,18 +97,19 @@ if __name__ == '__main__':
       if arg == 'reset':
         macro = layerTwo.macros('reset', 0)
         macro.reset(macros)
-
+        fileIO.update_Db(macros)
         break
       elif arg in macros[_layers[0]]:
         layer = _layers[0]
       elif arg in macros[_layers[1]]:  
         layer = _layers[1]
-
+        
       this_macro = macros[layer][arg][0]
       switch = macros[layer][arg][1]
       
       """ get saved states from pickle file """
-      saved_state = fileIO.read_Db()[layer][arg][1]
+      saved_states = fileIO.read_Db()
+      saved_state = saved_states[layer][arg][1]
 
       if switch == saved_state:
         switch = 1 - switch
@@ -119,11 +120,10 @@ if __name__ == '__main__':
         macro = layerTwo.macros(this_macro, switch)
 
       by_method = (getattr(macro, this_macro))
-      
-      new_state = int(by_method())
-      macros[layer][arg][1] = new_state
-      
-      break
 
-  """ update db. if save states not fetched will write reset """
-  fileIO.update_Db(macros)
+      new_state = int(by_method())
+      saved_states[layer][arg][1] = new_state
+
+      fileIO.update_Db(saved_states)
+
+      break
