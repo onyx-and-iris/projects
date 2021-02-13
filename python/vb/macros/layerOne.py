@@ -11,12 +11,12 @@ class send_vbantext:
     set_t = 'Strip(0).A1=1; Strip(0).A2=1; Strip(0).B1=0; Strip(0).B2=0; Strip(0).mono=1;'
     unset_t = 'Strip(0).A1=0; Strip(0).A2=0; Strip(0).B1=1; Strip(0).B2=1; Strip(0).mono=0;'
     if upd:
-      commands.VBAN_SendText('onyx.local', set_t, 6980, 'onyx_sound_t')
-      commands.VBAN_SendText('iris.local', set_t, 6980, 'iris_sound_t')
+      commands.VBAN_SendText('onyx.local', set_t, 6990, 'onyx_sound_t')
+      commands.VBAN_SendText('iris.local', set_t, 6990, 'iris_sound_t')
 
     else:
-      commands.VBAN_SendText('onyx.local', unset_t, 6980, 'onyx_sound_t')
-      commands.VBAN_SendText('iris.local', unset_t, 6980, 'iris_sound_t')  
+      commands.VBAN_SendText('onyx.local', unset_t, 6990, 'onyx_sound_t')
+      commands.VBAN_SendText('iris.local', unset_t, 6990, 'iris_sound_t')  
 
 
 class macros:
