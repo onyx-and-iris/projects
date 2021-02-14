@@ -55,7 +55,7 @@ class macros:
         })
         print("Mics unmuted")
 
-      oai.button_stateOnlyOnly(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
       
     return self.switch
 

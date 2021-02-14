@@ -38,7 +38,7 @@ class macros:
         'in-3': dict(mute=True)
       })
       
-      oai.button_state(self.logical_id, self.switch)      
+      oai.button_stateOnly(self.logical_id, self.switch)      
 
     self.set_scene.switch_to(self.macro.upper())
       
@@ -57,7 +57,7 @@ class macros:
         'in-3': dict(mute=False)
       })
 
-      oai.button_state(self.logical_id, self.switch)     
+      oai.button_stateOnly(self.logical_id, self.switch)     
 
     self.set_scene.switch_to(self.macro.upper())
       
@@ -76,7 +76,7 @@ class macros:
         'in-3': dict(A5=1, mute=False, gain=0)
       })    
       
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
     
     self.set_scene.switch_to(self.macro.upper())
       
@@ -94,7 +94,7 @@ class macros:
         'in-3': dict(mute=False, gain=-3),
       })    
       
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
 
     self.set_scene.switch_to(self.macro.upper())
 
@@ -112,7 +112,7 @@ class macros:
         'in-3': dict(A5=1, mute=False, gain=0)
       })    
       
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
 
     self.set_scene.switch_to(self.macro.upper())
       
@@ -128,7 +128,7 @@ class macros:
       oai.inputs[2].mute = True
       oai.inputs[3].mute = True
 
-      oai.button_state(self.logical_id, self.switch)    
+      oai.button_stateOnly(self.logical_id, self.switch)    
     
     self.set_scene.switch_to(self.macro.upper()) 
 
@@ -147,7 +147,7 @@ class macros:
       })
       print("BRB: game pcs muted")
 
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
 
     self.set_scene.switch_to(self.macro.upper())
 
@@ -161,7 +161,7 @@ class macros:
       oai.inputs[2].mute = True
       oai.inputs[3].mute = True
 
-      oai.button_state(self.logical_id, self.switch)    
+      oai.button_stateOnly(self.logical_id, self.switch)    
     
     self.set_scene.switch_to(self.macro.upper())
 
