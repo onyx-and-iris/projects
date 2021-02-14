@@ -82,15 +82,9 @@ if __name__ == '__main__':
     layer = 'audio'
     arg = args.audio[0]
 
-    this_macro = macros[layer][arg][0]
-    switch = macros[layer][arg][1]
-
   elif args.scenes:
     layer = 'scenes'
     arg = args.scenes[0]
-
-    this_macro = macros[layer][arg][0]
-    switch = macros[layer][arg][1]
 
   elif args.reset:
     macro = layerTwo.macros('reset', 0)
@@ -98,6 +92,9 @@ if __name__ == '__main__':
     fileIO.update_Db(macros)
 
     exit()
+  
+  this_macro = macros[layer][arg][0]
+  switch = macros[layer][arg][1]
   
   """ get saved states from pickle file """
   saved_states = fileIO.read_Db()
