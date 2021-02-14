@@ -43,7 +43,7 @@ if __name__ == '__main__':
   parser.add_argument('-audio', nargs=1,
   choices=['mm', 'od', 'os', 'st', 'so', 'si'])
   parser.add_argument('-scenes', nargs=1,
-  choices=['oo', 'io', 'ob', 'ib', 'start', 'brb', 'end'])
+  choices=['oo', 'io', 'ds', 'ob', 'ib', 'start', 'brb', 'end'])
   parser.add_argument('-reset', action='store_true')
 
   """ Read arguments from the command line """
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     fileIO.update_Db(macros)
 
     exit()
-  
+    
   this_macro = macros[layer][arg][0]
   switch = macros[layer][arg][1]
   
@@ -102,8 +102,12 @@ if __name__ == '__main__':
 
   if switch == saved_state:
     switch = 1 - switch
-
-  macro = layerOne.macros(this_macro, switch)
+  
+  if args.audio:
+    macro = layerOne.macros(this_macro, switch)
+  elif args.scenes:
+    macro = layerTwo.macros(this_macro, switch)
+  
   by_method = (getattr(macro, this_macro))
 
   new_state = int(by_method())
