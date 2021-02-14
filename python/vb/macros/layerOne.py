@@ -55,7 +55,7 @@ class macros:
         })
         print("Mics unmuted")
 
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnlyOnly(self.logical_id, self.switch)
       
     return self.switch
 
@@ -80,7 +80,7 @@ class macros:
           
         print("Only discord disabled")
 
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
         
     return self.switch
     
@@ -111,7 +111,7 @@ class macros:
         })
         print("Only Stream Disabled")
 
-      oai.button_state(self.logical_id, self.switch)   
+      oai.button_stateOnly(self.logical_id, self.switch)   
 
     return self.switch
  
@@ -138,7 +138,7 @@ class macros:
         print("Sound Test Disabled")
 
       send_vbantext.mic_test(self.switch)
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
       
     return self.switch
 
@@ -147,7 +147,7 @@ class macros:
     with voicemeeter.remote('potato') as oai:
       oai.show()
       
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
     
     return self.switch
 
@@ -156,7 +156,7 @@ class macros:
     with voicemeeter.remote('potato') as oai:
       oai.show()
       
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
     
     return self.switch
       

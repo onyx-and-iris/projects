@@ -40,26 +40,16 @@ class fileOps:
 if __name__ == '__main__':
   """ Initiate the parser """
   parser = argparse.ArgumentParser()
-  parser.add_argument('-mm', action='store_true')
-  parser.add_argument('-od', action='store_true')
-  parser.add_argument('-os', action='store_true')
-  parser.add_argument('-st', action='store_true')
-  parser.add_argument('-so', action='store_true')
-  parser.add_argument('-si', action='store_true')
-  parser.add_argument('-oo', action='store_true')
-  parser.add_argument('-io', action='store_true')
-  parser.add_argument('-ds', action='store_true')
-  parser.add_argument('-ob', action='store_true')
-  parser.add_argument('-ib', action='store_true')
-  parser.add_argument('-brb', action='store_true')
-  parser.add_argument('-start', action='store_true')
-  parser.add_argument('-end', action='store_true')
+  parser.add_argument('-audio', nargs=1,
+  choices=['mm', 'od', 'os', 'st', 'so', 'si'])
+  parser.add_argument('-scenes', nargs=1,
+  choices=['oo', 'io', 'ob', 'ib', 'start', 'brb', 'end'])
   parser.add_argument('-reset', action='store_true')
 
   """ Read arguments from the command line """
   args = parser.parse_args()
 
-  layer1 = {
+  audio = {
       'mm': ['mute_mics', 1], 
       'od': ['only_discord', 0], 
       'os': ['only_stream', 1], 
@@ -68,7 +58,7 @@ if __name__ == '__main__':
       'si': ['solo_iris', 0]
   }
 
-  layer2 = { 
+  scenes = { 
       'oo': ['onyx_only', 0], 
       'io': ['iris_only', 0], 
       'ds': ['dual_scene', 0], 
@@ -79,51 +69,47 @@ if __name__ == '__main__':
       'end': ['end', 0]
   }
 
-  layer3 = {}
+  gamecaster = {}
 
   macros = {}
-  macros['layer1'] = layer1
-  macros['layer2'] = layer2
-  macros['layer3'] = layer3
+  macros['audio'] = audio
+  macros['scenes'] = scenes
+  macros['gamecaster'] = gamecaster
   
   fileIO = fileOps(macros) 
+    
+  if args.audio:
+    layer = 'audio'
+    arg = args.audio[0]
 
-  for arg in vars(args):
-    """ get macro layer """
-    arg_isTrue = (getattr(args, arg))
-    _layers = ['layer1', 'layer2', 'layer3']
+    this_macro = macros[layer][arg][0]
+    switch = macros[layer][arg][1]
 
-    if arg_isTrue:
-      if arg == 'reset':
-        macro = layerTwo.macros('reset', 0)
-        macro.reset(macros)
-        fileIO.update_Db(macros)
-        break
-      elif arg in macros[_layers[0]]:
-        layer = _layers[0]
-      elif arg in macros[_layers[1]]:  
-        layer = _layers[1]
-        
-      this_macro = macros[layer][arg][0]
-      switch = macros[layer][arg][1]
-      
-      """ get saved states from pickle file """
-      saved_states = fileIO.read_Db()
-      saved_state = saved_states[layer][arg][1]
+  elif args.scenes:
+    layer = 'scenes'
+    arg = args.scenes[0]
 
-      if switch == saved_state:
-        switch = 1 - switch
+    this_macro = macros[layer][arg][0]
+    switch = macros[layer][arg][1]
 
-      if layer == _layers[0]:
-        macro = layerOne.macros(this_macro, switch)
-      elif layer == _layers[1]:
-        macro = layerTwo.macros(this_macro, switch)
+  elif args.reset:
+    macro = layerTwo.macros('reset', 0)
+    macro.reset(macros)
+    fileIO.update_Db(macros)
 
-      by_method = (getattr(macro, this_macro))
+    exit()
+  
+  """ get saved states from pickle file """
+  saved_states = fileIO.read_Db()
+  saved_state = saved_states[layer][arg][1]
 
-      new_state = int(by_method())
-      saved_states[layer][arg][1] = new_state
+  if switch == saved_state:
+    switch = 1 - switch
 
-      fileIO.update_Db(saved_states)
+  macro = layerOne.macros(this_macro, switch)
+  by_method = (getattr(macro, this_macro))
 
-      break
+  new_state = int(by_method())
+  saved_states[layer][arg][1] = new_state
+
+  fileIO.update_Db(saved_states)

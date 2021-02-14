@@ -193,15 +193,15 @@ class macros:
       })
       
 
-      for key in default_states['layer1']:
-        default_macro, default_state, = default_states['layer1'].get(key)
+      for key in default_states['audio']:
+        default_macro, default_state, = default_states['audio'].get(key)
         logical_id = self.button_map[default_macro]
         
         oai.button_stateOnly(logical_id, default_state)
         print(f'resetting {default_macro} to {default_state}')
 
-      for key in default_states['layer2']:
-        default_macro, default_state, = default_states['layer2'].get(key)
+      for key in default_states['scenes']:
+        default_macro, default_state, = default_states['scenes'].get(key)
         logical_id = self.button_map[default_macro]
         
         oai.button_stateOnly(logical_id, default_state)
