@@ -1,21 +1,19 @@
-# Our current layer 2 vb macros translated into python using this awesome wrapper:
+# Our current layer 1 vb macros translated into python using this awesome wrapper:
 # https://github.com/chvolkmann/voicemeeter-remote-python
-# todo: layer 3
-
+# todo: layer 2 and 3
 import voicemeeter
 import switchscene
 
-
 from custom import commands
 
-
-class macros:
+      
+class Macros:
   def __init__(self, macro, switch):
     self.macro = macro
     self.switch = switch
-    
+ 
     self.set_scene = switchscene.Switchscene()
-    
+
     """ map macro names to logical IDS """
     self.button_map = {
     'mute_mics': 0, 'only_discord': 1, 'only_stream': 2,
@@ -25,39 +23,181 @@ class macros:
     'onyx_big': 41, 'iris_big': 42, 'start': 20,
     'brb': 30, 'end': 50, 'reset': 72
     }
-    self.logical_id = self.button_map[self.macro]
+    self.logical_id = self.button_map[self.macro]  
+
+
+class Audio(Macros):
+  def __init__(self, macro, switch):
+    Macros.__init__(self, macro, switch)
+    
+  # strip 0,1,4 mute both mics to everywhere
+  # strip 4 = mics_louder    
+  def mute_mics(self):
+    with voicemeeter.remote('potato') as oai:
+      oai.show()
+
+      if self.switch:
+        oai.apply({
+          'in-0': dict(mute=True),
+          'in-1': dict(mute=True),
+          'in-4': dict(mute=True)
+        })
+        print("Mics muted")
+        
+      else:
+        oai.apply({
+          'in-0': dict(mute=False),
+          'in-1': dict(mute=False),
+          'in-4': dict(mute=False)
+        })
+        print("Mics unmuted")
+
+      oai.button_stateOnly(self.logical_id, self.switch)
+      
+    return self.switch
+
+  # vban 0,1 off disable mic to game but keep to disc
+  # out bus 2,7 off to disable disc + mics to stream
+  def only_discord(self):
+    with voicemeeter.remote('potato') as oai:
+      oai.show()
+      
+      if self.switch:
+        oai.set("vban.outstream[0].on", 0)
+        oai.set("vban.outstream[1].on", 0)
+        oai.outputs[2].mute = True
+        oai.outputs[7].mute = True
+          
+        print("Only discord enabled")
+      else:
+        oai.set("vban.outstream[0].on", 1)
+        oai.set("vban.outstream[1].on", 1)
+        oai.outputs[2].mute = False
+        oai.outputs[7].mute = False
+          
+        print("Only discord disabled")
+
+      oai.button_stateOnly(self.logical_id, self.switch)
+        
+    return self.switch
+    
+  # bus 0,1 muted stops mics to game, discord
+  # bus 3 left unmuted allowed mics_louder to stream
+  # minor 3db pad on games + disc for speaking to stream
+  def only_stream(self):
+    with voicemeeter.remote('potato') as oai:
+      oai.show()
+      
+      if self.switch:
+        oai.apply({
+          'out-5': dict(mute=True),
+          'out-6': dict(mute=True),
+          'in-2': dict(gain=-3),
+          'in-3': dict(gain=-3),
+          'in-6': dict(gain=-3)
+        })
+        print("Only Stream Enabled")
+
+      else:
+        oai.apply({
+          'out-5': dict(mute=False),
+          'out-6': dict(mute=False),
+          'in-2': dict(gain=0),
+          'in-3': dict(gain=0),
+          'in-6': dict(gain=0)
+        })
+        print("Only Stream Disabled")
+
+      oai.button_stateOnly(self.logical_id, self.switch)   
+
+    return self.switch
+ 
+  # A1, B3 off stops mics_louder to streamlabs/gamecaster and iris stream
+  # B1, B2 strip on and bus 0,1 out opened allows mics_louder over vban.
+  def sound_test(self):
+    _set = 'Strip(0).A1=1; Strip(0).A2=1; Strip(0).B1=0; Strip(0).B2=0; Strip(0).mono=1;',
+    _unset = 'Strip(0).A1=0; Strip(0).A2=0; Strip(0).B1=1; Strip(0).B2=1; Strip(0).mono=0;'
+    
+    with voicemeeter.remote('potato') as oai:
+      oai.show()
+      
+      if self.switch:
+        oai.apply({
+          'in-4': dict(A1=False, B1=True, B2=True, B3=False, mute=False),
+          'out-5': dict(mute=False),
+          'out-6': dict(mute=False)
+        })
+        commands.VBAN_SendText('onyx.local', _set, 6990, 'onyx_sound_t')
+        commands.VBAN_SendText('iris.local', _set, 6990, 'iris_sound_t')
+        print("Sound Test Enabled")
+
+      else:
+        oai.apply({
+          'in-4': dict(A1=True, B1=False, B2=False, B3=True, mute=True),
+          'out-5': dict(mute=True),
+          'out-6': dict(mute=True)
+        })
+        commands.VBAN_SendText('onyx.local', _unset, 6990, 'onyx_sound_t')
+        commands.VBAN_SendText('iris.local', _unset, 6990, 'iris_sound_t')
+        print("Sound Test Disabled")
+
+      oai.button_stateOnly(self.logical_id, self.switch)
+      
+    return self.switch
+
+  # only for updates. SOLO done through DAW
+  def solo_onyx(self):
+    with voicemeeter.remote('potato') as oai:
+      oai.show()
+      
+      oai.button_stateOnly(self.logical_id, self.switch)
+    
+    return self.switch
+
+  # only for updates. SOLO done through DAW
+  def solo_iris(self):
+    with voicemeeter.remote('potato') as oai:
+      oai.show()
+      
+      oai.button_stateOnly(self.logical_id, self.switch)
+    
+    return self.switch
+      
+class Scenes(Macros):
+  def __init__(self, macro, switch):
+    Macros.__init__(self, macro, switch)
 
   # unmute onyx pc mute iris pc 
   # and sets the scene to 'onyx_only'
   def onyx_only(self):
     with voicemeeter.remote('potato') as oai:
       oai.show()
-      
+    
       oai.apply({
         'in-2': dict(mute=False),
         'in-3': dict(mute=True)
       })
-      
-      oai.button_stateOnly(self.logical_id, self.switch)      
+
+      oai.button_state(self.logical_id, self.switch)      
 
     self.set_scene.switch_to(self.macro.upper())
-      
+
     print("Only Onyx Scene enabled, Iris mic muted")
-    
+
     return self.switch
-    
+
   # unmute iris pc mute onyx pc 
   # and sets the scene to 'iris_only'
   def iris_only(self):
     with voicemeeter.remote('potato') as oai:
       oai.show()
-      
+
       oai.apply({
         'in-2': dict(mute=True),
         'in-3': dict(mute=False)
       })
 
-      oai.button_stateOnly(self.logical_id, self.switch)     
+      oai.button_state(self.logical_id, self.switch)     
 
     self.set_scene.switch_to(self.macro.upper())
       
@@ -76,7 +216,7 @@ class macros:
         'in-3': dict(A5=1, mute=False, gain=0)
       })    
       
-      oai.button_stateOnly(self.logical_id, self.switch)
+      oai.button_state(self.logical_id, self.switch)
     
     self.set_scene.switch_to(self.macro.upper())
       
@@ -94,7 +234,7 @@ class macros:
         'in-3': dict(mute=False, gain=-3),
       })    
       
-      oai.button_stateOnly(self.logical_id, self.switch)
+      oai.button_state(self.logical_id, self.switch)
 
     self.set_scene.switch_to(self.macro.upper())
 
@@ -112,7 +252,7 @@ class macros:
         'in-3': dict(A5=1, mute=False, gain=0)
       })    
       
-      oai.button_stateOnly(self.logical_id, self.switch)
+      oai.button_state(self.logical_id, self.switch)
 
     self.set_scene.switch_to(self.macro.upper())
       
@@ -128,7 +268,7 @@ class macros:
       oai.inputs[2].mute = True
       oai.inputs[3].mute = True
 
-      oai.button_stateOnly(self.logical_id, self.switch)    
+      oai.button_state(self.logical_id, self.switch)    
     
     self.set_scene.switch_to(self.macro.upper()) 
 
@@ -147,7 +287,7 @@ class macros:
       })
       print("BRB: game pcs muted")
 
-      oai.button_stateOnly(self.logical_id, self.switch)
+      oai.button_state(self.logical_id, self.switch)
 
     self.set_scene.switch_to(self.macro.upper())
 
@@ -161,7 +301,7 @@ class macros:
       oai.inputs[2].mute = True
       oai.inputs[3].mute = True
 
-      oai.button_stateOnly(self.logical_id, self.switch)    
+      oai.button_state(self.logical_id, self.switch)    
     
     self.set_scene.switch_to(self.macro.upper())
 

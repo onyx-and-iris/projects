@@ -1,10 +1,8 @@
-import layerOne
-import layerTwo
+import macrobuttons
 
 import argparse
 import pickle
 
-from sys import stderr
 
 class fileOps:
   """ save/retrieve states to pickle file """
@@ -82,9 +80,15 @@ if __name__ == '__main__':
     layer = 'audio'
     arg = args.audio[0]
 
+    this_macro = macros[layer][arg][0]
+    switch = macros[layer][arg][1]
+
   elif args.scenes:
     layer = 'scenes'
     arg = args.scenes[0]
+
+    this_macro = macros[layer][arg][0]
+    switch = macros[layer][arg][1]
 
   elif args.reset:
     macro = layerTwo.macros('reset', 0)
@@ -92,9 +96,6 @@ if __name__ == '__main__':
     fileIO.update_Db(macros)
 
     exit()
-    
-  this_macro = macros[layer][arg][0]
-  switch = macros[layer][arg][1]
   
   """ get saved states from pickle file """
   saved_states = fileIO.read_Db()
@@ -102,12 +103,12 @@ if __name__ == '__main__':
 
   if switch == saved_state:
     switch = 1 - switch
-  
+
   if args.audio:
-    macro = layerOne.macros(this_macro, switch)
+    macro = macrobuttons.Audio(this_macro, switch)
   elif args.scenes:
-    macro = layerTwo.macros(this_macro, switch)
-  
+    macro = macrobuttons.Scenes(this_macro, switch)
+    
   by_method = (getattr(macro, this_macro))
 
   new_state = int(by_method())
