@@ -146,8 +146,8 @@ class Audio(Macros):
     self.oai.button_stateOnly(self.logical_id, self.switch)
       
 class Scenes(Macros):
-  def __init__(self, macro, switch):
-    Macros.__init__(self, macro, switch)
+  def __init__(self, macro, switch, oai):
+    Macros.__init__(self, macro, switch, oai)
 
   # unmute onyx pc mute iris pc 
   # and sets the scene to 'onyx_only'
