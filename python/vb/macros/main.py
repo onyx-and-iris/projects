@@ -35,6 +35,31 @@ class fileOps:
       records.close
 
 
+def main(layer, arg):
+  """ set macro + switch vars, load save states,
+  call desired class/method then update save states """
+  this_macro = macros[layer][arg][0]
+  switch = macros[layer][arg][1]
+
+  """ get saved states from pickle file """
+  saved_states = fileIO.read_Db()
+  saved_state = saved_states[layer][arg][1]
+
+  if switch == saved_state:
+    switch = 1 - switch
+    
+  """ Do we need Audio or Scenes class? Then instantiate """  
+  by_class = getattr(macrobuttons, layer.capitalize())(this_macro, switch)
+  
+  """ Call desired method """
+  getattr(by_class, this_macro)()
+
+  saved_states[layer][arg][1] = switch
+
+  """ write updates to file """
+  fileIO.update_Db(saved_states)
+
+
 if __name__ == '__main__':
   """ Initiate the parser """
   parser = argparse.ArgumentParser()
@@ -79,39 +104,17 @@ if __name__ == '__main__':
   if args.audio:
     layer = 'audio'
     arg = args.audio[0]
-
-    this_macro = macros[layer][arg][0]
-    switch = macros[layer][arg][1]
+    
+    main(layer, arg)
 
   elif args.scenes:
     layer = 'scenes'
     arg = args.scenes[0]
-
-    this_macro = macros[layer][arg][0]
-    switch = macros[layer][arg][1]
+    
+    main(layer, arg)
 
   elif args.reset:
     macro = macrobuttons.Scenes('reset', 0)
     macro.reset(macros)
     fileIO.update_Db(macros)
-
-    exit()
-  
-  """ get saved states from pickle file """
-  saved_states = fileIO.read_Db()
-  saved_state = saved_states[layer][arg][1]
-
-  if switch == saved_state:
-    switch = 1 - switch
-
-  if args.audio:
-    macro = macrobuttons.Audio(this_macro, switch)
-  elif args.scenes:
-    macro = macrobuttons.Scenes(this_macro, switch)
     
-  by_method = (getattr(macro, this_macro))
-
-  new_state = int(by_method())
-  saved_states[layer][arg][1] = new_state
-
-  fileIO.update_Db(saved_states)
