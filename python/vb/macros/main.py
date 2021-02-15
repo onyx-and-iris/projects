@@ -1,4 +1,5 @@
 import macrobuttons
+import voicemeeter
 
 import argparse
 import pickle
@@ -48,11 +49,12 @@ def main(layer, arg):
   if switch == saved_state:
     switch = 1 - switch
     
-  """ Do we need Audio or Scenes class? Then instantiate """  
-  by_class = getattr(macrobuttons, layer.capitalize())(this_macro, switch)
-  
-  """ Call desired method """
-  getattr(by_class, this_macro)()
+  with voicemeeter.remote('potato') as oai:
+    """ Do we need Audio or Scenes class? Then instantiate """  
+    by_class = getattr(macrobuttons, layer.capitalize())(this_macro, switch, oai)
+    
+    """ Call desired method """
+    getattr(by_class, this_macro)()
 
   saved_states[layer][arg][1] = switch
 
