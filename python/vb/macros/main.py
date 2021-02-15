@@ -91,7 +91,7 @@ if __name__ == '__main__':
     switch = macros[layer][arg][1]
 
   elif args.reset:
-    macro = layerTwo.macros('reset', 0)
+    macro = macrobuttons.Scenes('reset', 0)
     macro.reset(macros)
     fileIO.update_Db(macros)
 
