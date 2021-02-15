@@ -25,7 +25,6 @@ class Macros:
     }
     self.logical_id = self.button_map[self.macro]  
 
-
 class Audio(Macros):
   def __init__(self, macro, switch):
     Macros.__init__(self, macro, switch)
@@ -178,7 +177,7 @@ class Scenes(Macros):
         'in-3': dict(mute=True)
       })
 
-      oai.button_state(self.logical_id, self.switch)      
+      oai.button_stateOnly(self.logical_id, self.switch)      
 
     self.set_scene.switch_to(self.macro.upper())
 
@@ -197,7 +196,7 @@ class Scenes(Macros):
         'in-3': dict(mute=False)
       })
 
-      oai.button_state(self.logical_id, self.switch)     
+      oai.button_stateOnly(self.logical_id, self.switch)     
 
     self.set_scene.switch_to(self.macro.upper())
       
@@ -216,7 +215,7 @@ class Scenes(Macros):
         'in-3': dict(A5=1, mute=False, gain=0)
       })    
       
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
     
     self.set_scene.switch_to(self.macro.upper())
       
@@ -234,7 +233,7 @@ class Scenes(Macros):
         'in-3': dict(mute=False, gain=-3),
       })    
       
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
 
     self.set_scene.switch_to(self.macro.upper())
 
@@ -252,7 +251,7 @@ class Scenes(Macros):
         'in-3': dict(A5=1, mute=False, gain=0)
       })    
       
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
 
     self.set_scene.switch_to(self.macro.upper())
       
@@ -268,7 +267,7 @@ class Scenes(Macros):
       oai.inputs[2].mute = True
       oai.inputs[3].mute = True
 
-      oai.button_state(self.logical_id, self.switch)    
+      oai.button_stateOnly(self.logical_id, self.switch)    
     
     self.set_scene.switch_to(self.macro.upper()) 
 
@@ -287,7 +286,7 @@ class Scenes(Macros):
       })
       print("BRB: game pcs muted")
 
-      oai.button_state(self.logical_id, self.switch)
+      oai.button_stateOnly(self.logical_id, self.switch)
 
     self.set_scene.switch_to(self.macro.upper())
 
@@ -301,7 +300,7 @@ class Scenes(Macros):
       oai.inputs[2].mute = True
       oai.inputs[3].mute = True
 
-      oai.button_state(self.logical_id, self.switch)    
+      oai.button_stateOnly(self.logical_id, self.switch)    
     
     self.set_scene.switch_to(self.macro.upper())
 
