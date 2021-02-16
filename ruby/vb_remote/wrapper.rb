@@ -1,5 +1,4 @@
 require 'ffi'
-require 'toml'
 
 module VMR
     dll = ['C:\Program Files (x86)\VB\Voicemeeter\VoicemeeterRemote64.dll']
@@ -21,38 +20,16 @@ module VMR
 
     
     # set/get params float
+    attach_function :param_isDirty, :VBVMR_IsParametersDirty, [], :int
     attach_function :set_paramF, :VBVMR_SetParameterFloat, [:string, :float], :int
     attach_function :get_paramF, :VBVMR_GetParameterFloat, [:string, :pointer], :int
-    attach_function :param_isDirty, :VBVMR_IsParametersDirty, [], :int
 
     # set/get params string
 
-    @cache = Hash(nil)
-    @config = "myconfig.toml"
-    @file_db = "cache.dat"
-
     class << self
-        attr_accessor :cache
-        attr_accessor :config
-        attr_accessor :file_db
-
-        def _initialize_cache
-            if File.file?(VMR.config)
-                puts "Loading from config file"
-                VMR.cache = (TOML.load_file(VMR.config))
-                puts VMR.cache
-            
-            """ If no config set to base configuration """
-            elsif File.file?(VMR.file_db)
-                _load_cache
-                puts "initialize cache:\n#{VMR.cache}"
-            end
-            """ otherwise empty hash """
-        end
-
         def _clear_datapipe
             """ Poll param_isDirty until pipe is clear """
-            until param_isDirty ==0 do
+            until param_isDirty == 0 do
             end
         end
 
@@ -79,11 +56,8 @@ module VMR
             end
 
             type = _vbType
-            puts "VB type is #{type}"
 
             _clear_datapipe
-
-            _initialize_cache
         end
         
         def _macro_status(logical_id, state, mode=2)
@@ -99,68 +73,35 @@ module VMR
         end
 
         def _set_parameter(name, set)
-            """ if value in cache and same as set return early """
-            if VMR.cache.include? name
-                if VMR.cache[name] == set
-                    return nil
-                end
-            end
-
             """ Otherwise... VBVMR_SetParameterFloat """
             c_get_old = FFI::MemoryPointer.new(:float, 1)
             c_get_new = FFI::MemoryPointer.new(:float, 1)
 
             get_paramF(name, c_get_old)
             oldval = c_get_old.get_float(0)
+            if oldval != set
+                while true do
+                    set_paramF(name, set.to_f)
+                    get_paramF(name, c_get_new)
+                    newval = c_get_new.get_float(0)
 
-            while true do
-                set_paramF(name, set.to_f)
-                get_paramF(name, c_get_new)
-                newval = c_get_new.get_float(0)
-
-                _clear_datapipe
-                  
-                break if oldval != newval
+                    _clear_datapipe
+                    
+                    break if oldval != newval
+                end
             end
-
+            
             get_paramF(name, c_get_new)
             newval = c_get_new.get_float(0)
         end
-        
-        def _write_cache(name)
-            """ Get param then write to cache """
-            c_get = FFI::MemoryPointer.new(:float, 1)
-            c_get.put_float(0, 0.0)
 
-            get_paramF(name, c_get)
-            oldval = c_get.get_float(0)
+        def _get_parameter(name)
+            c_get = FFI::MemoryPointer.new(:float, 1)
 
             _clear_datapipe
-
-            ret = get_paramF(name, c_get)
-
-            if ret != 0
-                puts "ERROR: CBF failed: #{ret}"
-            end
-
-            value = c_get.get_float(0).to_int
-
-
-            VMR.cache["#{name}"] = value
             
-            File.open("cache.dat", "wb") do |f|
-                f.write(Marshal.dump(VMR.cache))
-            end
-        end
-
-        def _load_cache(name = nil, full = 0)
-            VMR.cache = Marshal.load(File.binread(VMR.file_db))
-
-            if name != nil
-                return VMR.cache["#{name}"]
-            elsif full
-                return VMR.cache
-            end
+            get_paramF(name, c_get)
+            val = c_get.get_float(0)
         end
  
         def _special_command(name)
