@@ -4,11 +4,11 @@ from ctypes import *
 from voicemeeter.driver import dll
 from sys import stderr
 
-class commands:
-  def button_setState(index, state, mode=2):
-    """ Direct call to VBVMR_MacroButton_SetStatus """
+class Commands:
+  def button_setstate(index, state, mode=2):
+    """ Hook into C API function """
     cbf_setstatus = dll.VBVMR_MacroButton_SetStatus
-    # set expected args and return type
+    """ set expected args and return type """
     cbf_setstatus.argtypes = [c_long, c_float, c_long]
     cbf_setstatus.restype = c_long
 
@@ -21,8 +21,11 @@ class commands:
       print(f'ERROR: Callback button_setState logical ID: [{int(c_index.value)}]'
       , file=stderr)
 
-  def VBAN_SendText(ip, text, port=6980, s_name='Command1'):
-    """ Credits go to TheStaticTurtle https://github.com/TheStaticTurtle/pyVBAN """
+  def vban_sendtext(ip, text, port=6980, s_name='Command1'):
+    """ 
+    Credits go to TheStaticTurtle 
+    https://github.com/TheStaticTurtle/pyVBAN 
+    """
     IP = ip
     PORT = port
     S_NAME = s_name

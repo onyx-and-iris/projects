@@ -5,13 +5,13 @@ import argparse
 import pickle
 
 
-class fileOps:
+class FileOps:
   """ save/retrieve states to pickle file """
   def __init__(self, macros):
     self.db = macros
     self.file_db = 'cache.pkl'
 
-  def read_Db(self):
+  def read_db(self):
     while True:
       try:
         with open(self.file_db, 'rb') as records:
@@ -24,13 +24,13 @@ class fileOps:
         records.close()
 
       except EOFError:
-        self.update_Db(self.db)
+        self.update_db(self.db)
         break
 
     return self.db
 
 
-  def update_Db(self, macros):
+  def update_db(self, macros):
     with open(self.file_db, 'wb') as records:
       pickle.dump(macros, records)
       records.close
@@ -43,13 +43,14 @@ def main(layer, arg):
   switch = macros[layer][arg][1]
 
   """ get saved states from pickle file """
-  saved_states = fileIO.read_Db()
+  saved_states = file_io.read_db()
   saved_state = saved_states[layer][arg][1]
 
   if switch == saved_state:
     switch = 1 - switch
     
   with voicemeeter.remote('potato') as oai:
+    oai.show()
     """ Do we need Audio or Scenes class? Then instantiate """  
     by_class = getattr(macrobuttons, layer.capitalize())(this_macro, switch, oai)
     
@@ -59,7 +60,7 @@ def main(layer, arg):
   saved_states[layer][arg][1] = switch
 
   """ write updates to file """
-  fileIO.update_Db(saved_states)
+  file_io.update_db(saved_states)
 
 
 if __name__ == '__main__':
@@ -101,7 +102,7 @@ if __name__ == '__main__':
   macros['scenes'] = scenes
   macros['gamecaster'] = gamecaster
   
-  fileIO = fileOps(macros) 
+  file_io = FileOps(macros) 
     
   if args.audio:
     layer = 'audio'
@@ -116,7 +117,9 @@ if __name__ == '__main__':
     main(layer, arg)
 
   elif args.reset:
-    macro = macrobuttons.Scenes('reset', 0)
-    macro.reset(macros)
-    fileIO.update_Db(macros)
+    with voicemeeter.remote('potato') as oai:
+      macro = macrobuttons.Scenes('reset', 0, oai)
+      macro.reset(macros)
+    
+    file_io.update_db(macros)
     
