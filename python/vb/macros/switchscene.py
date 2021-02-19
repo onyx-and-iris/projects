@@ -1,11 +1,13 @@
+"""
+Works with the Streamlabs OBS API Python Wrapper
+https://pypi.org/project/PySLOBS/
+"""
 import json
 import logging
 import pickle
 
 from websocket import create_connection, WebSocketTimeoutException
 
-## Credits go to https://pypi.org/project/PySLOBS/
-## I took just the small part I needed and modified it
 
 class Switchscene:
   def __init__(self):
@@ -22,7 +24,6 @@ class Switchscene:
     try:
         with open(self.tok_file, 'rb') as retrieve_tok:
           self.token = pickle.load(retrieve_tok)
-          retrieve_tok.close()
 
     except FileNotFoundError:
       self.store_tok()    
@@ -120,8 +121,7 @@ class Switchscene:
       try:
         with open(self.tok_file, 'wb') as save_tok:
           pickle.dump(password, save_tok)  
-          save_tok.close()
-          break
+        break
           
       except FileNotFoundError:
         save_tok = open(self.tok_file, 'x')

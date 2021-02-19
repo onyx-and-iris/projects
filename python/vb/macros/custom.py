@@ -4,6 +4,7 @@ from ctypes import *
 from voicemeeter.driver import dll
 from sys import stderr
 
+
 class Commands:
   def button_setstate(index, state, mode=2):
     """ Hook into C API function """

@@ -1,6 +1,5 @@
 import macrobuttons
 import voicemeeter
-
 import argparse
 import pickle
 
@@ -16,8 +15,7 @@ class FileOps:
       try:
         with open(self.file_db, 'rb') as records:
           self.db = pickle.load(records)
-          records.close()
-          break
+        break
 
       except FileNotFoundError:
         records = open(self.file_db, 'x')
@@ -29,11 +27,9 @@ class FileOps:
 
     return self.db
 
-
   def update_db(self, macros):
     with open(self.file_db, 'wb') as records:
       pickle.dump(macros, records)
-      records.close
 
 
 def main(layer, arg):
@@ -48,12 +44,12 @@ def main(layer, arg):
 
   if switch == saved_state:
     switch = 1 - switch
-    
+
   with voicemeeter.remote('potato') as oai:
     oai.show()
     """ Do we need Audio or Scenes class? Then instantiate """  
     by_class = getattr(macrobuttons, layer.capitalize())(this_macro, switch, oai)
-    
+
     """ Call desired method """
     getattr(by_class, this_macro)()
 
@@ -66,9 +62,9 @@ def main(layer, arg):
 if __name__ == '__main__':
   """ Initiate the parser """
   parser = argparse.ArgumentParser()
-  parser.add_argument('-audio', nargs=1,
+  parser.add_argument('-audio', nargs=None,
   choices=['mm', 'od', 'os', 'st', 'so', 'si'])
-  parser.add_argument('-scenes', nargs=1,
+  parser.add_argument('-scenes', nargs=None,
   choices=['oo', 'io', 'ds', 'ob', 'ib', 'start', 'brb', 'end'])
   parser.add_argument('-reset', action='store_true')
 
@@ -101,19 +97,19 @@ if __name__ == '__main__':
   macros['audio'] = audio
   macros['scenes'] = scenes
   macros['gamecaster'] = gamecaster
-  
+
   file_io = FileOps(macros) 
-    
+
   if args.audio:
     layer = 'audio'
-    arg = args.audio[0]
-    
+    arg = args.audio
+
     main(layer, arg)
 
   elif args.scenes:
     layer = 'scenes'
-    arg = args.scenes[0]
-    
+    arg = args.scenes
+
     main(layer, arg)
 
   elif args.reset:
@@ -122,4 +118,3 @@ if __name__ == '__main__':
       macro.reset(macros)
     
     file_io.update_db(macros)
-    
