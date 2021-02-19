@@ -80,7 +80,7 @@ class Cyclist < Athlete
 
 	def self.ag2r(name_first, name_last)
 		""" factory function """
-		Cyclist.new(name_first, name_last, "AG2R La Mndoiale")
+		Cyclist.new(name_first, name_last, "AG2R La Mondiale")
 	end
 
 	def self.ntt(name_first, name_last)
@@ -168,8 +168,7 @@ class Swimmer < Athlete
 		competitor.distance, competitor.stroke = competitor.event.split()
 
 		if self.stroke.nil? || competitor.stroke.nil?
-			puts("Comparing #{fullname} vs #{competitor.fullname}")
-			puts("Event not known for one of the athletes")
+			return nil
 		else
 			super
 		end

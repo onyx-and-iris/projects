@@ -27,11 +27,13 @@ Amy.country = "England"
 Amy.event = "200m"
 Amy.pb = "22.42"
 
+runners = [Laura, Mo, Dina, Adam, Amy]
+
 ############### CYCLISTS ##################
 # AG2R La Mondiale
-romain = Cyclist.ag2r("Romain", "Bardet")
-romain.rank = 1
-romain.career_points = 9181
+Romain = Cyclist.ag2r("Romain", "Bardet")
+Romain.rank = 1
+Romain.career_points = 9181
 
 Tony = Cyclist.ag2r("Tony", "Gallopin")
 Tony.rank = 2
@@ -91,12 +93,18 @@ Gianluca = Cyclist.trek("Gianluca", "Brambilla")
 Gianluca.rank = 5
 Gianluca.career_points = 3327
 
+cyclists = [
+    Romain, Tony, Oliver, Mathias, Frank,
+    Edvald, Roman, Domenico, Giacomo, Enrico,
+    Vincenzo, Bauke, Jasper, Mads, Gianluca
+]
+
 ############### SWIMMERS ##################
 # London Roar
-Adam = Swimmer.lonr("Adam", "Peaty")
-Adam.aggregate = 36854
-Adam.pb = "4294"
-Adam.event = "100m Breastroke"
+AdamP = Swimmer.lonr("Adam", "Peaty")
+AdamP.aggregate = 36854
+AdamP.pb = "4294"
+AdamP.event = "100m Breastroke"
 
 Guilherme = Swimmer.lonr("Guilherme", "Guido")
 Guilherme.aggregate = 33585
@@ -164,30 +172,52 @@ Zane.event = "400m Freestyle"
 Lindsey = Swimmer.oct("Lindsey", "Kozelsky")
 Lindsey.aggregate = 20580
 
-######################################
+swimmers = [
+    AdamP, Guilherme, Alia, Sydney, Minna,
+    Michael, Marco, Arina, Kasia, Joe,
+    Beth, Zach, AmyB, Zane, Lindsey
+]
 
-Laura.versus(Mo)
-puts format_separator
-Dina.versus(Laura)
-puts format_separator
-Mo.versus(Dina)
-puts format_separator
-Laura.is_wanda
-puts format_separator
-puts "Lauras pb is: #{Laura.pb}"
+def comp_dina(runners)
+    """ compare dina asher smith to other runners """
+    runners.each do | runner |
+        if runner.name_first != "Dina"
+            Dina.versus(runner)
+        end
+    end
+end
 
-puts "\n\n" + format_separator
-puts format_separator
-Oliver.team
-puts format_separator
-Edvald.team
-puts format_separator
-Jasper.team
+def comp_swimmers(swimmers)
+    """ 
+    compare each swimmer vs every other swimmer
+    exclude comparisons where distance and stroke are equal
+    """
+    swimmers.each do | swimmer |
+        swimmers.each do | competitor |
+            if ((swimmer.fullname != competitor.fullname) && 
+                (swimmer.event != competitor.event))
+                swimmer.versus(competitor)
+            end
+        end 
+    end
+end
 
-puts "\n\n" + format_separator
-puts format_separator
+def get_cyclist_teams(cyclists)
+    """ get team for every cyclist and print bikes used """
+    cyclists.each do | cyclist |
+        puts "#{cyclist.team}"
+    end
+end
 
-Alia.versus(Arina)
-Zane.versus(Michael)
-Kasia.versus(Minna)
+def main(runners, swimmers, cyclists)
+    comp_dina(runners)
 
+    comp_swimmers(swimmers)
+
+    get_cyclist_teams(cyclists)
+end
+
+
+if $PROGRAM_NAME == __FILE__
+    main(runners, swimmers, cyclists)
+end 
