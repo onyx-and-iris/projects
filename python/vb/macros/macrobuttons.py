@@ -31,6 +31,13 @@ class Macros:
 class Audio(Macros):
   def __init__(self, macro, switch, oai):
     Macros.__init__(self, macro, switch, oai)
+
+  def run(self):
+    self.oai.show()
+
+    getattr(Audio, self.macro)(self)
+
+    self.oai.button_stateonly(self.logical_id, self.switch)
   
   def mute_mics(self):
     """ 
@@ -53,8 +60,6 @@ class Audio(Macros):
       })
       print('Mics unmuted')
 
-    self.oai.button_stateonly(self.logical_id, self.switch)
-
   def only_discord(self):
     """
     vban 0,1 off disable mic to game but keep to disc
@@ -74,8 +79,6 @@ class Audio(Macros):
       self.oai.outputs[7].mute = False
         
       print('Only discord disabled')
-
-    self.oai.button_stateonly(self.logical_id, self.switch)
 
   def only_stream(self): 
     """
@@ -101,17 +104,17 @@ class Audio(Macros):
         'in-3': dict(gain=0),
         'in-6': dict(gain=0)
       })
-      print('Only Stream Disabled')
-
-    self.oai.button_stateonly(self.logical_id, self.switch)   
+      print('Only Stream Disabled')   
 
   def sound_test(self):
     """
     A1, B3 off stops mics_louder to streamlabs/gamecaster and iris stream
     B1, B2 strip on and bus 0,1 out opened allows mics_louder over vban.
     """
-    _set = 'Strip(0).A1=1; Strip(0).A2=1; Strip(0).B1=0; Strip(0).B2=0; Strip(0).mono=1;'
-    _unset = 'Strip(0).A1=0; Strip(0).A2=0; Strip(0).B1=1; Strip(0).B2=1; Strip(0).mono=0;'
+    _set = \
+    'Strip(0).A1=1; Strip(0).A2=1; Strip(0).B1=0; Strip(0).B2=0; Strip(0).mono=1;'
+    _unset = \
+    'Strip(0).A1=0; Strip(0).A2=0; Strip(0).B1=1; Strip(0).B2=1; Strip(0).mono=0;'
     
     if self.switch:
       self.oai.apply({
@@ -133,19 +136,26 @@ class Audio(Macros):
       Commands.vban_sendtext('iris.local', _unset, 6990, 'iris_sound_t')
       print('Sound Test Disabled')
 
-    self.oai.button_stateonly(self.logical_id, self.switch)
-
   def solo_onyx(self):
     """ only for updates. SOLO done through DAW """
-    self.oai.button_stateonly(self.logical_id, self.switch)
+    pass
 
   def solo_iris(self):
     """ only for updates. SOLO done through DAW """
-    self.oai.button_stateonly(self.logical_id, self.switch)
-      
+    pass
+
 class Scenes(Macros):
   def __init__(self, macro, switch, oai):
     Macros.__init__(self, macro, switch, oai)
+
+  def run(self):
+    self.oai.show()
+
+    getattr(Scenes, self.macro)(self)
+
+    self.oai.button_stateonly(self.logical_id, self.switch)
+
+    self.set_scene.switch_to(self.macro.upper())
 
   def onyx_only(self):
     """
@@ -155,12 +165,7 @@ class Scenes(Macros):
     self.oai.apply({
       'in-2': dict(mute=False),
       'in-3': dict(mute=True)
-    })
-
-    self.oai.button_stateonly(self.logical_id, self.switch)      
-
-    self.set_scene.switch_to(self.macro.upper())
-
+    })    
     print('Only Onyx Scene enabled, Iris game pc muted')
 
   def iris_only(self):
@@ -171,12 +176,7 @@ class Scenes(Macros):
     self.oai.apply({
       'in-2': dict(mute=True),
       'in-3': dict(mute=False)
-    })
-
-    self.oai.button_stateonly(self.logical_id, self.switch)     
-
-    self.set_scene.switch_to(self.macro.upper())
-      
+    })    
     print('Only Iris Scene enabled, Onyx game pc muted')
  
   def dual_scene(self):
@@ -187,12 +187,7 @@ class Scenes(Macros):
     self.oai.apply({
       'in-2': dict(mute=False, gain=0),
       'in-3': dict(A5=1, mute=False, gain=0)
-    })    
-    
-    self.oai.button_stateonly(self.logical_id, self.switch)
-    
-    self.set_scene.switch_to(self.macro.upper())
-      
+    })     
     print('Daul Scene enabled')
 
   def onyx_big(self):
@@ -203,11 +198,6 @@ class Scenes(Macros):
       'in-2': dict(mute=False, gain=0),
       'in-3': dict(mute=False, gain=-3),
     })    
-    
-    self.oai.button_stateonly(self.logical_id, self.switch)
-
-    self.set_scene.switch_to(self.macro.upper())
-
     print('Onyx Big scene enabled')
 
   def iris_big(self):
@@ -215,22 +205,13 @@ class Scenes(Macros):
     self.oai.apply({
       'in-2': dict(mute=False, gain=-3),
       'in-3': dict(A5=1, mute=False, gain=0)
-    })    
-    
-    self.oai.button_stateonly(self.logical_id, self.switch)
-
-    self.set_scene.switch_to(self.macro.upper())
-      
+    })     
     print('Iris Big enabled')
 
   def start(self):
     """ mute game pcs to stream for start scene """
     self.oai.inputs[2].mute = True
     self.oai.inputs[3].mute = True
-
-    self.oai.button_stateonly(self.logical_id, self.switch)    
-    
-    self.set_scene.switch_to(self.macro.upper()) 
 
     print('Start scene enabled.. ready to go live!')
 
@@ -242,18 +223,10 @@ class Scenes(Macros):
     })
     print('BRB: game pcs muted')
 
-    self.oai.button_stateonly(self.logical_id, self.switch)
-
-    self.set_scene.switch_to(self.macro.upper())
-
   def end(self):
     """ mute both game pcs leave mics unmuted for byes """
     self.oai.inputs[2].mute = True
     self.oai.inputs[3].mute = True
-
-    self.oai.button_stateonly(self.logical_id, self.switch)    
-    
-    self.set_scene.switch_to(self.macro.upper())
 
     print('Start scene enabled.. ready to go live!')
 
@@ -278,17 +251,10 @@ class Scenes(Macros):
       'out-7': dict(mute=False, gain=0)
     })
     
-
-    for key in default_states['audio']:
-      default_macro, default_state, = default_states['audio'].get(key)
-      logical_id = self.button_map[default_macro]
-      
-      self.oai.button_stateonly(logical_id, default_state)
-      print(f'resetting {default_macro} to {default_state}')
-
-    for key in default_states['scenes']:
-      default_macro, default_state, = default_states['scenes'].get(key)
-      logical_id = self.button_map[default_macro]
-      
-      self.oai.button_stateonly(logical_id, default_state)
-      print(f'resetting {default_macro} to {default_state}')
+    for layer in default_states:
+      for key in default_states[layer]:
+        default_macro, default_state, = default_states[layer].get(key)
+        logical_id = self.button_map[default_macro]
+          
+        self.oai.button_stateonly(logical_id, default_state)
+        print(f'resetting {default_macro} to {default_state}')

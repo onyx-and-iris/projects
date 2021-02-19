@@ -45,13 +45,12 @@ def main(layer, arg):
   if switch == saved_state:
     switch = 1 - switch
 
-  with voicemeeter.remote('potato') as oai:
-    oai.show()
-    """ Do we need Audio or Scenes class? Then instantiate """  
-    by_class = getattr(macrobuttons, layer.capitalize())(this_macro, switch, oai)
+  """ Do we need Audio or Scenes class? Then instantiate """  
+  by_class = getattr(macrobuttons, layer.capitalize())
 
-    """ Call desired method """
-    getattr(by_class, this_macro)()
+  with voicemeeter.remote('potato') as oai:
+    """ call .run() for appropriate class """  
+    by_class(this_macro, switch, oai).run()
 
   saved_states[layer][arg][1] = switch
 
