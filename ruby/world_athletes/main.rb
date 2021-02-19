@@ -178,6 +178,10 @@ swimmers = [
     Beth, Zach, AmyB, Zane, Lindsey
 ]
 
+athletes = {
+    "runners" => runners, "swimmers" => swimmers, "cyclists" => cyclists
+}
+
 def comp_dina(runners)
     """ compare dina asher smith to other runners """
     runners.each do | runner |
@@ -194,8 +198,7 @@ def comp_swimmers(swimmers)
     """
     swimmers.each do | swimmer |
         swimmers.each do | competitor |
-            if ((swimmer.fullname != competitor.fullname) && 
-                (swimmer.event != competitor.event))
+            if swimmer.fullname != competitor.fullname
                 swimmer.versus(competitor)
             end
         end 
@@ -209,15 +212,28 @@ def get_cyclist_teams(cyclists)
     end
 end
 
-def main(runners, swimmers, cyclists)
-    comp_dina(runners)
+def comp_cyclists(cyclists)
+    """ compare career points between cyclists """
+    cyclists.each do | cyclist |
+        cyclists.each do | competitor |
+            if cyclist.fullname != competitor.fullname
+                cyclist.versus(competitor)
+            end
+        end 
+    end
+end
 
-    comp_swimmers(swimmers)
+def main(athletes)
+    comp_dina(athletes["runners"])
 
-    get_cyclist_teams(cyclists)
+    comp_swimmers(athletes["swimmers"])
+
+    get_cyclist_teams(athletes["cyclists"])
+
+    comp_cyclists(athletes["cyclists"])
 end
 
 
 if $PROGRAM_NAME == __FILE__
-    main(runners, swimmers, cyclists)
+    main(athletes)
 end 

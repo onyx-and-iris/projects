@@ -40,6 +40,7 @@ class Athlete
 		self.name_first = name_first
 		self.name_last = name_last
 		self.event = "Unknown"
+		self.pb = "0"
 	end
 
 	def fullname
@@ -78,6 +79,20 @@ class Cyclist < Athlete
 		@team = value
 	end
 
+	def career_points=(value)
+		if value < 0
+			raise "ERROR Career points cannot be negative value!"
+		end
+		@career_points = value
+	end
+
+	def rank=(value)
+		if value < 0
+			raise "ERROR Rank must be positive integer"
+		end
+		@rank = value
+	end
+
 	def self.ag2r(name_first, name_last)
 		""" factory function """
 		Cyclist.new(name_first, name_last, "AG2R La Mondiale")
@@ -97,18 +112,7 @@ class Cyclist < Athlete
 		""" call super with only name_first and name_last """
 		super(name_first, name_last)
 		self.team = team
-	end
-
-	def rank=(value)
-		if value < 0
-			raise "ERROR Rank must be positive integer"
-		end
-	end
-
-	def career_points=(value)
-		if value < 0
-			raise ERROR "Career points must be positive integer"
-		end
+		self.career_points = 0
 	end
 
 	def bike(value)
@@ -127,6 +131,17 @@ class Cyclist < Athlete
 	def team
 		puts "#{fullname} is a member of #{@team}"
 		puts "Their team rides bikes: #{bike(@team)}"
+	end
+
+	def versus(competitor)
+		""" method override """
+		if @career_points > competitor.career_points
+			puts "#{fullname} has more career points than #{competitor.fullname}"
+			puts "#{@career_points} to #{competitor.career_points}"
+		else
+			puts "#{fullname} has more career points than #{competitor.fullname}"
+			puts "#{@career_points} to #{competitor.career_points}"
+		end
 	end
 end
 
@@ -160,6 +175,7 @@ class Swimmer < Athlete
 		""" call super with only name_first and name_last """
 		super(name_first, name_last)
 		self.team = team
+		self.aggregate = 0
 	end
 
 	def versus(competitor)
@@ -169,6 +185,14 @@ class Swimmer < Athlete
 
 		if self.stroke.nil? || competitor.stroke.nil?
 			return nil
+		elsif @event == competitor.event
+			if @pb.to_i > competitor.pb.to_i
+				puts "#{fullname} and #{competitor.fullname} do the #{@event}"
+				puts "#{fullname} beats #{competitor.fullname}"
+			else
+				puts "#{competitor.fullname} and #{fullname} do the #{@event}"
+				puts "#{competitor.fullname} beats #{fullname}"
+			end
 		else
 			super
 		end
