@@ -1,31 +1,18 @@
 require_relative "athletes"
+Laura = Runner.new("Laura", "Muir", 28,
+country: "Scotland", event: "1500m", pb: "3:55")
 
-format_separator = "======================"
-############### RUNNERS ##################
-Laura = Runner.new("Laura", "Muir", 28)
-Laura.country = "Scotland"
-Laura.event = "1500m"
-Laura.pb = "3:55"
+Mo = Runner.new("Mohammad", "Farah", 38, 
+country: "England", event: "10000m", pb: "26:46")
 
-Mo = Runner.new("Mohammad", "Farah", 38)
-Mo.country = "England"
-Mo.event = "10000m"
-Mo.pb = "26:46"
+Dina = Runner.new("Dina", "Asher-Smith", 25,
+country: "England", event: "100m", pb: "10.83")
 
-Dina = Runner.new("Dina", "Asher-Smith", 25)
-Dina.country = "England"
-Dina.event = "100m"
-Dina.pb = "10.83"
+Adam = Runner.new("Adam", "Gemili", 27, 
+country: "England", event: "100m", pb: "9.97")
 
-Adam = Runner.new("Adam", "Gemili", 27)
-Adam.country = "England"
-Adam.event = "100m"
-Adam.pb = "9.97"
-
-Amy = Runner.new("Amy", "Hunt", 18)
-Amy.country = "England"
-Amy.event = "200m"
-Amy.pb = "22.42"
+Amy = Runner.new("Amy", "Hunt", 18,
+country: "England", event: "200m", pb: "22.42")
 
 runners = [Laura, Mo, Dina, Adam, Amy]
 
@@ -179,7 +166,7 @@ swimmers = [
 ]
 
 athletes = {
-    "runners" => runners, "swimmers" => swimmers, "cyclists" => cyclists
+    :runners => runners, :swimmers => swimmers, :cyclists => cyclists
 }
 
 def comp_dina(runners)
@@ -224,13 +211,15 @@ def comp_cyclists(cyclists)
 end
 
 def main(athletes)
-    comp_dina(athletes["runners"])
 
-    comp_swimmers(athletes["swimmers"])
+    comp_dina(athletes[:runners])
+=begin
+    comp_swimmers(athletes[:swimmers])
 
-    get_cyclist_teams(athletes["cyclists"])
+    get_cyclist_teams(athletes[:cyclists])
 
-    comp_cyclists(athletes["cyclists"])
+    comp_cyclists(athletes[:cyclists])
+=end
 end
 
 

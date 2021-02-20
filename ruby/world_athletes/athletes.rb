@@ -1,24 +1,8 @@
 class Athlete
 	""" Superclass  Athlete """
-	attr_accessor :country, :event
-	attr_reader :name_first, :name_last, :age, :pb
+	attr_accessor :event
+	attr_reader :name_first, :name_last, :age, :pb, :country
  
-	def age=(value)
-		""" writer method validate input """
-		if value < 0
-			raise "ERROR: age must be a positive value"
-		end
-		@age = value
-	end
-	
-	def pb=(value)
-		""" writer method validate input """
-		if value.empty?
-			raise "ERROR: pb cannot be blank!"
-		end
-		@pb = value
-	end
-
 	def name_first=(value)
 		""" writer method validate input """
 		if value.empty?
@@ -33,6 +17,37 @@ class Athlete
 			raise "ERROR: Name cannot be blank string!"
 		end
 		@name_last = value
+	end
+
+	def age=(value)
+		""" writer method validate input """
+		if value < 0
+			raise "ERROR: age must be a positive value"
+		end
+		@age = value
+	end
+
+	def country=(value)
+		""" writer method validate input """
+		if value.nil? || value.empty?
+			raise "ERROR: Country cannot be blank string!"
+		end
+		@country = value
+	end
+
+	def event=(value)
+		if value.nil? || value.empty?
+			raise "ERROR: Event cannot be blank string!"
+		end
+		@country = value
+	end
+
+	def pb=(value)
+		""" writer method validate input """
+		if value.empty?
+			raise "ERROR: pb cannot be blank!"
+		end
+		@pb = value
 	end
 
 	def initialize(name_first = "Default", name_last = "Name")
@@ -56,10 +71,13 @@ end
 
 class Runner < Athlete
 	""" subclass runner """
-	def initialize(name_first = "Default", name_last = "Name", age = 0)
+	def initialize(name_first = "Default", name_last = "Name", age = 0, opts = {})
 		""" call super with only name_first and name_last """
 		super(name_first, name_last)
 		self.age = age
+		self.country = opts[:country]
+		self.event = opts[:event]
+		self.pb = opts[:pb]
 	end
 
 	def is_wanda
@@ -113,6 +131,7 @@ class Cyclist < Athlete
 		super(name_first, name_last)
 		self.team = team
 		self.career_points = 0
+		self.country = "Default"
 	end
 
 	def bike(value)
