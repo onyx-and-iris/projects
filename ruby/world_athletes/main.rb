@@ -88,76 +88,53 @@ cyclists = [
 
 ############### SWIMMERS ##################
 # London Roar
-AdamP = Swimmer.lonr("Adam", "Peaty")
-AdamP.aggregate = 36854
-AdamP.pb = "4294"
-AdamP.event = "100m Breastroke"
 
-Guilherme = Swimmer.lonr("Guilherme", "Guido")
-Guilherme.aggregate = 33585
-Guilherme.pb = "9170"
-Guilherme.event = "50m Backstroke"
+AdamP = Swimmer.lonr("Adam", "Peaty", 
+aggregate: 36854, pb: "4294", event: "100m Breastroke")
 
-Alia = Swimmer.lonr("Alia", "Atkinson")
-Alia.aggregate = 32265
-Alia.pb = "4385"
-Alia.event = "50m Breastroke"
+Guilherme = Swimmer.lonr("Guilherme", "Guido",
+aggregate: 33585, pb: "9170", event: "50m Backstroke")
 
-Sydney = Swimmer.lonr("Sydney", "Pickrem")
-Sydney.aggregate = 30364
-Sydney.pb = "4053"
-Sydney.event = "200m Medley"
+Alia = Swimmer.lonr("Alia", "Atkinson",
+aggregate: 32265, pb: "4385", event: "50m Breastroke")
 
-Minna = Swimmer.lonr("Minna", "Atherton")
-Minna.aggregate = 28910
-Minna.pb = "10830"
-Minna.event = "100m Backstroke"
+Sydney = Swimmer.lonr("Sydney", "Pickrem",
+aggregate: 30364, pb: "4053", event: "200m Medley")
+
+Minna = Swimmer.lonr("Minna", "Atherton",
+aggregate: 28910, pb: "10830", event: "100m Backstroke")
 
 # NY Breakers
-Michael = Swimmer.nyb("Michael", "Andrew")
-Michael.aggregate = 31288
-Michael.pb = "2706"
-Michael.event = "50m Butterfly"
+Michael = Swimmer.nyb("Michael", "Andrew",
+aggregate: 31288, pb: "2706", event: "50m Butterfly")
 
-Marco = Swimmer.nyb("Marco", "Koch")
-Marco.aggregate = 25555
-Marco.pb = "3033"
-Marco.event = "200m Breaststroke"
+Marco = Swimmer.nyb("Marco", "Koch",
+aggregate: 25555, pb: "3033", event: "200m Breaststroke")
 
-Arina = Swimmer.nyb("Arina", "Surkova")
-Arina.aggregate = 23869
-Arina.event = "50m Butterfly"
+Arina = Swimmer.nyb("Arina", "Surkova",
+aggregate: 23869, event: "50m Butterfly")
 
-Kasia = Swimmer.nyb("Kasia", "Wasick")
-Kasia.aggregate = 32724
+Kasia = Swimmer.nyb("Kasia", "Wasick",
+aggregate: 32724)
 
-Joe = Swimmer.nyb("Joe", "Litchfield")
-Joe.aggregate = 23089
-Joe.event = "Freestyle"
+Joe = Swimmer.nyb("Joe", "Litchfield",
+aggregate: 23089, event: "Freestyle")
 
 # DC Trident
-Beth = Swimmer.oct("Bethany", "Galat")
-Beth.aggregate = 22698
-Beth.pb = "2499"
-Beth.event = "100m Breaststroke"
+Beth = Swimmer.dct("Bethany", "Galat",
+aggregate: 22698, pb: "2499", event: "100m Breaststroke")
 
-Zach = Swimmer.oct("Zach", "Apple")
-Zach.aggregate = 22436
-Zach.pb = "1583"
-Zach.event = "100m Freestyle"
+Zach = Swimmer.dct("Zach", "Apple",
+aggregate: 22436, pb: "1583", event: "100m Freestyle")
 
-AmyB = Swimmer.oct("Amy", "Bilquist")
-AmyB.aggregate = 21512
-AmyB.pb = "2710"
-AmyB.event = "100m Backstroke"
+AmyB = Swimmer.dct("Amy", "Bilquist",
+aggregate: 21512, pb: "2710", event: "100m Backstroke")
 
-Zane = Swimmer.oct("Zane", "Grothe")
-Zane.aggregate = 20718
-Zane.pb = "3823"
-Zane.event = "400m Freestyle"
+Zane = Swimmer.dct("Zane", "Grothe",
+aggregate: 20718, pb: "3823", event: "400m Freestyle")
 
-Lindsey = Swimmer.oct("Lindsey", "Kozelsky")
-Lindsey.aggregate = 20580
+Lindsey = Swimmer.dct("Lindsey", "Kozelsky",
+aggregate: 20580)
 
 swimmers = [
     AdamP, Guilherme, Alia, Sydney, Minna,
@@ -172,7 +149,7 @@ athletes = {
 def comp_dina(runners)
     """ compare dina asher smith to other runners """
     runners.each do | runner |
-        if runner.name_first != "Dina"
+        if runner.object_id != Dina.object_id
             Dina.versus(runner)
         end
     end
@@ -195,7 +172,7 @@ end
 def get_cyclist_teams(cyclists)
     """ get team for every cyclist and print bikes used """
     cyclists.each do | cyclist |
-        puts "#{cyclist.team}"
+        print "#{cyclist.team}"
     end
 end
 
@@ -211,15 +188,13 @@ def comp_cyclists(cyclists)
 end
 
 def main(athletes)
-
     comp_dina(athletes[:runners])
-=begin
+
     comp_swimmers(athletes[:swimmers])
 
     get_cyclist_teams(athletes[:cyclists])
-
+    
     comp_cyclists(athletes[:cyclists])
-=end
 end
 
 

@@ -1,10 +1,9 @@
 class Athlete
 	""" Superclass  Athlete """
-	attr_accessor :event
-	attr_reader :name_first, :name_last, :age, :pb, :country
+	attr_reader :name_first, :name_last, :age, :pb, :country, :event
  
+	""" Writer methods validate input """
 	def name_first=(value)
-		""" writer method validate input """
 		if value.empty?
 			raise "ERROR: Name cannot be blank string!"
 		end
@@ -12,7 +11,6 @@ class Athlete
 	end
 
 	def name_last=(value)
-		""" writer method validate input """
 		if value.empty?
 			raise "ERROR: Name cannot be blank string!"
 		end
@@ -20,31 +18,21 @@ class Athlete
 	end
 
 	def age=(value)
-		""" writer method validate input """
 		if value < 0
 			raise "ERROR: age must be a positive value"
 		end
 		@age = value
 	end
 
-	def country=(value)
-		""" writer method validate input """
-		if value.nil? || value.empty?
-			raise "ERROR: Country cannot be blank string!"
-		end
-		@country = value
-	end
-
 	def event=(value)
 		if value.nil? || value.empty?
 			raise "ERROR: Event cannot be blank string!"
 		end
-		@country = value
+		@event = value
 	end
 
 	def pb=(value)
-		""" writer method validate input """
-		if value.empty?
+		if value.nil? || value.empty?
 			raise "ERROR: pb cannot be blank!"
 		end
 		@pb = value
@@ -63,21 +51,30 @@ class Athlete
 	end
 	
 	def versus(competitor)
-		puts "#{fullname} beats #{competitor.fullname} at the #{@event}"
-		puts "Meanwhile #{competitor.fullname} beats #{fullname}  at #{competitor.event}"
+		puts "#{fullname} beats #{competitor.fullname} at the #{@event}\n"\
+		"Meanwhile #{competitor.fullname} beats #{fullname} "\
+		"at #{competitor.event}"
 	end
 end
 
 
 class Runner < Athlete
 	""" subclass runner """
-	def initialize(name_first = "Default", name_last = "Name", age = 0, opts = {})
+	def initialize(name_first = "Default", name_last = "Name", age = 0, 
+		opts = {})
 		""" call super with only name_first and name_last """
 		super(name_first, name_last)
 		self.age = age
 		self.country = opts[:country]
 		self.event = opts[:event]
 		self.pb = opts[:pb]
+	end
+
+	def country=(value)
+		if value.nil? || value.empty?
+			raise "ERROR: Country cannot be blank string!"
+		end
+		@country = value
 	end
 
 	def is_wanda
@@ -131,13 +128,12 @@ class Cyclist < Athlete
 		super(name_first, name_last)
 		self.team = team
 		self.career_points = 0
-		self.country = "Default"
 	end
 
 	def bike(value)
 		""" hash teams to bikes and implicitly return bikes for team """
 		teams = {
-			"AG2R La Mondiale" => "Eddy Merckx EM525 Disc, Stockeu69", 
+		"AG2R La Mondiale" => "Eddy Merckx EM525 Disc, Stockeu69", 
 		"NTT Pro Cycling" => "BMC Teammachine SLR,  Timemachine Road", 
 		"Trek-Segafredo" => "Trek Emonda SLR, Madone SLR"
 		}
@@ -148,26 +144,28 @@ class Cyclist < Athlete
 	end
 
 	def team
-		puts "#{fullname} is a member of #{@team}"
-		puts "Their team rides bikes: #{bike(@team)}"
+		puts "#{fullname} is a member of #{@team}\n"\
+		"Their team rides bikes: #{bike(@team)}"
 	end
 
 	def versus(competitor)
 		""" method override """
 		if @career_points > competitor.career_points
-			puts "#{fullname} has more career points than #{competitor.fullname}"
-			puts "#{@career_points} to #{competitor.career_points}"
+			puts "#{fullname} has more career points than "\
+			"#{competitor.fullname}\n#{@career_points} to "\
+			"#{competitor.career_points}"
 		else
-			puts "#{fullname} has more career points than #{competitor.fullname}"
-			puts "#{@career_points} to #{competitor.career_points}"
+			puts "#{competitor.fullname} has more career points than "\
+			"#{fullname}\n#{competitor.career_points} to "\
+			"#{@career_points}"
 		end
 	end
 end
 
 class Swimmer < Athlete
+	""" subclass swimmer """
 	attr_accessor :aggregate, :team, :stroke, :distance
 
-	""" subclass swimmer """
 	def team=(value)
 		if value.empty?
 			raise "ERROR Team cannot be blank string!"
@@ -175,26 +173,35 @@ class Swimmer < Athlete
 		@team = value
 	end
 
-	def self.lonr(name_first, name_last)
-		""" factory function """
-		Swimmer.new(name_first, name_last, "London Roar")
+	def aggregate=(value)
+		if value.nil? || value < 0
+			raise "ERROR aggregate must be positive value!"
+		end
 	end
 
-	def self.nyb(name_first, name_last)
+	def self.lonr(name_first, name_last, opts)
 		""" factory function """
-		Swimmer.new(name_first, name_last, "New York Breakers")
+		Swimmer.new(name_first, name_last, "London Roar", opts)
 	end
 
-	def self.oct(name_first, name_last)
+	def self.nyb(name_first, name_last, opts)
 		""" factory function """
-		Swimmer.new(name_first, name_last, "OC Trident")
+		Swimmer.new(name_first, name_last, "New York Breakers", opts)
 	end
 
-	def initialize(name_first, name_last, team = "Default")
+	def self.dct(name_first, name_last, opts)
+		""" factory function """
+		Swimmer.new(name_first, name_last, "OC Trident", opts)
+	end
+
+	def initialize(name_first, name_last, team = "Default", 
+		aggregate: 0, pb: "Default", event: "Default")
 		""" call super with only name_first and name_last """
 		super(name_first, name_last)
 		self.team = team
-		self.aggregate = 0
+		self.aggregate = aggregate
+		self.pb = pb
+		self.event = event
 	end
 
 	def versus(competitor)
@@ -206,11 +213,11 @@ class Swimmer < Athlete
 			return nil
 		elsif @event == competitor.event
 			if @pb.to_i > competitor.pb.to_i
-				puts "#{fullname} and #{competitor.fullname} do the #{@event}"
-				puts "#{fullname} beats #{competitor.fullname}"
+				puts "#{fullname} and #{competitor.fullname} both do the "\
+				"#{@event}\n#{fullname} beats #{competitor.fullname}"
 			else
-				puts "#{competitor.fullname} and #{fullname} do the #{@event}"
-				puts "#{competitor.fullname} beats #{fullname}"
+				puts "#{competitor.fullname} and #{fullname} both do the "\
+				"#{@event}\n#{competitor.fullname} beats #{fullname}"
 			end
 		else
 			super
