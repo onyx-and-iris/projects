@@ -1,4 +1,6 @@
 require_relative "athletes"
+
+
 Laura = Runner.new("Laura", "Muir", 28,
 country: "Scotland", event: "1500m", pb: "3:55")
 
@@ -146,8 +148,11 @@ athletes = {
     :runners => runners, :swimmers => swimmers, :cyclists => cyclists
 }
 
-def comp_dina(runners)
+""" Tests """
+def comp_dina(athletes)
     """ compare dina asher smith to other runners """
+    runners = athletes[:runners]
+
     runners.each do | runner |
         if runner.object_id != Dina.object_id
             Dina.versus(runner)
@@ -155,49 +160,60 @@ def comp_dina(runners)
     end
 end
 
-def comp_swimmers(swimmers)
+def comp_swimmers(athletes)
     """ 
     compare each swimmer vs every other swimmer
-    exclude comparisons where distance and stroke are equal
+    exclude comparisons where objects match (athlete vs themself)
     """
+    swimmers = athletes[:swimmers]
+
     swimmers.each do | swimmer |
         swimmers.each do | competitor |
-            if swimmer.fullname != competitor.fullname
+            if swimmer.object_id != competitor.object_id
                 swimmer.versus(competitor)
             end
         end 
     end
 end
 
-def get_cyclist_teams(cyclists)
+def get_cyclist_teams(athletes)
     """ get team for every cyclist and print bikes used """
+    cyclists = athletes[:cyclists]
+
     cyclists.each do | cyclist |
         print "#{cyclist.team}"
     end
 end
 
-def comp_cyclists(cyclists)
-    """ compare career points between cyclists """
+def comp_cyclists(athletes)
+    """ 
+    compare career points between cyclists
+    exclude comparisons where objects match (athlete vs themself)
+    """
+    cyclists = athletes[:cyclists]
+
     cyclists.each do | cyclist |
         cyclists.each do | competitor |
-            if cyclist.fullname != competitor.fullname
+            if cyclist.object_id != competitor.object_id
                 cyclist.versus(competitor)
             end
         end 
     end
 end
 
-def main(athletes)
-    comp_dina(athletes[:runners])
-
-    comp_swimmers(athletes[:swimmers])
-
-    get_cyclist_teams(athletes[:cyclists])
-    
-    comp_cyclists(athletes[:cyclists])
+def main(athletes, args)
+    """ build eval string to invoke test run for each arg variable """
+    args.each { |func| run = func.to_s; eval(run + "(athletes)") }
 end
 
 
 if $PROGRAM_NAME == __FILE__
-    main(athletes)
+    """ pass name(s) of test(s) to run as argument variable(s) """
+    args = ARGV
+
+    if args.empty?
+        puts 'USAGE: "ruby .\\main.rb <test to run>" eg comp_dina...'
+    end
+
+    main(athletes, args)
 end 
