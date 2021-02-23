@@ -1,16 +1,6 @@
 def extract(reformatted, word)
-    """ more verbose method """
-    extract = []
-    extract = reformatted.find_all do |line| 
-        line.include? word
-    end
-
-    extract
-end
-
-def extract_map(reformatted, word)
     """ using map and inplace reject """
-    extract = reformatted.map { |line| line if line.include? word}
+    extract = reformatted.map { |line| line if line.include? word }
     extract.reject! { |line| line.nil? || line.empty? }
 end
 
@@ -27,7 +17,7 @@ def reformat(lines)
     reformat
 end
 
-def main
+def main(word)
     book = "book.txt"
     newbook = "newbook.txt"
     print_format = "================================"
@@ -45,17 +35,15 @@ def main
         end
     end
 
-    extracted = extract(reformatted, 'Lord')
-    puts("Lines with LORD in them:")
-    puts print_format
-    puts extracted
-
-    extracted = extract_map(reformatted, 'Jesus')
-    puts("Lines with JESUS in them:")
+    extracted = extract(reformatted, word)
+    puts("Lines with #{word} in them:")
     puts print_format
     puts extracted
 end
 
-if $PROGRAM_NAME == __FILE__
-    main
+if __FILE__ == $PROGRAM_NAME
+    args = ARGV
+    word = args[0]
+
+    main(word)
 end
