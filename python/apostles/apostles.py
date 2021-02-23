@@ -1,39 +1,54 @@
 import re
 import requests
-from bs4 import BeautifulSoup
-
 import argparse
 
-class parseHtml:
-    def __init__(self, soup=None):
-        self.soup = soup    
+from bs4 import BeautifulSoup
 
+class Version:
+    def __init__(self):
         self.url_kj = {
-            'matthew': "http://www.earlychristianwritings.com/text/matthew-kjv.html",
-            'mark': "http://www.earlychristianwritings.com/text/mark-kjv.html",
-            'luke': "http://www.earlychristianwritings.com/text/luke-kjv.html",
-            'john': "http://www.earlychristianwritings.com/text/john-kjv.html"
+        'matthew': "http://www.earlychristianwritings.com/text/matthew-kjv.html",
+        'mark': "http://www.earlychristianwritings.com/text/mark-kjv.html",
+        'luke': "http://www.earlychristianwritings.com/text/luke-kjv.html",
+        'john': "http://www.earlychristianwritings.com/text/john-kjv.html"
         }
 
         self.url_as = {
-            'matthew': "http://www.earlychristianwritings.com/text/matthew-asv.html",
-            'mark': "http://www.earlychristianwritings.com/text/mark-asv.html",
-            'luke': "http://www.earlychristianwritings.com/text/luke-asv.html",
-            'john': "http://www.earlychristianwritings.com/text/john-asv.html"
+        'matthew': "http://www.earlychristianwritings.com/text/matthew-asv.html",
+        'mark': "http://www.earlychristianwritings.com/text/mark-asv.html",
+        'luke': "http://www.earlychristianwritings.com/text/luke-asv.html",
+        'john': "http://www.earlychristianwritings.com/text/john-asv.html"
         }
 
         self.url_we = {
-            'matthew': "http://www.earlychristianwritings.com/text/matthew-web.html",
-            'mark': "http://www.earlychristianwritings.com/text/mark-web.html",
-            'luke': "http://www.earlychristianwritings.com/text/luke-web.html",
-            'john': "http://www.earlychristianwritings.com/text/john-web.html"        
+        'matthew': "http://www.earlychristianwritings.com/text/matthew-web.html",
+        'mark': "http://www.earlychristianwritings.com/text/mark-web.html",
+        'luke': "http://www.earlychristianwritings.com/text/luke-web.html",
+        'john': "http://www.earlychristianwritings.com/text/john-web.html"        
         }
+
+        self.soup = soup    
         
         self.version = {}
         self.version['king_james'] = self.url_kj
         self.version['american_standard'] = self.url_as
         self.version['world_english'] = self.url_we
 
+    def get_text(self, ver, book):
+        if ver and book:
+            html_text = requests.get(self.version[ver][book]).text
+        else:
+            print(f'Please provide book and version.\n'
+            f'Book available options:\n'
+            f'matthew\nmark\nluke\njohn\n'
+            f'Version available options:\n'
+            f'king_james\namerican_standard\nworld_english\n')
+
+        return html_text
+
+class Parse():
+    def __init__(self, soup):
+        self.soup = soup
 
     def king_james(self): 
         # remove all javascript and stylesheet code
@@ -91,8 +106,8 @@ class parseHtml:
         return text
 
 
-class fileOps:
-    def writeTofile(self, text):
+class FileOps:
+    def write_tofile(self, text):
         book_txt = "book.txt"
 
         while True:
@@ -106,35 +121,31 @@ class fileOps:
                 textfile.close()
 
 
-# allow us to run this as a local standalone script
+def main(version, book):
+    """ get html_text then parse with appropriate parser then write to file """
+    version = Version()
+    html_text = version.get_text(args.v, args.b)    
+
+    if html_text:
+        soup = BeautifulSoup(html_text, 'html.parser')
+
+        book = Parse(soup)
+        parse_bymethod = getattr(book, args.v)
+        text = parse_bymethod() 
+
+        file_io = FileOps()
+        file_io.write_tofile(text)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v')
-    parser.add_argument('-b')
+    parser.add_argument('-v', nargs=None, 
+    choices=['king_james', 'american_standard', 'world_english'])
+    parser.add_argument('-b', nargs=None, 
+    choices=['matthew', 'mark', 'luke', 'john'])
     args = parser.parse_args()
 
     html_text = None
     soup = None
 
-    book = parseHtml(soup)
-
-    if args.v in book.version:
-        if args.b in book.version[args.v]:
-            html_text = requests.get(book.version[args.v][args.b]).text
-        else:
-            print(f'No such book, available options:\n'
-            f'matthew\nmark\nluke\njohn\n')            
-    else:
-        print(f'No such version, available options:\n'
-        f'king_james\namerican_standard\nworld_english\n')
-
-    if html_text:
-        soup = BeautifulSoup(html_text, 'html.parser')
-
-        # use the appropriate parser
-        book = parseHtml(soup)
-        parse_bymethod = getattr(book, args.v)
-        text = parse_bymethod() 
-
-        fileIO = fileOps()
-        fileIO.writeTofile(text)
+    main(args.v, args.b)

@@ -55,7 +55,7 @@ if __name__ == '__main__':
         soup = None
         html_text = None
 
-        book = apostles.parseHtml(soup)
+        book = apostles.Parse(soup)
 
         if args[0] in book.version:
             if args[1] in book.version[args[0]]:
@@ -68,15 +68,12 @@ if __name__ == '__main__':
         if html_text:
             soup = BeautifulSoup(html_text, 'html.parser')
 
-            # use the appropriate parser
             book = apostles.parseHtml(soup)
             parse_bymethod = getattr(book, args[0])
             text = parse_bymethod() 
 
-            # write text to file on server
             fileIO = apostles.fileOps()
             fileIO.writeTofile(text)
 
-            # serve data to client
             serve_text.serve()
 

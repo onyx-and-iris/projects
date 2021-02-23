@@ -2,7 +2,8 @@ import argparse
 import socket
 import os
 
-class locals:
+
+class Locals:
     def __init__(self, version, book):
         self.thisBook = version + '_' + book + '.txt'
 
@@ -13,7 +14,8 @@ class locals:
         if os.path.isfile('book.txt'):
             os.rename('book.txt', self.thisBook)
 
-class retrieve_text:
+
+class RetrieveText:
     def __enter__(self):
         try:
             self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,14 +24,14 @@ class retrieve_text:
             sys.exit()
         print('Socket Created')
 
-        self.s.connect((self.HOST,self.PORT))
+        self.s.connect((self.HOST, self.PORT))
 
         return self
 
     def __init__(self):
         # mapped in local hosts file
         self.HOST = 'oai.vps'
-        self.PORT = 60000
+        self.PORT = 60001
 
     def send_req(self, request):
         self.s.send(request.encode())
@@ -43,8 +45,6 @@ class retrieve_text:
                 book_txt.write(data)
 
             data = self.s.recv(1024).decode('utf-8')
-        
-        book_txt.close()
 
     def __exit__(self, type, value, traceback):
         self.s.close()
@@ -53,32 +53,29 @@ class retrieve_text:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v')
-    parser.add_argument('-b')
+    parser.add_argument('-v', nargs=None, 
+    choices=['king_james', 'american_standard', 'world_english'])
+    parser.add_argument('-b', nargs=None, 
+    choices=['matthew', 'mark', 'luke', 'john'])
     args = parser.parse_args()
-
-    version = ('king_james', 'american_standard', 'world_english')
-    book = ('matthew', 'mark', 'luke', 'john')
 
     request = None
 
-    if args.v in version:
-        if args.b in book:
+    if args.v and args.b:
             request = args.v + " " + args.b
-        else:
-            print(f'No such book, available options:\n'
-            f'matthew\nmark\nluke\njohn\n')            
     else:
-        print(f'No such version, available options:\n'
+        print(f'Please provide book and version.\n'
+        f'Book available options:\n'
+        f'matthew\nmark\nluke\njohn\n'
+        f'Version available options:\n'
         f'king_james\namerican_standard\nworld_english\n')
 
-    # check if we already have book
-    check_lib = locals(args.v, args.b)
+    check_lib = Locals(args.v, args.b)
 
     if check_lib.has_book():
         print('Book already in local storage')
     else:
-        with retrieve_text() as retrieve:
+        with RetrieveText() as retrieve:
             if request:
                 retrieve.send_req(request)
             else:
