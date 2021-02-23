@@ -27,8 +27,6 @@ class Version:
         'john': "http://www.earlychristianwritings.com/text/john-web.html"        
         }
 
-        self.soup = soup    
-        
         self.version = {}
         self.version['king_james'] = self.url_kj
         self.version['american_standard'] = self.url_as
@@ -114,8 +112,7 @@ class FileOps:
             try:
                 with open(book_txt, "w") as textfile:
                     textfile.write(text)
-                    textfile.close()
-                    break
+                break
             except IOError:
                 textfile = open(book_txt, "x")
                 textfile.close()

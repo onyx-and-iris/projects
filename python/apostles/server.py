@@ -3,13 +3,13 @@ import requests
 from bs4 import BeautifulSoup
 import socket
 
-class server:
+class Server:
     def __enter__(self):
         return self
 
     def __init__(self):
         self.HOST = ''
-        self.PORT = 60000
+        self.PORT = 60001
 
         try:
             self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,31 +49,24 @@ class server:
 
 
 if __name__ == '__main__':
-    with server() as serve_text:
+    with Server() as serve_text:
         args = serve_text.run()
 
         soup = None
         html_text = None
 
-        book = apostles.Parse(soup)
-
-        if args[0] in book.version:
-            if args[1] in book.version[args[0]]:
-                html_text = requests.get(book.version[args[0]][args[1]]).text
-            else:
-                print(f'No such book available!')
-        else:
-            print(f'No such version available!')
-
+        book = apostles.Version()
+        html_text = book.get_text(args[0], args[1])
+        
         if html_text:
             soup = BeautifulSoup(html_text, 'html.parser')
 
-            book = apostles.parseHtml(soup)
+            book = apostles.Parse(soup)
             parse_bymethod = getattr(book, args[0])
             text = parse_bymethod() 
 
-            fileIO = apostles.fileOps()
-            fileIO.writeTofile(text)
+            file_io = apostles.FileOps()
+            file_io.write_tofile(text)
 
             serve_text.serve()
 
