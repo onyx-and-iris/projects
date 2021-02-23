@@ -90,7 +90,6 @@ cyclists = [
 
 ############### SWIMMERS ##################
 # London Roar
-
 AdamP = Swimmer.lonr("Adam", "Peaty", 
 aggregate: 36854, pb: "4294", event: "100m Breastroke")
 
@@ -207,7 +206,7 @@ def main(athletes, args)
 end
 
 
-if $PROGRAM_NAME == __FILE__
+if __FILE__ == $PROGRAM_NAME
     """ pass name(s) of test(s) to run as argument variable(s) """
     args = ARGV
 

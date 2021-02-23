@@ -2,26 +2,26 @@ import pickle
 import argparse
 from pathlib import Path
 
-class fileOps:
+
+class FileOps:
     def __init__(self):
         self.db = {}
-        self.file_db = "records.db"
+        self.file_db = 'records.db'
 
-    def createEmpty(self):
+    def create_empty(self):
         Path(self.file_db).touch()
 
-    def writeFile(self):
-        records = open(self.file_db, "wb")
+    def write_file(self):
+        records = open(self.file_db, 'wb')
 
         pickle.dump(self.db, records)
         records.close
 
-    def readFile(self):
-        # attempt read from file if not exist then create file
+    def read_file(self):
+        """ attempt read from file if not exist then create file """
         try:
-            with open(self.file_db, "rb") as records:
+            with open(self.file_db, 'rb') as records:
                 self.db = pickle.load(records)
-                records.close
 
         except IOError:
             self.createEmpty()
@@ -32,53 +32,51 @@ class fileOps:
         return self.db
 
     def truncate(self):
-        records = open(self.file_db, "wb")
+        records = open(self.file_db, 'wb')
         records.truncate(0)
         records.close
 
 
-class records:
-    def newRecord():
-        fileIO = fileOps()
-        db = fileIO.readFile()
+class Records:
+    def __init__(self):
+        file_io = FileOps()
+        self.db = file_io.read_file()    
+
+    def new_record(self):
         next = 'y'
 
         while next == 'y':
             name = input('Please enter athlete short name: ')
-            db[name] = {}
+            self.db[name] = {}
             name_full = input('Please enter athlete full name: ')
-            db[name]['name'] = name_full
+            self.db[name]['name'] = name_full
             age = input('Age:')
-            db[name]['age'] = age
+            self.db[name]['age'] = age
             country = input('Country:')
-            db[name]['country'] = country
+            self.db[name]['country'] = country
             event = input('Event:')
-            db[name]['event'] = event
+            self.db[name]['event'] = event
             pb = input('PB:')
-            db[name]['pb'] = pb
+            self.db[name]['pb'] = pb
 
             next = input('Add another record (y/n)? ')
 
-        fileIO.writeFile()
+        file_io.write_file()
 
-        
-    def getRecords():
-        fileIO = fileOps()
-        db = fileIO.readFile()
-
-        if not db:
-            print("No records set yet, please set some!")
+    def get_records(self):
+        if not self.db:
+            print('No records set yet, please set some!')
         else:
-            for key in db:
-                print(f"{db[key]['name']} \n==============\n"
-                f"{db[key]['age']}\n{db[key]['country']}\n"
-                f"{db[key]['event']}\n{db[key]['pb']}\n")
+            for key in self.db:
+                print(f'{self.db[key]["name"]} \n==============\n'
+                f'{self.db[key]["age"]}\n{self.db[key]["country"]}\n'
+                f'{self.db[key]["event"]}\n{self.db[key]["pb"]}\n')
 
     def reset():
-        fileIO = fileOps()
-        response = input("Truncating database, are you sure? (y/n) ")
-        if response == "y":
-            fileIO.truncate()
+        file_io = FileOps()
+        response = input('Truncating database, are you sure? (y/n) ')
+        if response == 'y':
+            file_io.truncate()
 
 
 if __name__ == '__main__':
@@ -88,9 +86,11 @@ if __name__ == '__main__':
     parser.add_argument('-t', action='store_true')
     args = parser.parse_args()
 
+    records = Records()
+
     if args.n:
-        records.newRecord()
+        records.new_record()
     elif args.g:
-        records.getRecords()
+        records.get_records()
     elif args.t:
         records.reset()
