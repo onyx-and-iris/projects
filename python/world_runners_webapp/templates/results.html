@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h2>{{ the_title }}</h2>
+
+<p>You requested the following record:</p>
+<table>
+<tr><td>Name:</td><td>{{ the_name }}</td></tr>
+<tr><td>Name:</td><td>{{ the_age }}</td></tr>
+<tr><td>Name:</td><td>{{ the_country }}</td></tr>
+<tr><td>Name:</td><td>{{ the_event }}</td></tr>
+<tr><td>Name:</td><td>{{ the_pb }}</td></tr>
+</table>
+
+<p> {{ the_outro }} </p>
+
+{% endblock %}

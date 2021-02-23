@@ -4,6 +4,7 @@
 **/*.toml
 **/*.json
 **/*.dat
+**/*.backup
 
 **/__pycache__
 
