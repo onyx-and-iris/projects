@@ -2,8 +2,8 @@ require "highline/import"
 
 
 class Reformat
-    attr_accessor :files, :book_format, :book_name, :book_version
-    attr_reader :book, :phrase
+    attr_accessor :book, :book_format, :book_name, :book_version
+    attr_reader :phrase, :response, :files
 
     """ validator writer methods """
     def phrase=(value)
@@ -13,11 +13,18 @@ class Reformat
         @phrase = value
     end
 
-    def book=(value)
-        if value < files.length
+    def response=(value)
+        unless (1.. @files.length).include? value.to_i
             raise "Error please choose a number from the list"
         end
-        @book = value
+        @response = value
+    end
+
+    def files=(value)
+        if value.nil? || value.empty?
+            raise "No books in local repository."
+        end
+        @files = value
     end
 
     def initialize(phrase = "Default")
@@ -60,7 +67,6 @@ class Reformat
     def reformat_kj(lines)
         """ King James parser """
         reformat = []
-
         lines.each_with_index do |line, index|
             nextline = lines[index + 1]
 
@@ -96,26 +102,26 @@ class Reformat
         @files.reject! { |file| file.include? "book" }
         @files.each_with_index { |file, index| puts "#{index + 1}: #{file}" }
 
-        response = ask "Which book to search? (give number):"
-        @book = @files[response.to_i - 1]
-        print_format()
+        self.response = ask "Which book to search? (give number):"
+        @book = @files[@response.to_i - 1]
+        set_bookname_bookver()
 
         lines = []
         File.open(@book) do |text|
             lines = text.readlines
         end
 
-        if @book.include? "american_standard"
+        if @book_version.eql? "American Standard"
             reformat_as(lines)
-        elsif @book.include? "king_james"
+        elsif @book_version.eql? "King James"
             reformat_kj(lines)
-        elsif @book.include? "world_english"
+        elsif @book_version.eql? "World English"
             reformat_we(lines)
         end
     end
 
-    def print_format()
-        """ get book_name and book_version from requested book """
+    def set_bookname_bookver()
+        """ set book_name and book_version from requested book """
         this_book = @book.split('_')
         this_book.map! { |string| string.capitalize() }
         this_book[2].slice!('.txt')
