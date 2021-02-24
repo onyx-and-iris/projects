@@ -2,7 +2,7 @@ require "highline/import"
 
 
 class Reformat
-    attr_accessor :book, :book_format, :book_name, :book_version
+    attr_accessor :book, :book_name, :book_version
     attr_reader :phrase, :response, :files
 
     """ validator writer methods """
