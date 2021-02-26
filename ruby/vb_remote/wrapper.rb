@@ -54,3 +54,46 @@ module VMR_API
         end
     end
 end
+
+module STRIPS
+    attr_reader :strip_layout
+
+    BASIC = 1
+    BANANA = 2
+    POTATO = 3
+
+    def strip_layout=(value)
+        @strip_layout = value
+    end
+
+    def build_strips(type)
+        self.strip_layout =  {
+            :strip => {:p_in => 0, :v_in => 0, :p_out => 0, :v_out => 0}, 
+            :in_vban => 0, 
+            :out_vban => 0
+        }    
+
+        if type == BASIC
+            factory([2, 1, 2, 2, 4])
+        elsif type == BANANA
+            factory([3, 2, 3, 2, 8])
+        elsif type == POTATO
+            factory([5, 3, 5, 3, 8])
+        end
+    end
+
+    def factory(values)
+        num = 0
+
+        @strip_layout.each do |key, val|
+            unless @strip_layout[key] && @strip_layout[key][val]
+                val.each do |k, v|
+                    @strip_layout[key][k] = values[num]
+                    num += 1
+                end
+            end
+        end
+        @strip_layout[:in_vban] = values[num]
+        @strip_layout[:out_vban] = values[num]
+    end
+end
