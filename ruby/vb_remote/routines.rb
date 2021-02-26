@@ -1,15 +1,17 @@
 require_relative 'wrapper'
 
 class BaseRoutines
-    """ define basic behaviours of hook functions """
+    """ 
+    define basic behaviours of hook functions
+    mixin modules
+    """
     include VMR_API
+    include STRIPS
+
     attr_accessor :type
     attr_reader :ret, :success, :sp_command, :value_string, :param_options
 
     SIZE = 1
-    BASIC = 1
-    BANANA = 2
-    POTATO = 3
     BUFF = 512
 
     """ Validation writer methods """
@@ -59,11 +61,12 @@ class BaseRoutines
 
         value.each do |key, val|
             m = regex.match(key)
+            num = m[2].to_s.to_i - 1
 
             k = nil
             v = nil
             val.each do |k, v|
-                build_str.append("#{m[1].capitalize}[#{m[2]}].#{k} = #{v}")
+                build_str.append("#{m[1].capitalize}[#{num.to_s}].#{k} = #{v}")
             end
         end
         @param_options =  build_str.join(";")
@@ -71,17 +74,19 @@ class BaseRoutines
 
     def get_vbtype
         """ 1 = basic, 2 = banana, 3 = potato """
-        c_get = FFI::MemoryPointer.new(:int, SIZE)
+        c_get = FFI::MemoryPointer.new(:long, SIZE)
         get_type(c_get)
         
         c_get.read_long
     end
 
     def do_login
-        """ login, get type, poll dirty """
+        """ login, return vb type, build strip layouts """
         self.success = login
 
         self.type = get_vbtype
+
+        build_strips(@type)
     end
 
     def do_logout
@@ -171,21 +176,9 @@ class Remote < BaseRoutines
     """
     def run
         do_login
-        puts "Logged in"
-
-        is_type = get_vbtype
-        print "Running Voicemeeter version: "
-        if is_type == BASIC
-            puts "Basic"
-        elsif is_type == BANANA
-            puts "Banana"
-        elsif is_type == POTATO
-            puts "Potato"
-        end
-
+        
         yield
 
         do_logout
-        puts "Logged out"
     end
 end
