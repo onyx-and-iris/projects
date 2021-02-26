@@ -1,11 +1,11 @@
-require_relative 'wrapper'
+require_relative 'base'
 
 class BaseRoutines
     """ 
     define basic behaviours of hook functions
     mixin modules
     """
-    include VMR_API
+    include HOOKS
     include STRIPS
 
     attr_accessor :type
@@ -55,21 +55,27 @@ class BaseRoutines
     end
 
     def param_options=(value)
-        """ Add test against factory functions """
+        """ Test options against regex then build param string """
         build_str = []
-        regex = /(\w+)_(\d)/
+        regex = /(\w+)_(\d+)/
 
         value.each do |key, val|
             m = regex.match(key)
-            num = m[2].to_s.to_i - 1
 
+            name = m[1]
+            num = shift(m[2])
             k = nil
             v = nil
             val.each do |k, v|
-                build_str.append("#{m[1].capitalize}[#{num.to_s}].#{k} = #{v}")
+                if validate(name, num)
+                    build_str.append(
+                        "#{name.capitalize}[#{num}].#{k} = #{v}"
+                        )
+                end
             end
         end
         @param_options =  build_str.join(";")
+        puts @param_options
     end
 
     def get_vbtype
@@ -114,14 +120,20 @@ class BaseRoutines
         set parameter by name, value
         poll macro_isdirty until nonzero to signify status change
         """
-        c_get = FFI::MemoryPointer.new(:float, SIZE)
+        regex = /^(\w+)\[(\d+)\]/
+        m = regex.match(name)
+        if validate(m[1].downcase, m[2])
+            c_get = FFI::MemoryPointer.new(:float, SIZE)
 
-        self.ret = set_paramfloat(name, value.to_f)
-        wait_pdirty
+            self.ret = set_paramfloat(name, value.to_f)
+            wait_pdirty
 
-        self.ret = get_paramfloat(name, c_get)
-        val = c_get.read_float
-        val = 1 - val.to_i
+            self.ret = get_paramfloat(name, c_get)
+            val = c_get.read_float
+            val = 1 - val.to_i
+        else
+            puts "Strip/Bus value out of range"
+        end
     end
 
     def set_parameter_string(name, value)
@@ -172,7 +184,8 @@ end
 
 class Remote < BaseRoutines
     """ 
-    subclass to Routines. Performs log in/out routines cleanly. 
+    subclass to BaseRoutines. 
+    Performs log in/out routines cleanly. Yields a block argument
     """
     def run
         do_login
