@@ -107,12 +107,12 @@ def setparammulti(vmr)
     param_hash = Hash.new
 
     param_hash = {
-        :strip_0 => {"mute" => ON, "gain" => ON, "A1" => ON},
         :strip_1 => {"mute" => ON, "gain" => ON, "A1" => ON},
         :strip_2 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :bus_0 => {"mute" => ON, "gain" => ON, "mono" => ON},
+        :strip_3 => {"mute" => ON, "gain" => ON, "A1" => ON},
         :bus_1 => {"mute" => ON, "gain" => ON, "mono" => ON},
-        :bus_2 => {"mute" => ON, "gain" => ON, "mono" => ON}
+        :bus_2 => {"mute" => ON, "gain" => ON, "mono" => ON},
+        :bus_3 => {"mute" => ON, "gain" => ON, "mono" => ON}
     }
     puts "Running multi parameter set"
     vmr.set_parameter_multi(param_hash)
@@ -183,6 +183,9 @@ if __FILE__ == $PROGRAM_NAME
     elsif args[0] == "recorder"
         vmr.run do
             recorder(vmr)
+        end
+    elsif args[0] == "strips"
+        vmr.run do
         end
     else
         vmr.run do
