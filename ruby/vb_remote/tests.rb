@@ -1,7 +1,7 @@
 require_relative 'routines'
 
 def macrostatus(vmr)
-    """ mute then unmute macrobuttons 0 to 9 """
+    """ mute then unmute macrobuttons """
     (0..2).each do |num|
         puts "Setting Macrobutton[#{num}]: on"
         vmr.macro_status(num, ON)
@@ -13,8 +13,8 @@ def macrostatus(vmr)
 end
 
 def setmutes(vmr)
-    """ mute then unmute strip 0 to 3 """
-    (0..2).each do |num|
+    """ mute then unmute strips"""
+    (0..8).each do |num|
         puts "Setting Strip[#{num}].mute: on"
         vmr.set_parameter("Strip[#{num}].mute", ON)
         sleep(0.5)
@@ -22,10 +22,18 @@ def setmutes(vmr)
         vmr.set_parameter("Strip[#{num}].mute", OFF)
         sleep(0.5)
     end
+    (0..8).each do |num|
+        puts "Setting Bus[#{num}].mute: on"
+        vmr.set_parameter("Bus[#{num}].mute", ON)
+        sleep(0.5)
+        puts "Setting Bus[#{num}].mute: off"
+        vmr.set_parameter("Bus[#{num}].mute", OFF)
+        sleep(0.5)
+    end
 end
 
 def getparams(vmr)
-    """ mute then unmute strip 0 to 3 """
+    """ mute then unmute strips """
     (0..2).each do |num|
         puts "Getting Strip[#{num}].mute"
         puts vmr.get_parameter("Strip[#{num}].mute")
@@ -103,16 +111,28 @@ def getparamstring(vmr)
 end
 
 def setparammulti(vmr)
-    """ set several parameters using a hash """
+    """ 
+    set several parameters using a hash 
+    test values out of range
+    """
     param_hash = Hash.new
 
     param_hash = {
         :strip_1 => {"mute" => ON, "gain" => ON, "A1" => ON},
         :strip_2 => {"mute" => ON, "gain" => ON, "A1" => ON},
         :strip_3 => {"mute" => ON, "gain" => ON, "A1" => ON},
+        :strip_4 => {"mute" => ON, "gain" => ON, "A1" => ON},
+        :strip_5 => {"mute" => ON, "gain" => ON, "A1" => ON},
+        :strip_6 => {"mute" => ON, "gain" => ON, "A1" => ON},
+        :strip_7 => {"mute" => ON, "gain" => ON, "A1" => ON},
+        :strip_8 => {"mute" => ON, "gain" => ON, "A1" => ON},
+        :strip_9 => {"mute" => ON, "gain" => ON, "A1" => ON},
+        :strip_10 => {"mute" => ON, "gain" => ON, "A1" => ON},
         :bus_1 => {"mute" => ON, "gain" => ON, "mono" => ON},
         :bus_2 => {"mute" => ON, "gain" => ON, "mono" => ON},
-        :bus_3 => {"mute" => ON, "gain" => ON, "mono" => ON}
+        :bus_3 => {"mute" => ON, "gain" => ON, "mono" => ON},
+        :bus_12 => {"mute" => ON, "gain" => ON, "mono" => ON},
+        :bus_15 => {"mute" => ON, "gain" => ON, "mono" => ON}
     }
     puts "Running multi parameter set"
     vmr.set_parameter_multi(param_hash)
@@ -150,16 +170,18 @@ end
 
 if __FILE__ == $PROGRAM_NAME
     """ 
-    Run every test if no arg
-    Otherwise run test requested
+    Run every test listed if no arg
+    Otherwise run any test(s) requested as argument variables.
     """
     args = ARGV
     vmr = Remote.new
+    puts args
 
     ON = 1
     OFF = 0
 
     if args.empty?
+        puts "Running multiple tests"
         vmr.run do
             macrostatus(vmr)
             setmutes(vmr)
@@ -176,15 +198,18 @@ if __FILE__ == $PROGRAM_NAME
                 sleep(1)
             end
         end
-    elsif args[0] == "loop"
+    elsif args.include? "loop"
+        puts "Running loop test"
         vmr.run do
             getparams_loop(vmr)
         end
-    elsif args[0] == "recorder"
+    elsif args.include? "recorder"
+        puts "Running recorder test"
         vmr.run do
             recorder(vmr)
         end
-    elsif args[0] == "strips"
+    elsif args.include? "strips"
+        puts "Running strips test"
         vmr.run do
         end
     else
