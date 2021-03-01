@@ -141,7 +141,7 @@ module STRIPS
 
     def validate(name, num)
         num = num.to_i
-        puts name, num
+
         if name.eql? "strip"
             num < @strip_total
         elsif name.eql? "bus"
