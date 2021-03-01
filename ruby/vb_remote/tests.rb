@@ -80,7 +80,6 @@ def setvban(vmr)
     (0..10).each do |num|
         puts "Setting vban.instream[#{num}].on: on"
         vmr.set_parameter("vban.instream[#{num}].on", ON)
-
         puts "Setting vban.instream[#{num}].on: off"
         vmr.set_parameter("vban.instream[#{num}].on", OFF)
     end
@@ -88,9 +87,39 @@ def setvban(vmr)
     (0..10).each do |num|
         puts "Setting vban.outstream[#{num}].on: on"
         vmr.set_parameter("vban.outstream[#{num}].on", ON)
-
         puts "Setting vban.outstream[#{num}].on: off"
         vmr.set_parameter("vban.outstream[#{num}].on", OFF)
+    end
+end
+
+def setrevdel(vmr)
+    """ toggle reverb/delay (potato only) """
+    puts "Setting Fx.Reverb.On: on"
+    vmr.set_parameter("Fx.Reverb.On", ON)
+    puts "Setting Fx.Reverb.On: off"
+    vmr.set_parameter("Fx.Reverb.On", OFF)
+
+    puts "Setting Fx.Delay.On: on"
+    vmr.set_parameter("Fx.Delay.On", ON)
+    puts "Setting Fx.Delay.On: off"
+    vmr.set_parameter("Fx.Delay.On", OFF)
+end
+
+def setpatchinsert(vmr)
+    """ 
+    toggle patch inserts 
+    test out of bounds
+    """
+    (0..40).each do |num|
+        puts "Setting patch.insert[#{num}]: on"
+        vmr.set_parameter("patch.insert[#{num}]", ON)
+        puts "Setting patch.insert[#{num}]: off"
+        vmr.set_parameter("patch.insert[#{num}]", OFF)
+
+        puts "Setting patch.insert[#{num}]: on"
+        vmr.set_parameter("patch.insert[#{num}]", ON)
+        puts "Setting patch.insert[#{num}]: off"
+        vmr.set_parameter("patch.insert[#{num}]", OFF)
     end
 end
 
