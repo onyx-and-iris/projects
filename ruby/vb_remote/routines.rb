@@ -7,8 +7,9 @@ class BaseRoutines
     """
     include VMR_API
     include STRIPS
+    include UTILS
 
-    attr_accessor :type, :m
+    attr_accessor :type
     attr_reader :ret, :success, :sp_command, :param_string, :param_options, \
     :param_float, :param_name
 
@@ -49,11 +50,13 @@ class BaseRoutines
     end
 
     def param_name=(value)
-        regex = /^(\w+)\[(\d+)\]/
-        @m = regex.match(value)
-        if @m.to_s.empty?
-            raise "Error: parameter name cannot be blank"
+        """ strip/bus[i] """
+        begin 
+            test_regex(/^(\w+)\[(\d+)\]/, value).empty?
+        rescue NoMethodError => e
+            test_regex(/^vban.(\w+)\[(\d+)\]/, value).empty?
         end
+
         @param_name = value
     end
 
@@ -68,10 +71,9 @@ class BaseRoutines
     def param_options=(value)
         """ Test options against regex then build param string """
         build_str = []
-        regex = /(\w+)_(\d+)/
 
         value.each do |key, val|
-            @m = regex.match(key)
+            test_regex(/(\w+)_(\d+)/, key)
 
             name = @m[1]
             num = shift(@m[2])
@@ -90,7 +92,7 @@ class BaseRoutines
 
     def logical_id=(value)
         if value < 0 || value > 69
-            raise "Error: Logical ID must be between 0 - 69"
+            raise "Error: Logical ID out of range"
         end
         @logical_id = value
     end
@@ -98,7 +100,7 @@ class BaseRoutines
     def get_vbtype
         """ 1 = basic, 2 = banana, 3 = potato """
         c_get = FFI::MemoryPointer.new(:long, SIZE)
-        get_type(c_get)
+        self.ret = get_type(c_get)
         
         c_get.read_long
     end
@@ -164,7 +166,6 @@ class BaseRoutines
     def set_parameter_multi(param_hash)
         self.param_options = param_hash
 
-        clear_pdirty
         self.ret = set_parammulti(@param_options)
         sleep(DELAY)
     end
