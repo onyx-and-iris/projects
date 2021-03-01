@@ -41,6 +41,59 @@ def setmutes(vmr)
     end
 end
 
+def setmono(vmr)
+    """ 
+    toggle mono for strips
+    test out of bounds values 
+    """
+    5.times do
+        (0..8).each do |num|
+            puts "Setting Strip[#{num}].mono: on"
+            vmr.set_parameter("Strip[#{num}].mono", ON)
+
+            puts "Setting Strip[#{num}].mono: off"
+            vmr.set_parameter("Strip[#{num}].mono", OFF)
+        end
+    end
+end
+
+def setsolo(vmr)
+    """ 
+    toggle solo for strips
+    test out of bounds values 
+    """
+    5.times do
+        (0..8).each do |num|
+            puts "Setting Bus[#{num}].solo: on"
+            vmr.set_parameter("Bus[#{num}].solo", ON)
+
+            puts "Setting Bus[#{num}].solo: off"
+            vmr.set_parameter("Bus[#{num}].solo", OFF)
+        end
+    end
+end
+
+def setvban(vmr)
+    """ 
+    toggle vban in/oustreams, test out of bounds
+    """
+    (0..10).each do |num|
+        puts "Setting vban.instream[#{num}].on: on"
+        vmr.set_parameter("vban.instream[#{num}].on", ON)
+
+        puts "Setting vban.instream[#{num}].on: off"
+        vmr.set_parameter("vban.instream[#{num}].on", OFF)
+    end
+
+    (0..10).each do |num|
+        puts "Setting vban.outstream[#{num}].on: on"
+        vmr.set_parameter("vban.outstream[#{num}].on", ON)
+
+        puts "Setting vban.outstream[#{num}].on: off"
+        vmr.set_parameter("vban.outstream[#{num}].on", OFF)
+    end
+end
+
 def getparams(vmr)
     """ mute then unmute strips """
     (0..2).each do |num|
@@ -145,16 +198,16 @@ def setparammulti(vmr)
 
     10.times do
         param_hash = {
-            :strip_1 => {"mute" => ON, "gain" => ON, "A1" => ON},
-            :strip_2 => {"mute" => ON, "gain" => ON, "A1" => ON},
-            :strip_3 => {"mute" => ON, "gain" => ON, "A1" => ON},
-            :strip_4 => {"mute" => ON, "gain" => ON, "A1" => ON},
-            :strip_5 => {"mute" => ON, "gain" => ON, "A1" => ON},
-            :strip_6 => {"mute" => ON, "gain" => ON, "A1" => ON},
-            :strip_7 => {"mute" => ON, "gain" => ON, "A1" => ON},
-            :strip_8 => {"mute" => ON, "gain" => ON, "A1" => ON},
-            :strip_9 => {"mute" => ON, "gain" => ON, "A1" => ON},
-            :strip_10 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_1 => {"mute" => ON, "gain" => ON, "A2" => ON},
+            :strip_2 => {"mute" => ON, "gain" => ON, "A2" => ON},
+            :strip_3 => {"mute" => ON, "gain" => ON, "A2" => ON},
+            :strip_4 => {"mute" => ON, "gain" => ON, "A2" => ON},
+            :strip_5 => {"mute" => ON, "gain" => ON, "A2" => ON},
+            :strip_6 => {"mute" => ON, "gain" => ON, "A2" => ON},
+            :strip_7 => {"mute" => ON, "gain" => ON, "A2" => ON},
+            :strip_8 => {"mute" => ON, "gain" => ON, "A2" => ON},
+            :strip_9 => {"mute" => ON, "gain" => ON, "A2" => ON},
+            :strip_10 => {"mute" => ON, "gain" => ON, "A2" => ON},
             :bus_1 => {"mute" => ON, "gain" => ON, "mono" => ON},
             :bus_2 => {"mute" => ON, "gain" => ON, "mono" => ON},
             :bus_3 => {"mute" => ON, "gain" => ON, "mono" => ON},
@@ -228,6 +281,7 @@ if __FILE__ == $PROGRAM_NAME
             setparamstring(vmr)
             getparamstring(vmr)
             setparammulti(vmr)
+            setvban(vmr)
             
             """ Testing from vmr.run """
             (0..2).each do |num|
