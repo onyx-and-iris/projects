@@ -50,11 +50,15 @@ class BaseRoutines
     end
 
     def param_name=(value)
-        """ strip/bus[i] """
-        begin 
-            test_regex(/^(\w+)\[(\d+)\]/, value).empty?
-        rescue NoMethodError => e
-            test_regex(/^vban.(\w+)\[(\d+)\]/, value).empty?
+        """ 
+        Test against available regex
+        If no matches continue with assignment but there
+        will be no boundary testing
+        """
+        if test_regex(/^(\w+)\[(\d+)\]/, value)
+        elsif test_regex(/^vban.(\w+)\[(\d+)\]/, value)
+        elsif test_regex(/^Fx.(\w+).On/, value)
+        elsif test_regex(/^patch.(\w+)\[(\d+)\]/, value)
         end
 
         @param_name = value
@@ -150,16 +154,20 @@ class BaseRoutines
         self.param_name = name
         self.param_value = value
 
-        if validate(@m[1].downcase, @m[2])
-            if @param_string
-                self.ret = set_paramstring(@param_name, @param_string)
+        begin
+            if validate(@m[1].downcase, @m[2])
+                if @param_value.is_a? (String)
+                    self.ret = set_paramstring(@param_name, @param_string)
+                else
+                    c_get = FFI::MemoryPointer.new(:float, SIZE)
+                    self.ret = set_paramfloat(@param_name, @param_float)
+                end
+                sleep(DELAY)
             else
-                c_get = FFI::MemoryPointer.new(:float, SIZE)
-                self.ret = set_paramfloat(@param_name, @param_float)
+                puts "Parameter out of bounds"
             end
-            sleep(DELAY)
-        else
-            puts "ERROR: parameter out of range"
+        rescue NoMethodError
+            raise "Boundary params not defined"
         end
     end
 
