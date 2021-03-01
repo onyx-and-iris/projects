@@ -2,14 +2,15 @@ require_relative 'base'
 
 class BaseRoutines
     """ 
-    define basic behaviours of hook functions
+    define basic behaviours of API functions
     mixin modules
     """
-    include HOOKS
+    include VMR_API
     include STRIPS
 
-    attr_accessor :type
-    attr_reader :ret, :success, :sp_command, :value_string, :param_options
+    attr_accessor :type, :m
+    attr_reader :ret, :success, :sp_command, :param_string, :param_options, \
+    :param_float, :param_name
 
     SIZE = 1
     BUFF = 512
@@ -47,11 +48,21 @@ class BaseRoutines
         @sp_command = value
     end
 
-    def value_string=(value)
-        if value.length > 512
-            raise "Error: string too long"
+    def param_name=(value)
+        regex = /^(\w+)\[(\d+)\]/
+        @m = regex.match(value)
+        if @m.to_s.empty?
+            raise "Error: parameter name cannot be blank"
         end
-        @value_string = value
+        @param_name = value
+    end
+
+    def param_value=(value)
+        if value.is_a? (String)
+            @param_string = value
+        else
+            @param_float = value
+        end
     end
 
     def param_options=(value)
@@ -60,10 +71,10 @@ class BaseRoutines
         regex = /(\w+)_(\d+)/
 
         value.each do |key, val|
-            m = regex.match(key)
+            @m = regex.match(key)
 
-            name = m[1]
-            num = shift(m[2])
+            name = @m[1]
+            num = shift(@m[2])
             k = nil
             v = nil
             val.each do |k, v|
@@ -75,7 +86,13 @@ class BaseRoutines
             end
         end
         @param_options =  build_str.join(";")
-        puts @param_options
+    end
+
+    def logical_id=(value)
+        if value < 0 || value > 69
+            raise "Error: Logical ID must be between 0 - 69"
+        end
+        @logical_id = value
     end
 
     def get_vbtype
@@ -90,6 +107,10 @@ class BaseRoutines
         """ login, return vb type, build strip layouts """
         self.success = login
 
+        if param_isdirty&.nonzero?
+            clear_pdirty
+        end
+
         self.type = get_vbtype
 
         build_strips(@type)
@@ -99,47 +120,45 @@ class BaseRoutines
         logout
     end
 
-    def macro_status(logical_id, state, mode=2)
+    def macro_setstatus(logical_id, state, mode=2)
         """ 
         set macrobutton by number, state and mode
         poll m_dirty to signify value change
         """
+        self.logical_id = logical_id
+        self.ret = macrobutton_setstatus(@logical_id, state.to_f, mode)
+        sleep(DELAY)        
+    end
+
+    def macro_getstatus(logical_id, mode=2)
         c_get = FFI::MemoryPointer.new(:float, SIZE)
 
-        self.ret = macro_setstatus(logical_id, state.to_f, mode)
-
-        wait_mdirty
-
-        self.ret = macro_getstatus(logical_id, c_get, mode)
+        if macro_isdirty
+            clear_mdirty
+        end
+        self.ret = macrobutton_getstatus(logical_id, c_get, mode)
         val = c_get.read_float
-        val = 1 - val.to_i
     end
 
     def set_parameter(name, value)
         """ 
-        set parameter by name, value
-        poll macro_isdirty until nonzero to signify status change
+        determine if string or float parameter
+        then set parameter by name, value
         """
-        regex = /^(\w+)\[(\d+)\]/
-        m = regex.match(name)
-        if validate(m[1].downcase, m[2])
-            c_get = FFI::MemoryPointer.new(:float, SIZE)
+        self.param_name = name
+        self.param_value = value
 
-            self.ret = set_paramfloat(name, value.to_f)
-            wait_pdirty
-
-            self.ret = get_paramfloat(name, c_get)
-            val = c_get.read_float
-            val = 1 - val.to_i
+        if validate(@m[1].downcase, @m[2])
+            if @param_string
+                self.ret = set_paramstring(@param_name, @param_string)
+            else
+                c_get = FFI::MemoryPointer.new(:float, SIZE)
+                self.ret = set_paramfloat(@param_name, @param_float)
+            end
+            sleep(DELAY)
         else
-            puts "Strip/Bus value out of range"
+            puts "ERROR: parameter out of range"
         end
-    end
-
-    def set_parameter_string(name, value)
-        self.value_string = value
-
-        self.ret = set_paramstring(name, @value_string)
     end
 
     def set_parameter_multi(param_hash)
@@ -147,25 +166,27 @@ class BaseRoutines
 
         clear_pdirty
         self.ret = set_parammulti(@param_options)
-        wait_pdirty
+        sleep(DELAY)
     end
 
     def get_parameter(name)
         c_get = FFI::MemoryPointer.new(:float, SIZE)
-
         if param_isdirty&.nonzero?
             clear_pdirty
         end
+
         self.ret = get_paramfloat(name, c_get)
-        val = c_get.read_float
-        val.round(1)
+        val = c_get.read_float.round(1)
     end
 
-    def get_parameter_string(param)
+    def get_parameter_string(name)
         """ implicity return from pointer variable """
         c_get = FFI::MemoryPointer.new(:string, BUFF, true)
+        if param_isdirty&.nonzero?
+            clear_pdirty
+        end
 
-        self.ret = get_paramstring(param, c_get)
+        self.ret = get_paramstring(name, c_get)
         c_get.read_string
     end
 
