@@ -1,14 +1,24 @@
 require 'ffi'
 require 'pathname'
+require 'os'
 
-module HOOKS
+module VMR_API
     extend FFI::Library
 
     attr_reader :vmr_dll
 
-    dll_name = "VoicemeeterRemote64.dll"
-    pn = Pathname.new("C:\\Program Files (x86)\\VB\\Voicemeeter\\")
-    pn = pn.join(dll_name)
+    if OS.bits.eql? 64
+        dll_name = "VoicemeeterRemote64.dll"
+    else
+        raise "Only 64 bit supported"
+    end
+
+    if OS.windows?
+        pn = Pathname.new("C:\\Program Files (x86)\\VB\\Voicemeeter\\")
+        pn = pn.join(dll_name)
+    else
+        raise "Only Windows platform supported"
+    end
 
     if pn.file?
         @vmr_dll = pn
@@ -25,9 +35,9 @@ module HOOKS
     attach_function :get_type, :VBVMR_GetVoicemeeterType, [:pointer], :long
 
     attach_function :macro_isdirty, :VBVMR_MacroButton_IsDirty, [], :long
-    attach_function :macro_setstatus, :VBVMR_MacroButton_SetStatus, \
+    attach_function :macrobutton_setstatus, :VBVMR_MacroButton_SetStatus, \
     [:long, :float, :long], :long
-    attach_function :macro_getstatus, :VBVMR_MacroButton_GetStatus, \
+    attach_function :macrobutton_getstatus, :VBVMR_MacroButton_GetStatus, \
     [:long, :pointer, :long], :long
 
     attach_function :param_isdirty, :VBVMR_IsParametersDirty, [], :long
@@ -64,6 +74,8 @@ module HOOKS
         until macro_isdirty&.nonzero?
         end
     end
+
+    DELAY = 0.02
 end
 
 module STRIPS
@@ -132,7 +144,7 @@ module STRIPS
     end
 
     def shift(oldnum)
-        num = oldnum.to_s.to_i - 1
+        num = oldnum.to_i - 1
         num.to_s
     end
 end
