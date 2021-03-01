@@ -1,34 +1,43 @@
 require_relative 'routines'
 
 def macrostatus(vmr)
-    """ mute then unmute macrobuttons """
-    (0..2).each do |num|
-        puts "Setting Macrobutton[#{num}]: on"
-        vmr.macro_status(num, ON)
-        sleep(0.5)
-        puts "Setting Macrobutton[#{num}]: off"
-        vmr.macro_status(num, OFF)
-        sleep(0.5)
+    """ 
+    mute then unmute macrobuttons 
+    set then get values
+    """
+    10.times do
+        (0..5).each do |num|
+            puts "Setting Macrobutton[#{num}]: on"
+            vmr.macro_setstatus(num, ON)
+            puts vmr.macro_getstatus(num)
+
+            puts "Setting Macrobutton[#{num}]: off"
+            vmr.macro_setstatus(num, OFF)
+            puts vmr.macro_getstatus(num)
+        end
     end
 end
 
 def setmutes(vmr)
-    """ mute then unmute strips"""
-    (0..8).each do |num|
-        puts "Setting Strip[#{num}].mute: on"
-        vmr.set_parameter("Strip[#{num}].mute", ON)
-        sleep(0.5)
-        puts "Setting Strip[#{num}].mute: off"
-        vmr.set_parameter("Strip[#{num}].mute", OFF)
-        sleep(0.5)
-    end
-    (0..8).each do |num|
-        puts "Setting Bus[#{num}].mute: on"
-        vmr.set_parameter("Bus[#{num}].mute", ON)
-        sleep(0.5)
-        puts "Setting Bus[#{num}].mute: off"
-        vmr.set_parameter("Bus[#{num}].mute", OFF)
-        sleep(0.5)
+    """ 
+    mute then unmute strips
+    test out of bounds values 
+    """
+    5.times do
+        (0..8).each do |num|
+            puts "Setting Strip[#{num}].mute: on"
+            vmr.set_parameter("Strip[#{num}].mute", ON)
+
+            puts "Setting Strip[#{num}].mute: off"
+            vmr.set_parameter("Strip[#{num}].mute", OFF)
+        end
+        (0..8).each do |num|
+            puts "Setting Bus[#{num}].mute: on"
+            vmr.set_parameter("Bus[#{num}].mute", ON)
+
+            puts "Setting Bus[#{num}].mute: off"
+            vmr.set_parameter("Bus[#{num}].mute", OFF)
+        end
     end
 end
 
@@ -37,30 +46,29 @@ def getparams(vmr)
     (0..2).each do |num|
         puts "Getting Strip[#{num}].mute"
         puts vmr.get_parameter("Strip[#{num}].mute")
-        sleep(0.5)
         puts "Getting Strip[#{num}].gain"
         puts vmr.get_parameter("Strip[#{num}].gain")
     end
 end
 
 def getparams_loop(vmr)
-    100.times do
+    500.times do
         print "Strip Mutes = [%.0f] [%.0f] [%.0f]\n" \
         % [
             vmr.get_parameter("Strip[0].mute"),
             vmr.get_parameter("Strip[1].mute"),
             vmr.get_parameter("Strip[2].mute")
         ]
-        sleep(0.2)
+        sleep(DELAY)
     end
-    100.times do
+    500.times do
         print "Strip Gains = [%.1f] [%.1f] [%.1f]\n" \
         % [
             vmr.get_parameter("Strip[0].gain"),
             vmr.get_parameter("Strip[1].gain"),
             vmr.get_parameter("Strip[2].gain")
         ]
-        sleep(0.2)
+        sleep(DELAY)
     end
 end
 
@@ -70,10 +78,10 @@ def special(vmr)
     options = 'Shutdown', 'Show', 'Restart',
     'Reset', 'DialogShow.VBANCHAT'
     """
-    sleep(1)
+    sleep(DELAY)
     puts "Running command Show"
     vmr.special_command("Show")
-    sleep(1)
+    sleep(DELAY)
     puts "Running command DialogShow.VBANCHAT"
     vmr.special_command("DialogShow.VBANCHAT")
 end
@@ -81,32 +89,50 @@ end
 def setparamstring(vmr)
     """ 
     get a string parameter eg Strip[0].name
+    added out of bounds tests
     """
     puts "Setting Strip Label names test0"
-    (0..2).each do |num|
-        vmr.set_parameter_string("Strip[#{num}].Label", "testing[0]")
-        sleep(1)
+    (0..8).each do |num|
+        vmr.set_parameter("Strip[#{num}].Label", "testing[0]")
+        sleep(DELAY)
     end
     puts "Setting Strip Label names test1"
-    (0..2).each do |num|
-        vmr.set_parameter_string("Strip[#{num}].Label", "testing[1]")
-        sleep(1)
+    (0..8).each do |num|
+        vmr.set_parameter("Strip[#{num}].Label", "testing[1]")
+        sleep(DELAY)
     end
     puts "Setting Strip Label names reset"
-    (0..2).each do |num|
-        vmr.set_parameter_string("Strip[#{num}].Label", "reset")
-        sleep(1)
+    (0..8).each do |num|
+        vmr.set_parameter("Strip[#{num}].Label", "reset")
+        sleep(DELAY)
     end
 end
 
 def getparamstring(vmr)
     """ 
-    get a string parameter eg Strip[0].name
+    get a string parameter eg Strip[0].device.name
     """
     (0..2).each do |num|
-        vmr.get_parameter_string("Strip[#{num}].Label")
-        vmr.get_parameter_string("Strip[#{num}].device.name")
-        sleep(1)
+        puts vmr.get_parameter_string("Strip[#{num}].Label")
+        puts vmr.get_parameter_string("Strip[#{num}].device.name")
+    end
+end
+
+def setandgetparamstring(vmr)
+    puts "Setting Strip Label names test0"
+    (0..2).each do |num|
+        vmr.set_parameter_string("Strip[#{num}].Label", "testing[0]")
+        puts vmr.get_parameter_string("Strip[#{num}].Label")
+    end
+    puts "Setting Strip Label names test1"
+    (0..2).each do |num|
+        vmr.set_parameter_string("Strip[#{num}].Label", "testing[1]")
+        puts vmr.get_parameter_string("Strip[#{num}].Label")
+    end
+    puts "Setting Strip Label names reset"
+    (0..2).each do |num|
+        vmr.set_parameter_string("Strip[#{num}].Label", "reset")
+        puts vmr.get_parameter_string("Strip[#{num}].Label")
     end
 end
 
@@ -117,35 +143,46 @@ def setparammulti(vmr)
     """
     param_hash = Hash.new
 
-    param_hash = {
-        :strip_1 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :strip_2 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :strip_3 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :strip_4 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :strip_5 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :strip_6 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :strip_7 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :strip_8 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :strip_9 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :strip_10 => {"mute" => ON, "gain" => ON, "A1" => ON},
-        :bus_1 => {"mute" => ON, "gain" => ON, "mono" => ON},
-        :bus_2 => {"mute" => ON, "gain" => ON, "mono" => ON},
-        :bus_3 => {"mute" => ON, "gain" => ON, "mono" => ON},
-        :bus_12 => {"mute" => ON, "gain" => ON, "mono" => ON},
-        :bus_15 => {"mute" => ON, "gain" => ON, "mono" => ON}
-    }
-    puts "Running multi parameter set"
-    vmr.set_parameter_multi(param_hash)
+    10.times do
+        param_hash = {
+            :strip_1 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_2 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_3 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_4 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_5 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_6 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_7 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_8 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_9 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :strip_10 => {"mute" => ON, "gain" => ON, "A1" => ON},
+            :bus_1 => {"mute" => ON, "gain" => ON, "mono" => ON},
+            :bus_2 => {"mute" => ON, "gain" => ON, "mono" => ON},
+            :bus_3 => {"mute" => ON, "gain" => ON, "mono" => ON},
+            :bus_12 => {"mute" => ON, "gain" => ON, "mono" => ON},
+            :bus_15 => {"mute" => ON, "gain" => ON, "mono" => ON}
+        }
+        puts "Running multi parameter set"
+        vmr.set_parameter_multi(param_hash)
 
-    sleep(1)
-
-    param_hash.each do |key, index|
-        index.each do |k, v|
-            param_hash[key][k] = OFF
+        param_hash.each do |key, index|
+            index.each do |k, v|
+                param_hash[key][k] = OFF
+            end
         end
+        puts "Running multi parameter unset"
+        vmr.set_parameter_multi(param_hash)
     end
-    puts "Running multi parameter unset"
-    vmr.set_parameter_multi(param_hash)
+end
+
+def setandget(vmr)
+    (1..30).each do |num|
+        puts "Set then get Strip[0].gain to -#{num}"
+        vmr.set_parameter("Strip[0].gain", -num)
+        puts vmr.get_parameter("Strip[0].gain")
+    end
+    puts "Reset Strip[0].gain"
+    vmr.set_parameter("Strip[0].gain", 0)
+    puts vmr.get_parameter("Strip[0].gain")
 end
 
 def recorder(vmr)
@@ -179,6 +216,7 @@ if __FILE__ == $PROGRAM_NAME
 
     ON = 1
     OFF = 0
+    DELAY = 0.02
 
     if args.empty?
         puts "Running multiple tests"
