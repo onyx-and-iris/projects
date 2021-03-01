@@ -98,7 +98,23 @@ module STRIPS
     end
 
     def vban_total=(value)
+        @layout[:in_vban] = value
+        @layout[:out_vban] = value
         @vban_total = value
+    end
+
+    def composite_total=(value)
+        if value < 0 || value > 7
+            raise "Value out of bounds"
+        end
+        @composite_total = value
+    end
+
+    def insert_total=(value)
+        if value < 0 || value > 33
+            raise "Value out of bounds"
+        end
+        @insert_total = value
     end
 
     def build_strips(type)
@@ -106,15 +122,16 @@ module STRIPS
             :strip => {:p_in => 0, :v_in => 0}, 
             :bus => {:p_out => 0, :v_out => 0},
             :in_vban => 0, 
-            :out_vban => 0
+            :out_vban => 0,
+            :patch_insert => 0
         }
 
         if type == BASIC
-            factory([2, 1, 2, 0, 4])
+            factory([2, 1, 2, 0, 4, 0])
         elsif type == BANANA
-            factory([3, 2, 3, 2, 8])
+            factory([3, 2, 3, 2, 8, 22])
         elsif type == POTATO
-            factory([5, 3, 5, 3, 8])
+            factory([5, 3, 5, 3, 8, 33])
         end
     end
 
@@ -129,17 +146,22 @@ module STRIPS
                 end
             end
         end
-        @layout[:in_vban] = values[num]
-        @layout[:out_vban] = values[num]
+        self.vban_total = values[num]
+        num += 1
+        self.composite_total = 7
+        self.insert_total = values[num]
 
         self.strip_total = 
         @layout[:strip][:p_in].to_i.+(@layout[:strip][:v_in].to_i)
         self.bus_total = 
         @layout[:bus][:p_out].to_i.+(@layout[:bus][:v_out].to_i)
-        self.vban_total = @layout[:in_vban]
     end
 
-    def validate(name, num)
+    def validate(name, num = 0)
+        """ 
+        Validate boundaries unless param requires none 
+        example: Reverb and Delay
+        """
         num = num.to_i
 
         if name.eql? "strip"
@@ -148,6 +170,12 @@ module STRIPS
             num < @bus_total
         elsif name == "instream" || name == "outstream"
             num < @vban_total
+        elsif name.eql? "composite" 
+            num < @composite_total
+        elsif name.eql? "insert"
+            num < @insert_total
+        else
+            num
         end
     end
 end
