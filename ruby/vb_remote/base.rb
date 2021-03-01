@@ -79,7 +79,7 @@ module VMR_API
 end
 
 module STRIPS
-    attr_reader :layout, :strip_total, :bus_total
+    attr_reader :layout, :strip_total, :bus_total, :vban_total
 
     BASIC = 1
     BANANA = 2
@@ -95,6 +95,10 @@ module STRIPS
 
     def bus_total=(value)
         @bus_total = value.to_i
+    end
+
+    def vban_total=(value)
+        @vban_total = value
     end
 
     def build_strips(type)
@@ -132,15 +136,27 @@ module STRIPS
         @layout[:strip][:p_in].to_i.+(@layout[:strip][:v_in].to_i)
         self.bus_total = 
         @layout[:bus][:p_out].to_i.+(@layout[:bus][:v_out].to_i)
+        self.vban_total = @layout[:in_vban]
     end
 
     def validate(name, num)
         num = num.to_i
+        puts name, num
         if name.eql? "strip"
             num < @strip_total
         elsif name.eql? "bus"
             num < @bus_total
+        elsif name == "instream" || name == "outstream"
+            num < @vban_total
         end
+    end
+end
+
+module UTILS
+    attr_accessor :m
+
+    def test_regex(regex, value)
+        @m = regex.match(value)
     end
 
     def shift(oldnum)
