@@ -110,9 +110,6 @@ async def listen(conn, s):
     print('Listening for Streamlabs events')
     try:
         while data.streaming_status == 'live':
-            print(f'Stream is {data.streaming_status}')
-            print('Receiving data')
-
             try:
                 resp = s.recv(1024).decode('utf-8')
 
@@ -130,7 +127,6 @@ async def listen(conn, s):
         logging.exception('Error func listen')
     finally:
         print('Closing socket')
-        s.send('close'.encode())
         s.close()
         await conn.close()
 

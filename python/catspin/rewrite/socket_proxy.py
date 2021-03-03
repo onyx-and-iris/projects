@@ -44,28 +44,26 @@ class Streamlabs():
         if 'for' in data:
             if data['for'] == 'twitch_account':
                 if data['type'] in events:
-                    while self.conn:
+                    while True:
                         try:
-                            type = data['type']
-                            self.conn.send(type.encode())
+                            this_type = data['type']
+                            self.conn.send(this_type.encode())
                             resp = self.conn.recv(1024).decode('utf-8')
-                            if resp == type:
+                            if resp == this_type:
                                 break
                         except BrokenPipeError:
-                            if self.conn:
-                                self.conn.close()
-                                self.conn = None
-                            else:
+                            if not self.conn:
                                 break
+                            self.conn.close()
+                            self.conn = None
+
                 else:
                     print(data['type'])
             
             elif data['type'] == 'donation':
-                print(data)
                 try:
-                    type = 'donation'
-                    self.conn.send(type.encode())
-                    print('Just got a {type}') 
+                    this_type = 'donation'
+                    self.conn.send(this_type.encode())
                 except BrokenPipeError:
                     self.conn.close()
                     self.conn = None
