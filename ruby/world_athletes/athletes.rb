@@ -163,7 +163,9 @@ class Cyclist < Athlete
 end
 
 class Swimmer < Athlete
-	""" subclass swimmer """
+	""" subclass swimmer, mixin Comparable """
+	include Comparable
+
 	attr_accessor :aggregate, :team, :stroke, :distance
 
 	def team=(value)
@@ -177,6 +179,12 @@ class Swimmer < Athlete
 		if value.nil? || value < 0
 			raise "ERROR aggregate must be positive value!"
 		end
+		@aggregate = value
+	end
+
+	def <=>(other)
+		""" required by Comparable module """
+		@aggregate <=> other.aggregate
 	end
 
 	def self.lonr(name_first, name_last, opts)
@@ -191,7 +199,7 @@ class Swimmer < Athlete
 
 	def self.dct(name_first, name_last, opts)
 		""" factory function """
-		Swimmer.new(name_first, name_last, "OC Trident", opts)
+		Swimmer.new(name_first, name_last, "DC Trident", opts)
 	end
 
 	def initialize(name_first, name_last, team = "Default", 

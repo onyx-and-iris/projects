@@ -179,7 +179,7 @@ def get_cyclist_teams(athletes)
     """ get team for every cyclist and print bikes used """
     cyclists = athletes[:cyclists]
 
-    cyclists.each do | cyclist |
+    cyclists.each do |cyclist|
         print "#{cyclist.team}"
     end
 end
@@ -197,6 +197,86 @@ def comp_cyclists(athletes)
                 cyclist.versus(competitor)
             end
         end 
+    end
+end
+
+def byaggregate_swimmer(athletes)
+    """ 
+    using comparable module to allow arithmetic operators on objects
+    instance methods.
+    """
+    swimmers = athletes[:swimmers]
+    greatest = nil
+
+    swimmers.each do | swimmer |
+        swimmers.each do | competitor |
+            if swimmer.object_id != competitor.object_id
+                if greatest.nil?
+                    if swimmer > competitor
+                        greatest = swimmer
+                    else
+                        greatest = competitor
+                    end
+                else
+                    if swimmer > greatest
+                        greatest = swimmer
+                    elsif competitor > greatest
+                        greatest = competitor
+                    end
+                end
+            end
+        end
+    end
+    puts "Swimmer with highest aggregate: #{greatest.fullname}"
+end
+
+def organise_byteam_allswimmers(athletes)
+    swimmers = athletes[:swimmers]
+    lonr = []
+    nyb = []
+    dct = []
+
+    teams = [lonr, nyb, dct]
+    
+    swimmers.each do | swimmer |
+        if swimmer.team == "London Roar"
+            lonr.push(swimmer)
+        elsif swimmer.team == "New York Breakers"
+            nyb.push(swimmer)
+        elsif swimmer.team == "OC Trident"
+            dct.push(swimmer)
+        end
+    end
+
+    teams.each do | team |
+        team.each do | swimmer |
+            puts "#{swimmer.fullname} is in team #{swimmer.team}"
+        end
+    end
+
+    teams.each do | team |
+        team.each do | swimmer |
+            team.each do | teammate |
+                team.each do |other_teammate|
+                    if (swimmer.object_id != teammate.object_id) \
+                        && (swimmer.object_id != other_teammate.object_id) \
+                        && (teammate.object_id != other_teammate.object_id)
+                        if swimmer.between?(teammate, other_teammate)
+                            puts "=============================\n" \
+                            "#{swimmer.team.upcase}\n" \
+                            "#{swimmer.fullname} " \
+                            "aggregate = #{swimmer.aggregate}\n" \
+                            "sits between " \
+                            "#{teammate.fullname} " \
+                            "aggregate: #{teammate.aggregate}\n" \
+                            "and " \
+                            "#{other_teammate.fullname} " \
+                            "aggregate: #{other_teammate.aggregate}" 
+                        end
+                    end
+                end
+            end
+        end
     end
 end
 
