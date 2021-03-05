@@ -94,22 +94,20 @@ async def spin(conn):
         pass
         
 async def listen(conn, s):
-    ss = StreamingService(conn)
-    print('Toggling stream')
-    await ss.toggle_streaming()
-
-    while True:
-        data = await ss.get_model()
-        print(data.streaming_status)
-        if data.streaming_status == 'live':
-            break
-        sleep(1)
-
     events = ['follow', 'subscription', 'bits', 'host', 'donation']
+    ss = StreamingService(conn)
+
+    print('Going LIVE')
+    await ss.toggle_streaming()
+    data = await ss.get_model()
+
+    while data.streaming_status == 'offline':
+        data = await ss.get_model()
+        sleep(0.2)
 
     print('Listening for Streamlabs events')
     try:
-        while data.streaming_status == 'live':
+        while data.streaming_status == 'offline':
             try:
                 resp = s.recv(1024).decode('utf-8')
 
@@ -117,7 +115,11 @@ async def listen(conn, s):
                     print(f'Just got a {resp}')
                     s.send(resp.encode())
                     await spin(conn)
-                
+                    s.close()
+
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    s.connect((HOST, PORT))
+
                 data = await ss.get_model()
 
             except socket.timeout as e:
@@ -126,8 +128,6 @@ async def listen(conn, s):
     except Exception:
         logging.exception('Error func listen')
     finally:
-        print('Closing socket')
-        s.close()
         await conn.close()
 
 async def main(conn, s):
@@ -146,7 +146,6 @@ if __name__ == "__main__":
 
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(10)
     except socket.error:
         print('Failed to create socket')
         sys.exit()
