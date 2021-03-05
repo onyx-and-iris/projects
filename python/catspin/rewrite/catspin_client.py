@@ -107,7 +107,7 @@ async def listen(conn, s):
 
     print('Listening for Streamlabs events')
     try:
-        while data.streaming_status == 'offline':
+        while data.streaming_status == 'live':
             try:
                 resp = s.recv(1024).decode('utf-8')
 
