@@ -21,12 +21,12 @@ class Streamlabs():
 
         self.s.bind ((self.HOST, self.PORT))
         self.s.listen()
-        self.conn, self.addr = self.s.accept()
 
     def MakeConnection(self):
         try:
           self.sio.connect("https://sockets.streamlabs.com?token=" +
                            self.token)
+          self.conn, self.addr = self.s.accept()
         except ValueError as e:
           pass
 
@@ -41,41 +41,56 @@ class Streamlabs():
         """ run on defined event """
         events = ['follow', 'subscription', 'bits', 'host', 'donation']
 
+        if not self.conn:
+            self.conn, self.addr = self.s.accept()
+
         if 'for' in data:
             if data['for'] == 'twitch_account':
                 if data['type'] in events:
                     while True:
                         try:
-                            this_type = data['type']
-                            self.conn.send(this_type.encode())
+                            type = data['type']
+                            self.conn.send(type.encode())
+                            validated = self.conn.recv(1024).decode('utf-8')
+                            if validated == type:
+                                print('Validated event with client')
+                            elif not validated:
+                                print('Did not validated with client')
+                                self.conn, self.addr = self.s.accept()
+                                continue
+                                
                             resp = self.conn.recv(1024).decode('utf-8')
-                            if resp == this_type:
+                            if not resp:
+                                self.conn.close()
+                                self.conn = None
                                 break
                         except BrokenPipeError:
-                            if not self.conn:
+                            if self.conn:
+                                self.conn.close()
+                                self.conn = None
+                            else:
                                 break
-                            self.conn.close()
-                            self.conn = None
-
+                        finally:
+                            if not self.conn:
+                                self.conn, self.addr = self.s.accept()
+                            
                 else:
                     print(data['type'])
             
             elif data['type'] == 'donation':
+                print(data)
                 try:
-                    this_type = 'donation'
-                    self.conn.send(this_type.encode())
+                    type = 'donation'
+                    self.conn.send(type.encode())
+                    print('Just got a {type}') 
                 except BrokenPipeError:
                     self.conn.close()
                     self.conn = None
 
-        if not self.conn:
-            self.s.listen()
-            self.conn, self.addr = self.s.accept()
                
     def DisconnectHandler(self):
         """ disconnected cleanly? """
         print('disconnected')
-        self.s.close()
         
 if __name__ == '__main__':
     file_t = 'token.pkl'
