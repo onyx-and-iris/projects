@@ -228,7 +228,7 @@ class Scenes(Macros):
         self.oai.inputs[2].mute = True
         self.oai.inputs[3].mute = True
 
-        print('Start scene enabled.. ready to go live!')
+        print('End scene enabled.')
 
 class Reset(Macros):
     def __init__(self, macro, switch, oai):
