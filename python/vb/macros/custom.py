@@ -1,27 +1,11 @@
 import socket
+import pickle
 
-from ctypes import *
 from voicemeeter.driver import dll
 from sys import stderr
 
 
 class Commands:
-  def button_setstate(index, state, mode=2):
-    """ Hook into C API function """
-    cbf_setstatus = dll.VBVMR_MacroButton_SetStatus
-    """ set expected args and return type """
-    cbf_setstatus.argtypes = [c_long, c_float, c_long]
-    cbf_setstatus.restype = c_long
-
-    c_index = c_long(index)
-    c_state = c_float(state)
-    c_mode = c_long(mode)
-
-    retval = cbf_setstatus(c_index, c_state, c_mode)
-    if retval:
-      print(f'ERROR: Callback button_setState logical ID: [{int(c_index.value)}]'
-      , file=stderr)
-
   def vban_sendtext(ip, text, port=6980, s_name='Command1'):
     """ 
     Credits go to TheStaticTurtle 
@@ -50,3 +34,30 @@ class Commands:
 
     except Exception as e:
       pass
+
+class FileOps:
+  """ save/retrieve states to pickle file """
+  def __init__(self, macros):
+    self.db = macros
+    self.file_db = 'cache.pkl'
+
+  def read_db(self):
+    while True:
+      try:
+        with open(self.file_db, 'rb') as records:
+          self.db = pickle.load(records)
+        break
+
+      except FileNotFoundError:
+        records = open(self.file_db, 'x')
+        records.close()
+
+      except EOFError:
+        self.update_db(self.db)
+        break
+
+    return self.db
+
+  def update_db(self, macros):
+    with open(self.file_db, 'wb') as records:
+      pickle.dump(macros, records)
