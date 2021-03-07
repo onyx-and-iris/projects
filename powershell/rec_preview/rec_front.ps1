@@ -1,6 +1,6 @@
 param([string]$capture,[string]$ffmpeg)
 
-$outfile="D:\ffmpeg\rec\front.mkv"
+$outfile="E:\rec\front.mkv"
 
 #LETS PUSH IT FURTHER SEEMS DECENT STILL ABOUT 30 MBPS
 & $ffmpeg -f dshow -rtbufsize 2000M -i video=$capture -c:v h264_nvenc -rc:v vbr_hq -cq:v 19 -b:v 16000k -maxrate:v 30000k -profile:v high $outfile

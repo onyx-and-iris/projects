@@ -34,23 +34,29 @@ Function Rec{
 }
 
 Function Stop{
+	Write-Host "Stopping jobs"
 	Stop-Job play_top, play_front, rec_top, rec_front, rec__mics
+	exit
 }
 
 if ($MyInvocation.InvocationName -ne '.')
 {
-	$FFPLAY="E:\Smallware\ffmpeg\bin\ffplay.exe"
-	$FFMPEG="E:\Smallware\ffmpeg\bin\ffmpeg.exe"
+	if($stop) { 
+		Stop
+	}
+	
+	$FFPLAY="${PSScriptRoot}\ffmpeg\ffmpeg\bin\ffplay.exe"
+	$FFMPEG="${PSScriptRoot}\ffmpeg\ffmpeg\bin\ffmpeg.exe"
 
-	""" Write ffmpeg direct show devices to file """
-	& $FFMPEG -list_devices true -f dshow -i dummy > D:\ffmpeg.txt 2>&1
+	"Write ffmpeg direct show devices to file"
+	& $FFMPEG -list_devices true -f dshow -i dummy > ${PSScriptRoot}\ffmpeg.txt 2>&1
 
-	""" Get the capture card devices and save to array """
+	"Get the capture card devices and save to array"
 	[string[]]$CAPTURE=$(select-string -Path ffmpeg.txt -Pattern '(Game Capture.*Video)')
-	""" Parse array """
+	"Parse array"
 	$CAPTURE = $CAPTURE | ForEach-Object { $_.split('"')[1] }
 
-	""" Save audio device from file into string """
+	"Save audio device from file into string"
 	$AUDIO = $(select-string -Path ffmpeg.txt -Pattern 'Mic/Line In 05/06') | Out-String 
 	$AUDIO = $AUDIO.split('"')[1]
 
@@ -60,9 +66,5 @@ if ($MyInvocation.InvocationName -ne '.')
 	}
 	Write-Host $AUDIO
 	
-	if($stop) { 
-		Stop
-	} else {
-		Show
-	}
+	Show
 }
