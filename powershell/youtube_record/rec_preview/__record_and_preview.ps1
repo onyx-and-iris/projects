@@ -95,7 +95,9 @@ Function Stop{
             
         } until ($StopLoop -eq $true)
     }
-    
+
+    $CRED = Get-Content "${PSScriptRoot}\credentials.txt" | ConvertFrom-StringData
+
     ForEach ($string in $SAVEDFILES) {
         $savefile = Split-Path $string -Leaf
         Write-Host "Backed up file: ", $savefile
@@ -103,7 +105,11 @@ Function Stop{
         Transfer -SOURCE $string -SAVEFILE $savefile
     }
 
-	Exit
+    if ($SAVEDFILES) {
+        Invoke-Command -ComputerName $CRED.NAME -ScriptBlock { D:\test\ffmpeg_convert.ps1 }
+    }
+
+    Exit
 }
 
 Function Transfer {
@@ -130,7 +136,7 @@ if ($MyInvocation.InvocationName -ne '.')
       Stop -JOBS $JOBS
     }
 
-    $CONFIG_FILE = 'config.txt'
+    $CONFIG_FILE = "${PSScriptRoot}\config.txt"
     $CAPTURE_CARD_PATTERN = '*Game Capture*Video*'
     $AUDIO_DEVICE_PATTERN = '*Mic/Line In 05/06*'
     
