@@ -1,83 +1,79 @@
 param([switch]$rec, [switch]$stop)
 
 Function Show{
-    param($FF, [string[]]$CAPTURE, [string[]]$SCRIPTS)
+    param(
+    [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS
+    )
 
-    # Setup script arguments for play_top
-    $run = "play_top"
-    FOREACH ($file in $SCRIPTS) {
-        if ($file -Match $run) {
-            $THIS_SCRIPT = $file
+    $i = 0
+    ForEach ($job in $JOBS) {
+        if ($job -And $job.Contains('play')) {
+            ForEach ($file in $SCRIPTS) {
+                if ($file -Match $job) {
+                    $THIS_SCRIPT = $file
+                }
+            }
+            Start-Job -Name $job -ScriptBlock {
+                & $args[2] -capture $args[0] -ffplay $args[1]
+            } -ArgumentList $CAPTURE[$i], $FF.FFPLAY, $THIS_SCRIPT
+            $i++
         }
     }
-    Start-Job -Name $run -ScriptBlock {
-        & $args[2] -capture $args[0] -ffplay $args[1]
-    } -ArgumentList $CAPTURE[0], $FF.FFPLAY, $THIS_SCRIPT
-
-    # Setup script arguments for play_front
-    $run = "play_front"
-    FOREACH ($file in $SCRIPTS) {
-        if ($file -Match $run) {
-            $THIS_SCRIPT = $file
-        }
-    }
-	Start-Job -Name $run -ScriptBlock {
-        & $args[2] -capture $args[0] -ffplay $args[1]
-	} -ArgumentList $CAPTURE[1], $FF.FFPLAY, $THIS_SCRIPT
 }
 
 Function Rec{
-    param($FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO)
-    New-Item -ItemType Directory -Force -Path ".\rec"
+    param(
+    [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
+    )
+    if (-Not(Test-Path -Path ".\rec")) {
+        New-Item -ItemType Directory -Force -Path ".\rec"
+    }
 
-    # Setup script arguments for play_top
-    $run = "rec_top"
-    FOREACH ($file in $SCRIPTS) {
-        if ($file -Match $run) {
-            $THIS_SCRIPT = $file
+    $i = 0
+    ForEach ($job in $JOBS) {
+        if ($job) {
+            if ($job.Contains('rec_cap')) {
+                ForEach ($file in $SCRIPTS) {
+                    if ($file -Match $job) {
+                        $THIS_SCRIPT = $file
+                    }
+                }
+                Start-Job -Name $job -ScriptBlock {
+                    & $args[2] -capture $args[0] -ffmpeg $args[1] -name $args[3]
+
+                } -ArgumentList $CAPTURE[$i], $FF.FFMPEG, $THIS_SCRIPT, $job
+                $i++
+            }
+            
+            elseif ($job -eq 'rec_mics') {
+                ForEach ($file in $SCRIPTS) {
+                    if ($file -Match $job) {
+                        $THIS_SCRIPT = $file
+                    }
+                }
+                Start-Job -Name $job -ScriptBlock {
+                    & $args[2] -mics $args[0] -ffmpeg $args[1] -name $args[3]
+
+                } -ArgumentList $AUDIO, $FF.FFMPEG, $THIS_SCRIPT, $job            
+            }
         }
     }
-	Start-Job -Name $run -ScriptBlock {
-		& $args[2] -capture $args[0] -ffmpeg $args[1]
-
-	} -ArgumentList $CAPTURE[0], $FF.FFMPEG, $THIS_SCRIPT
-
-    # Setup script arguments for play_front
-    $run = "rec_front"
-    FOREACH ($file in $SCRIPTS) {
-        if ($file -Match $run) {
-            $THIS_SCRIPT = $file
-        }
-    }
-	Start-Job -Name $run -ScriptBlock {
-		& $args[2] -capture $args[0] -ffmpeg $args[1]
-
-	} -ArgumentList $CAPTURE[1], $FF.FFMPEG, $THIS_SCRIPT
-
-    # Record mics
-    $run = "rec__mics"
-    FOREACH ($file in $SCRIPTS) {
-        if ($file -Match $run) {
-            $THIS_SCRIPT = $file
-        }
-    }
-	Start-Job -Name $run -ScriptBlock {
-		& $args[2] -mics $args[0] -ffmpeg $args[1]
-
-	} -ArgumentList $AUDIO, $FF.FFMPEG, $THIS_SCRIPT
 }
 
 Function Stop{
-    [string[]]$jobs = @("play_top", "play_front", "rec_top", "rec_front", "rec__mics")
-    FOREACH ($job in Get-Job -State 'Running')
+    param(
+        [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
+    )
+    
+    ForEach ($JobObj in Get-Job -State 'Running')
     {
-        if ($jobs.Contains($job.name)) {
-            Write-Host "Stopping ", $job.name
-            Stop-Job $job
+        if ($JOBS.Contains($JobObj.name)) {
+            Write-Host "Stopping ", $JobObj.name
+            Stop-Job $JobObj
         }
     }
 
-    Get-ChildItem ./rec/ -recurse | where {$_.extension -in ".mkv",".wav"} | % {
+    Get-ChildItem ./rec/ -recurse | Where {$_.extension -in ".mkv",".wav"} | % {
         $i = 1
         $StopLoop = $false
         do {
@@ -94,7 +90,7 @@ Function Stop{
         
         [string[]]$OUTFILES += $_.FullName
     }
-    FOREACH ($string in $OUTFILES) {
+    ForEach ($string in $OUTFILES) {
         $savefile = Split-Path $string -leaf
         Write-Host "Backed up file: ", $savefile
     }
@@ -105,21 +101,21 @@ Function Stop{
 
 if ($MyInvocation.InvocationName -ne '.')
 {  
+    [string[]]$JOBS = @("play_top", "play_front", "rec_cap_top", "rec_cap_front", "rec_mics")
     if($stop) { 
-      Stop
+      Stop -JOBS $JOBS
     }
 
     $CONFIG_FILE = 'config.txt'
     $CAPTURE_CARD_PATTERN = '*Game Capture*Video*'
     $AUDIO_DEVICE_PATTERN = '*Mic/Line In 05/06*'
-
-
+    
     # Load ffmpeg settings from config file, save to Hash
     $FF = Get-Content $CONFIG_FILE | ConvertFrom-StringData
 
     # Store dshow devices to Array
     $DATA = & $FF.FFMPEG -list_devices true -f dshow -i dummy 2>&1
-    FOREACH ($line in $DATA) {
+    ForEach ($line in $DATA) {
         if ($line -like $CAPTURE_CARD_PATTERN) {
             $line = $($line | Out-String).split('"')[1]
             [string[]]$CAPTURE += $line
@@ -132,18 +128,18 @@ if ($MyInvocation.InvocationName -ne '.')
     }
 
     Write-Host "Using Devices:"
-    FOREACH ($string in $CAPTURE) {
+    ForEach ($string in $CAPTURE) {
         Write-Host $string
     }
-    Write-Host $AUDIO
+    if ($AUDIO) { Write-Host $AUDIO }
     
     # Get all script files in working directory, save to string array
-    Get-ChildItem ./ -recurse | where {$_.extension -eq ".ps1"} | % {
+    Get-ChildItem ./ -recurse | Where {$_.extension -eq ".ps1"} | % {
         [string[]]$SCRIPTS += $_.FullName
     }
 
-    Show -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS
+    Show -JOBS $JOBS -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS
     if($rec) { 
-		Rec -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS -AUDIO $AUDIO
+		Rec -JOBS $JOBS -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS -AUDIO $AUDIO
 	}
 }
