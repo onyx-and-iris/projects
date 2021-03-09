@@ -4,7 +4,7 @@ Function Show{
     param(
     [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS
     )
-
+    # Set up args for each job and run script as background process
     $i = 0
     ForEach ($job in $JOBS) {
         if ($job -And $job.Contains('play')) {
@@ -28,7 +28,7 @@ Function Rec{
     if (-Not(Test-Path -Path ".\rec")) {
         New-Item -ItemType Directory -Force -Path ".\rec"
     }
-
+    # Set up args for each job and run script as background process
     $i = 0
     ForEach ($job in $JOBS) {
         if ($job) {
@@ -64,7 +64,7 @@ Function Stop{
     param(
         [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
     )
-    
+    # Stop running jobs and back them up in a rotation
     ForEach ($JobObj in Get-Job -State 'Running')
     {
         if ($JOBS.Contains($JobObj.name)) {
@@ -76,26 +76,50 @@ Function Stop{
     Get-ChildItem ./rec/ -recurse | Where {$_.extension -in ".mkv",".wav"} | % {
         $i = 1
         $StopLoop = $false
+        $DIR = $_.DirectoryName
         do {
             try {
+                $SAVEDFILE = "$($_.BaseName)_$i.backup" 
                 Rename-Item -Path $_.FullName `
-                -NewName "$($_.FullName).backup.$i" -ErrorAction 'Stop'
+                -NewName $SAVEDFILE -ErrorAction 'Stop'
                 $StopLoop = $true
             } 
             catch {
                 Start-Sleep -m 100
                 $i++
             }
+            
+            [string[]]$SAVEDFILES `
+            += $(Join-Path -Path $DIR `
+            -ChildPath $SAVEDFILE) 
+            
         } until ($StopLoop -eq $true)
-        
-        [string[]]$OUTFILES += $_.FullName
     }
-    ForEach ($string in $OUTFILES) {
-        $savefile = Split-Path $string -leaf
+    
+    ForEach ($string in $SAVEDFILES) {
+        $savefile = Split-Path $string -Leaf
         Write-Host "Backed up file: ", $savefile
+        
+        Transfer -SOURCE $string -SAVEFILE $savefile
     }
 
 	Exit
+}
+
+Function Transfer {
+    param(
+        [string[]]$SOURCE, $SAVEFILE
+    )
+    # Transfer to workstation for DNxHD conversion
+    $DIR_SOURCE = $(Split-Path -Path $SOURCE)
+    if ($SAVEFILE -Match 'top') {
+        $DIR_DEST = "\\onyx-db\test\top"
+    }
+    elseif ($SAVEFILE -Match 'front') {
+        $DIR_DEST = "\\onyx-db\test\front"
+    }
+    
+    robocopy $DIR_SOURCE $DIR_DEST $SAVEFILE
 }
 
 
