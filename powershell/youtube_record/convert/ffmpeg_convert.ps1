@@ -19,10 +19,11 @@ Function Convert{
     }
 }
 
+if ($MyInvocation.InvocationName -ne '.') {
+    Write-Host "Running batch conversion..."
+    Set-Location -Path D:\test
 
-if ($MyInvocation.InvocationName -ne '.')
-{
-    $CONFIG_FILE = 'config.txt'
+    $CONFIG_FILE = "config.txt"
 
     $FF = Get-Content $CONFIG_FILE | ConvertFrom-StringData
 
@@ -32,3 +33,4 @@ if ($MyInvocation.InvocationName -ne '.')
 
     Convert -FF $FF -FILES $FILES
 }
+
