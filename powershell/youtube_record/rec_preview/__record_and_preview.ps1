@@ -2,7 +2,7 @@ param([switch]$rec, [switch]$stop)
 
 Function Show{
     param(
-    [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS
+        [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS
     )
     # Set up args for each job and run script as background process
     $i = 0
@@ -65,7 +65,7 @@ Function Stop{
         [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
     )
     # Stop running jobs and back them up in a rotation
-    ForEach ($JobObj in Get-Job -State 'Running')
+    ForEach ($JobObj in Get-Job -State "Running")
     {
         if ($JOBS.Contains($JobObj.name)) {
             Write-Host "Stopping ", $JobObj.name
@@ -73,27 +73,32 @@ Function Stop{
         }
     }
 
-    Get-ChildItem ./rec/ -recurse | Where-Object {$_.extension -in ".mkv",".wav"} | % {
-        $i = 1
-        $StopLoop = $false
-        $DIR = $_.DirectoryName
-        do {
-            try {
-                $SAVEDFILE = "$($_.BaseName)_$i.backup" 
-                Rename-Item -Path $_.FullName `
-                -NewName $SAVEDFILE -ErrorAction 'Stop'
+    $DRIVES = @("X:/", "Y:/")
 
-                [string[]]$SAVEDFILES `
-                += $(Join-Path -Path $DIR `
-                -ChildPath $SAVEDFILE)
+    ForEach ($drive in $DRIVES) {
+        Get-ChildItem $(Join-Path -Path $drive -ChildPath /rec/) `
+        -recurse | Where-Object {$_.extension -in ".mkv",".wav"} | % {
+            $i = 1
+            $StopLoop = $false
+            $DIR = $_.DirectoryName
+            do {
+                try {
+                    $SAVEDFILE = "$($_.BaseName)_$i.backup" 
+                    Rename-Item -Path $_.FullName `
+                    -NewName $SAVEDFILE -ErrorAction "Stop"
 
-                $StopLoop = $true
-            } 
-            catch {
-                Start-Sleep -m 100
-                $i++
-            }      
-        } until ($StopLoop -eq $true)
+                    [string[]]$SAVEDFILES `
+                    += $(Join-Path -Path $DIR `
+                    -ChildPath $SAVEDFILE)
+
+                    $StopLoop = $true
+                } 
+                catch {
+                    Start-Sleep -m 100
+                    $i++
+                }      
+            } until ($StopLoop -eq $true)
+        }
     }
 
     $CRED = Get-Content "${PSScriptRoot}\credentials.txt" | ConvertFrom-StringData
@@ -126,8 +131,8 @@ Function Transfer {
     elseif ($SAVEFILE -Match 'front') {
         $DIR_DEST = "\\${SERVER}\DNxHD2\"
     }
-	elseif ($SAVEFILE -Match 'mics') {
-		$DIR_DEST = "\\${SERVER}\DNxHD\_audio\"
+    elseif ($SAVEFILE -Match 'mics') {
+        $DIR_DEST = "\\${SERVER}\DNxHD\_audio\"
 	}
     
     robocopy $DIR_SOURCE $DIR_DEST $SAVEFILE /min:10 
@@ -176,5 +181,5 @@ if ($MyInvocation.InvocationName -ne '.')
     Show -JOBS $JOBS -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS
     if($rec) { 
         Rec -JOBS $JOBS -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS -AUDIO $AUDIO
-	}
+    }
 }
