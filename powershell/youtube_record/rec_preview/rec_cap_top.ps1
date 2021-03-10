@@ -1,6 +1,6 @@
 param([string]$capture, [string]$ffmpeg, [string]$name)
 
-$outfile = "${PSScriptRoot}\rec\$name.mkv"
+$outfile = "X:\rec\$name.mkv"
 
 & $ffmpeg -f dshow `
 -rtbufsize 2000M -framerate 60 -i video=$capture `

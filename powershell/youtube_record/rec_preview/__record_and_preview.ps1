@@ -76,11 +76,13 @@ Function Stop{
     $DRIVES = @("X:/", "Y:/")
 
     ForEach ($drive in $DRIVES) {
-        Get-ChildItem $(Join-Path -Path $drive -ChildPath /rec/) `
-        -recurse | Where-Object {$_.extension -in ".mkv",".wav"} | % {
+        Get-ChildItem $(Join-Path -Path $drive -ChildPath /rec/) -recurse `
+        | Where-Object {$_.extension -in ".mkv",".wav" -And $_.Length -gt 0kb } `
+        | % {
             $i = 1
             $StopLoop = $false
             $DIR = $_.DirectoryName
+            
             do {
                 try {
                     $SAVEDFILE = "$($_.BaseName)_$i.backup" 
@@ -92,7 +94,7 @@ Function Stop{
                     -ChildPath $SAVEDFILE)
 
                     $StopLoop = $true
-                } 
+                }
                 catch {
                     Start-Sleep -m 100
                     $i++
@@ -112,10 +114,13 @@ Function Stop{
         
         Transfer -SOURCE $string -SAVEFILE $savefile -SERVER $server
     }
+    
 
-    if ($SAVEDFILES) {	
-        Invoke-Command -ComputerName $server -Credential $cred -ScriptBlock { X:\DNxHD\ffmpeg_convert.ps1 }
-        Invoke-Command -ComputerName $server -Credential $cred -ScriptBlock { Y:\DNxHD2\ffmpeg_convert.ps1 }
+    if ($SAVEDFILES) {
+        Invoke-Command -ComputerName $server -Credential $cred `
+        -ScriptBlock { X:\DNxHD\ffmpeg_convert.ps1 }
+        Invoke-Command -ComputerName $server -Credential $cred `
+        -ScriptBlock { Y:\DNxHD2\ffmpeg_convert.ps1 }
     }
 
     Exit
@@ -135,13 +140,14 @@ Function Transfer {
         $DIR_DEST = "\\${SERVER}\DNxHD\_audio\"
 	}
     
-    robocopy $DIR_SOURCE $DIR_DEST $SAVEFILE /min:10 
+    robocopy $DIR_SOURCE $DIR_DEST $SAVEFILE /min:1 
 }
 
 
 if ($MyInvocation.InvocationName -ne '.')
 {  
-    [string[]]$JOBS = @("play_top", "play_front", "rec_cap_top", "rec_cap_front", "rec_mics")
+    [string[]]$JOBS `
+    = @("play_top", "play_front", "rec_cap_top", "rec_cap_front", "rec_mics")
     if($stop) { 
       Stop -JOBS $JOBS
     }
