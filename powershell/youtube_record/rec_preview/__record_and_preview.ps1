@@ -73,7 +73,7 @@ Function Stop{
         }
     }
 
-    Get-ChildItem ./rec/ -recurse | Where {$_.extension -in ".mkv",".wav"} | % {
+    Get-ChildItem ./rec/ -recurse | Where-Object {$_.extension -in ".mkv",".wav"} | % {
         $i = 1
         $StopLoop = $false
         $DIR = $_.DirectoryName
@@ -82,11 +82,11 @@ Function Stop{
                 $SAVEDFILE = "$($_.BaseName)_$i.backup" 
                 Rename-Item -Path $_.FullName `
                 -NewName $SAVEDFILE -ErrorAction 'Stop'
-				
-				[string[]]$SAVEDFILES `
-				+= $(Join-Path -Path $DIR `
-				-ChildPath $SAVEDFILE)
-				
+
+                [string[]]$SAVEDFILES `
+                += $(Join-Path -Path $DIR `
+                -ChildPath $SAVEDFILE)
+
                 $StopLoop = $true
             } 
             catch {
@@ -97,9 +97,9 @@ Function Stop{
     }
 
     $CRED = Get-Content "${PSScriptRoot}\credentials.txt" | ConvertFrom-StringData
-	$server = $($CRED.SERVER | Out-String).Trim()
-	$password = ConvertTo-SecureString -AsPlainText $CRED.PASSWORD -Force
-	$cred = New-Object System.Management.Automation.PSCredential $CRED.USERNAME,$password		
+    $server = $($CRED.SERVER | Out-String).Trim()
+    $password = ConvertTo-SecureString -AsPlainText $CRED.PASSWORD -Force
+    $cred = New-Object System.Management.Automation.PSCredential $CRED.USERNAME,$password		
 
     ForEach ($string in $SAVEDFILES) {
         $savefile = Split-Path $string -Leaf
@@ -110,7 +110,7 @@ Function Stop{
 
     if ($SAVEDFILES) {	
         Invoke-Command -ComputerName $server -Credential $cred -ScriptBlock { X:\DNxHD\ffmpeg_convert.ps1 }
-		Invoke-Command -ComputerName $server -Credential $cred -ScriptBlock { Y:\DNxHD2\ffmpeg_convert.ps1 }
+        Invoke-Command -ComputerName $server -Credential $cred -ScriptBlock { Y:\DNxHD2\ffmpeg_convert.ps1 }
     }
 
     Exit
@@ -169,12 +169,12 @@ if ($MyInvocation.InvocationName -ne '.')
     if ($AUDIO) { Write-Host $AUDIO }
     
     # Get all script files in working directory, save to string array
-    Get-ChildItem ./ -recurse | Where {$_.extension -eq ".ps1"} | % {
+    Get-ChildItem ./ -recurse | Where-Object {$_.extension -eq ".ps1"} | % {
         [string[]]$SCRIPTS += $_.FullName
     }
 
     Show -JOBS $JOBS -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS
     if($rec) { 
-		Rec -JOBS $JOBS -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS -AUDIO $AUDIO
+        Rec -JOBS $JOBS -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS -AUDIO $AUDIO
 	}
 }
