@@ -82,31 +82,35 @@ Function Stop{
                 $SAVEDFILE = "$($_.BaseName)_$i.backup" 
                 Rename-Item -Path $_.FullName `
                 -NewName $SAVEDFILE -ErrorAction 'Stop'
+				
+				[string[]]$SAVEDFILES `
+				+= $(Join-Path -Path $DIR `
+				-ChildPath $SAVEDFILE)
+				
                 $StopLoop = $true
             } 
             catch {
                 Start-Sleep -m 100
                 $i++
-            }
-            
-            [string[]]$SAVEDFILES `
-            += $(Join-Path -Path $DIR `
-            -ChildPath $SAVEDFILE) 
-            
+            }      
         } until ($StopLoop -eq $true)
     }
 
     $CRED = Get-Content "${PSScriptRoot}\credentials.txt" | ConvertFrom-StringData
+	$server = $($CRED.SERVER | Out-String).Trim()
+	$password = ConvertTo-SecureString -AsPlainText $CRED.PASSWORD -Force
+	$cred = New-Object System.Management.Automation.PSCredential $CRED.USERNAME,$password		
 
     ForEach ($string in $SAVEDFILES) {
         $savefile = Split-Path $string -Leaf
         Write-Host "Backed up file: ", $savefile
         
-        Transfer -SOURCE $string -SAVEFILE $savefile
+        Transfer -SOURCE $string -SAVEFILE $savefile -SERVER $server
     }
 
-    if ($SAVEDFILES) {
-        Invoke-Command -ComputerName $CRED.NAME -ScriptBlock { D:\test\ffmpeg_convert.ps1 }
+    if ($SAVEDFILES) {	
+        Invoke-Command -ComputerName $server -Credential $cred -ScriptBlock { X:\DNxHD\ffmpeg_convert.ps1 }
+		Invoke-Command -ComputerName $server -Credential $cred -ScriptBlock { Y:\DNxHD2\ffmpeg_convert.ps1 }
     }
 
     Exit
@@ -114,18 +118,21 @@ Function Stop{
 
 Function Transfer {
     param(
-        [string[]]$SOURCE, $SAVEFILE
+        [string[]]$SOURCE, $SAVEFILE, $SERVER
     )
     # Transfer to workstation for DNxHD conversion
     $DIR_SOURCE = $(Split-Path -Path $SOURCE)
     if ($SAVEFILE -Match 'top') {
-        $DIR_DEST = "\\onyx-db\test\top"
+        $DIR_DEST = "\\${SERVER}\DNxHD\"
     }
     elseif ($SAVEFILE -Match 'front') {
-        $DIR_DEST = "\\onyx-db\test\front"
+        $DIR_DEST = "\\${SERVER}\DNxHD2\"
     }
+	elseif ($SAVEFILE -Match 'mics') {
+		$DIR_DEST = "\\${SERVER}\DNxHD\_audio\"
+	}
     
-    robocopy $DIR_SOURCE $DIR_DEST $SAVEFILE
+    robocopy $DIR_SOURCE $DIR_DEST $SAVEFILE /min:10 
 }
 
 
