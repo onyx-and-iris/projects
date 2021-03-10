@@ -5,18 +5,20 @@ Function Show{
         [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS
     )
     # Set up args for each job and run script as background process
-    $i = 0
     ForEach ($job in $JOBS) {
         if ($job -And $job.Contains('play')) {
+            if ($job.Contains([Captures]::top)) { $num = [int][Captures]::top }
+            elseif ($job.Contains([Captures]::front)) { $num = [int][Captures]::front }
+
             ForEach ($file in $SCRIPTS) {
                 if ($file -Match $job) {
                     $THIS_SCRIPT = $file
                 }
             }
+
             Start-Job -Name $job -ScriptBlock {
                 & $args[2] -capture $args[0] -ffplay $args[1]
-            } -ArgumentList $CAPTURE[$i], $FF.FFPLAY, $THIS_SCRIPT
-            $i++
+            } -ArgumentList $CAPTURE[$num], $FF.FFPLAY, $THIS_SCRIPT
         }
     }
 }
@@ -106,7 +108,7 @@ Function Stop{
     $CRED = Get-Content "${PSScriptRoot}\credentials.txt" | ConvertFrom-StringData
     $server = $($CRED.SERVER | Out-String).Trim()
     $password = ConvertTo-SecureString -AsPlainText $CRED.PASSWORD -Force
-    $cred = New-Object System.Management.Automation.PSCredential $CRED.USERNAME,$password		
+    $CredObj = New-Object System.Management.Automation.PSCredential $CRED.USERNAME,$password		
 
     ForEach ($string in $SAVEDFILES) {
         $savefile = Split-Path $string -Leaf
@@ -115,11 +117,10 @@ Function Stop{
         Transfer -SOURCE $string -SAVEFILE $savefile -SERVER $server
     }
     
-
     if ($SAVEDFILES) {
-        Invoke-Command -ComputerName $server -Credential $cred `
+        Invoke-Command -ComputerName $server -Credential $CredObj `
         -ScriptBlock { X:\DNxHD\ffmpeg_convert.ps1 }
-        Invoke-Command -ComputerName $server -Credential $cred `
+        Invoke-Command -ComputerName $server -Credential $CredObj `
         -ScriptBlock { Y:\DNxHD2\ffmpeg_convert.ps1 }
     }
 
@@ -146,8 +147,18 @@ Function Transfer {
 
 if ($MyInvocation.InvocationName -ne '.')
 {  
-    [string[]]$JOBS `
-    = @("play_top", "play_front", "rec_cap_top", "rec_cap_front", "rec_mics")
+    Get-ChildItem ./ -recurse `
+    | Where-Object {$_.extension -eq ".ps1" -And $_.Name -notmatch "^__*"} `
+    | % {
+        [string[]]$SCRIPTS += $_.FullName
+        [string[]]$JOBS += $_.BaseName
+    }
+
+    Enum Captures{ 
+        top
+        front
+    }
+
     if($stop) { 
       Stop -JOBS $JOBS
     }
@@ -155,7 +166,7 @@ if ($MyInvocation.InvocationName -ne '.')
     $CONFIG_FILE = "${PSScriptRoot}\config.txt"
     $CAPTURE_CARD_PATTERN = '*Game Capture*Video*'
     $AUDIO_DEVICE_PATTERN = '*Mic/Line In 05/06*'
-    
+
     # Load ffmpeg settings from config file, save to Hash
     $FF = Get-Content $CONFIG_FILE | ConvertFrom-StringData
 
@@ -178,11 +189,6 @@ if ($MyInvocation.InvocationName -ne '.')
         Write-Host $string
     }
     if ($AUDIO) { Write-Host $AUDIO }
-    
-    # Get all script files in working directory, save to string array
-    Get-ChildItem ./ -recurse | Where-Object {$_.extension -eq ".ps1"} | % {
-        [string[]]$SCRIPTS += $_.FullName
-    }
 
     Show -JOBS $JOBS -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS
     if($rec) { 
