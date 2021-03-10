@@ -23,7 +23,7 @@ Function Show{
 
 Function Rec{
     param(
-    [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
+        [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
     )
     if (-Not(Test-Path -Path ".\rec")) {
         New-Item -ItemType Directory -Force -Path ".\rec"
@@ -117,9 +117,7 @@ Function Stop{
 }
 
 Function Transfer {
-    param(
-        [string[]]$SOURCE, $SAVEFILE, $SERVER
-    )
+    param([string[]]$SOURCE, $SAVEFILE, $SERVER)
     # Transfer to workstation for DNxHD conversion
     $DIR_SOURCE = $(Split-Path -Path $SOURCE)
     if ($SAVEFILE -Match 'top') {
