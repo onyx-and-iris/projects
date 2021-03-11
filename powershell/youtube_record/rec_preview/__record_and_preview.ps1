@@ -4,6 +4,7 @@ Function Show{
     param(
         [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS
     )
+
     # Set up args for each job and run script as background process
     ForEach ($job in $JOBS) {
         if ($job -And $job.Contains('play')) {
@@ -22,19 +23,25 @@ Function Show{
         }
     }
 }
-
 Function Rec{
     param(
         [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
     )
-    if (-Not(Test-Path -Path ".\rec")) {
-        New-Item -ItemType Directory -Force -Path ".\rec"
+
+    ForEach ($drive in $global:DRIVES) {
+        $dir_rec = $drive + "rec"
+        if (-Not(Test-Path -Path $dir_rec)) {
+            Write-Host "Record path doesn't exit... creating directory"
+            New-Item -ItemType Directory -Path $dir_rec
+        }
     }
     # Set up args for each job and run script as background process
-    $i = 0
     ForEach ($job in $JOBS) {
         if ($job) {
             if ($job.Contains('rec_cap')) {
+                if ($job.Contains([Captures]::top)) { $num = [int][Captures]::top }
+                elseif ($job.Contains([Captures]::front)) { $num = [int][Captures]::front }
+                
                 ForEach ($file in $SCRIPTS) {
                     if ($file -Match $job) {
                         $THIS_SCRIPT = $file
@@ -43,8 +50,7 @@ Function Rec{
                 Start-Job -Name $job -ScriptBlock {
                     & $args[2] -capture $args[0] -ffmpeg $args[1] -name $args[3]
 
-                } -ArgumentList $CAPTURE[$i], $FF.FFMPEG, $THIS_SCRIPT, $job
-                $i++
+                } -ArgumentList $CAPTURE[$num], $FF.FFMPEG, $THIS_SCRIPT, $job
             }
             
             elseif ($job -eq 'rec_mics') {
@@ -61,11 +67,11 @@ Function Rec{
         }
     }
 }
-
 Function Stop{
     param(
         [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
     )
+    
     # Stop running jobs and back them up in a rotation
     ForEach ($JobObj in Get-Job -State "Running")
     {
@@ -75,10 +81,8 @@ Function Stop{
         }
     }
 
-    $DRIVES = @("X:/", "Y:/")
-
-    ForEach ($drive in $DRIVES) {
-        Get-ChildItem $(Join-Path -Path $drive -ChildPath /rec/) -recurse `
+    ForEach ($drive in $global:DRIVES) {
+        Get-ChildItem $(Join-Path -Path $drive -ChildPath "rec") -recurse `
         | Where-Object {$_.extension -in ".mkv",".wav" -And $_.Length -gt 0kb } `
         | % {
             $i = 1
@@ -105,6 +109,14 @@ Function Stop{
         }
     }
 
+    if ($SAVEDFILES) { Remote -SAVEDFILES $SAVEDFILES }
+    
+    Exit
+}
+Function Remote {
+    param([string[]]$SAVEDFILES)
+
+    # Get PSRemote Credentials and run Transfer and Conversion operations
     $CRED = Get-Content "${PSScriptRoot}\credentials.txt" | ConvertFrom-StringData
     $server = $($CRED.SERVER | Out-String).Trim()
     $password = ConvertTo-SecureString -AsPlainText $CRED.PASSWORD -Force
@@ -116,20 +128,12 @@ Function Stop{
         
         Transfer -SOURCE $string -SAVEFILE $savefile -SERVER $server
     }
-    
-    if ($SAVEDFILES) {
-        Invoke-Command -ComputerName $server -Credential $CredObj `
-        -ScriptBlock { X:\DNxHD\ffmpeg_convert.ps1 }
-        Invoke-Command -ComputerName $server -Credential $CredObj `
-        -ScriptBlock { Y:\DNxHD2\ffmpeg_convert.ps1 }
-    }
 
-    Exit
+    Convert -CRED $CRED -CredObj $CredObj
 }
-
 Function Transfer {
     param([string[]]$SOURCE, $SAVEFILE, $SERVER)
-    # Transfer to workstation for DNxHD conversion
+
     $DIR_SOURCE = $(Split-Path -Path $SOURCE)
     if ($SAVEFILE -Match 'top') {
         $DIR_DEST = "\\${SERVER}\DNxHD\"
@@ -141,12 +145,27 @@ Function Transfer {
         $DIR_DEST = "\\${SERVER}\DNxHD\_audio\"
 	}
     
-    robocopy $DIR_SOURCE $DIR_DEST $SAVEFILE /min:1 
+    robocopy $DIR_SOURCE $DIR_DEST $SAVEFILE
+}
+Function Convert {
+    param($CRED, $CredObj)
+
+    Write-Host "Invoking:", $CRED.SCRIPT_TOP
+    Invoke-Command -ComputerName $server -Credential $CredObj `
+    -ScriptBlock { param($command) Invoke-Expression $command } `
+    -ArgumentList $CRED.SCRIPT_TOP
+
+    Write-Host "Invoking:", $CRED.SCRIPT_FRONT
+    Invoke-Command -ComputerName $server -Credential $CredObj `
+    -ScriptBlock { param($command) Invoke-Expression $command } `
+    -ArgumentList $CRED.SCRIPT_FRONT    
 }
 
 
 if ($MyInvocation.InvocationName -ne '.')
 {  
+    $global:DRIVES=@("X:\", "Y:\")
+
     Get-ChildItem ./ -recurse `
     | Where-Object {$_.extension -eq ".ps1" -And $_.Name -notmatch "^__*"} `
     | % {
@@ -189,6 +208,7 @@ if ($MyInvocation.InvocationName -ne '.')
         Write-Host $string
     }
     if ($AUDIO) { Write-Host $AUDIO }
+    else { Write-Host "No audio device connected" }
 
     Show -JOBS $JOBS -FF $FF -CAPTURE $CAPTURE -SCRIPTS $SCRIPTS
     if($rec) { 
