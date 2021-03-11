@@ -23,6 +23,7 @@ Function Show{
         }
     }
 }
+
 Function Rec{
     param(
         [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
@@ -67,6 +68,7 @@ Function Rec{
         }
     }
 }
+
 Function Stop{
     param(
         [string[]]$JOBS, $FF, [string[]]$CAPTURE, [string[]]$SCRIPTS, $AUDIO
@@ -113,6 +115,7 @@ Function Stop{
     
     Exit
 }
+
 Function Remote {
     param([string[]]$SAVEDFILES)
 
@@ -131,6 +134,7 @@ Function Remote {
 
     Convert -CRED $CRED -CredObj $CredObj
 }
+
 Function Transfer {
     param([string[]]$SOURCE, $SAVEFILE, $SERVER)
 
@@ -147,6 +151,7 @@ Function Transfer {
     
     robocopy $DIR_SOURCE $DIR_DEST $SAVEFILE
 }
+
 Function Convert {
     param($CRED, $CredObj)
 
