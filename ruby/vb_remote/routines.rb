@@ -156,7 +156,7 @@ class BaseRoutines
 
         begin
             if validate(@m[1].downcase, @m[2])
-                if @param_value.is_a? (String)
+                if @param_string
                     self.ret = set_paramstring(@param_name, @param_string)
                 else
                     c_get = FFI::MemoryPointer.new(:float, SIZE)
