@@ -6,13 +6,13 @@ module VMR_API
 
     attr_reader :vmr_dll
 
-    if get_arch == 64
+    if ((os_bits = get_arch) == 64)
         dll_name = "VoicemeeterRemote64.dll"
-    else
-        raise "Only 64 bit supported"
+    elsif os_bits == 32
+        dll_name = "VoicemeeterRemote.dll"
     end
 
-    pn = Pathname.new(get_vbpath)
+    pn = get_vbpath
     pn = pn.join(dll_name)
 
     if pn.file?
@@ -159,27 +159,38 @@ module STRIPS
         """
         num = num.to_i
 
-        if name.eql? "strip"
+        if name == "strip"
             num < @strip_total
-        elsif name.eql? "bus"
+        elsif name == "bus"
             num < @bus_total
         elsif name == "instream" || name == "outstream"
             num < @vban_total
-        elsif name.eql? "composite" 
+        elsif name == "composite" 
             num < @composite_total
-        elsif name.eql? "insert"
+        elsif name == "insert"
             num < @insert_total
         else
-            num
+            true
         end
     end
 end
 
 module UTILS
-    attr_accessor :m
+    attr_reader :m, :m1, :m2
 
-    def test_regex(regex, value)
-        @m = regex.match(value)
+    def m1=(value)
+        @m1 = value.downcase
+    end
+
+    def m2=(value)
+        @m2 = value
+    end
+
+    def test_regex(regex, param)
+        regex.match(param) do |m|
+            self.m1 = m[1]
+            self.m2 = m[2]
+        end
     end
 
     def shift(oldnum)
