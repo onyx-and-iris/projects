@@ -79,8 +79,8 @@ class BaseRoutines
         value.each do |key, val|
             test_regex(/(\w+)_(\d+)/, key)
 
-            name = @m[1]
-            num = shift(@m[2])
+            name = @m1
+            num = shift(@m2)
             k = nil
             v = nil
             val.each do |k, v|
@@ -154,20 +154,16 @@ class BaseRoutines
         self.param_name = name
         self.param_value = value
 
-        begin
-            if validate(@m[1].downcase, @m[2])
-                if @param_string
-                    self.ret = set_paramstring(@param_name, @param_string)
-                else
-                    c_get = FFI::MemoryPointer.new(:float, SIZE)
-                    self.ret = set_paramfloat(@param_name, @param_float)
-                end
-                sleep(DELAY)
+        if validate(@m1, @m2)
+            if @param_string
+                self.ret = set_paramstring(@param_name, @param_string)
             else
-                puts "Parameter out of bounds"
+                c_get = FFI::MemoryPointer.new(:float, SIZE)
+                self.ret = set_paramfloat(@param_name, @param_float)
             end
-        rescue NoMethodError
-            raise "Boundary params not defined"
+            sleep(DELAY)
+        else
+            puts "Parameter out of bounds"
         end
     end
 
