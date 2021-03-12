@@ -4,11 +4,11 @@ require 'Pathname'
 def get_arch
     key = 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
     Win32::Registry::HKEY_LOCAL_MACHINE.open(key) do |reg|
-        os_size = reg["PROCESSOR_ARCHITECTURE"]
-        if os_size.eql? "AMD64"
+        os_bits = reg["PROCESSOR_ARCHITECTURE"]
+        if os_bits.include? 64.to_s
             return 64
         end
-        return nil
+        return 32
     end
 end
 
@@ -39,6 +39,6 @@ end
 
 
 if __FILE__ == $PROGRAM_NAME
-    #puts get_vbpath
-    get_arch
+    puts get_vbpath
+    puts get_arch
 end
