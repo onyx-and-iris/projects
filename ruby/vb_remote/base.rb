@@ -1,24 +1,19 @@
 require 'ffi'
-require 'pathname'
-require 'os'
+require_relative 'inst.rb'
 
 module VMR_API
     extend FFI::Library
 
     attr_reader :vmr_dll
 
-    if OS.bits.eql? 64
+    if get_arch == 64
         dll_name = "VoicemeeterRemote64.dll"
     else
         raise "Only 64 bit supported"
     end
 
-    if OS.windows?
-        pn = Pathname.new("C:\\Program Files (x86)\\VB\\Voicemeeter\\")
-        pn = pn.join(dll_name)
-    else
-        raise "Only Windows platform supported"
-    end
+    pn = Pathname.new(get_vbpath)
+    pn = pn.join(dll_name)
 
     if pn.file?
         @vmr_dll = pn
