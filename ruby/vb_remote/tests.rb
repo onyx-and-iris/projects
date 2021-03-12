@@ -304,19 +304,19 @@ if __FILE__ == $PROGRAM_NAME
         puts "Running multiple tests"
         vmr.run do
             macrostatus(vmr)
+            setvban(vmr)
             setmutes(vmr)
             getparams(vmr)
             special(vmr)
             setparamstring(vmr)
             getparamstring(vmr)
             setparammulti(vmr)
-            setvban(vmr)
             
             """ Testing from vmr.run """
             (0..2).each do |num|
-                vmr.get_parameter_string("Strip[#{num}].Label")
-                vmr.get_parameter_string("Strip[#{num}].device.name")
-                sleep(1)
+                puts "Getting Strip[#{num}] Label and device.name"
+                puts vmr.get_parameter_string("Strip[#{num}].Label")
+                puts vmr.get_parameter_string("Strip[#{num}].device.name")
             end
         end
     elsif args.include? "loop"
