@@ -6,8 +6,8 @@ class BaseRoutines
     mixin modules
     """
     include VMR_API
-    include STRIPS
-    include UTILS
+    include Strips
+    include Utils
 
     attr_accessor :type
     attr_reader :ret, :success, :sp_command, :param_string, :param_options, \
@@ -19,16 +19,26 @@ class BaseRoutines
     """ Validation writer methods """
     def ret=(value)
         """ C API return value """
-        if ret&.nonzero?
-            raise "ERROR: CBF failed: #{value}"
+        begin
+            if value&.nonzero?
+                raise APIError
+            end
+        rescue APIError => error
+            puts "ERROR: #{error.message} #{value}"
         end
         @ret = value
     end
 
     def success=(value)
         """ login success status """
-        if value&.nonzero?
-            raise "Voicemeeter not running.. exiting"
+        begin
+            if value&.nonzero?
+                raise LoginError
+            end
+        rescue LoginError => error
+            puts "ERROR: #{error.message} #{value}"
+            do_logout
+            exit(false)
         end
         @success = value
     end
@@ -75,19 +85,16 @@ class BaseRoutines
     def param_options=(value)
         """ Test options against regex then build param string """
         build_str = []
-
         value.each do |key, val|
             test_regex(/(\w+)_(\d+)/, key)
-
             name = @m1
             num = shift(@m2)
-            k = nil
-            v = nil
+
             val.each do |k, v|
                 if validate(name, num)
                     build_str.append(
-                        "#{name.capitalize}[#{num}].#{k} = #{v}"
-                        )
+                        "#{name.capitalize}[#{num.to_s}].#{k} = #{v}"
+                    )
                 end
             end
         end
@@ -96,7 +103,7 @@ class BaseRoutines
 
     def logical_id=(value)
         if value < 0 || value > 69
-            raise "Error: Logical ID out of range"
+            raise BoundsError
         end
         @logical_id = value
     end
@@ -131,19 +138,28 @@ class BaseRoutines
         set macrobutton by number, state and mode
         poll m_dirty to signify value change
         """
-        self.logical_id = logical_id
-        self.ret = macrobutton_setstatus(@logical_id, state.to_f, mode)
-        sleep(DELAY)        
+        begin
+            self.logical_id = logical_id
+            self.ret = macrobutton_setstatus(@logical_id, state.to_f, mode)
+            sleep(DELAY)
+        rescue BoundsError => error
+            puts "ERROR: Logical ID out of range"
+        end  
     end
 
     def macro_getstatus(logical_id, mode=2)
-        c_get = FFI::MemoryPointer.new(:float, SIZE)
-
         if macro_isdirty
             clear_mdirty
         end
-        self.ret = macrobutton_getstatus(logical_id, c_get, mode)
-        val = c_get.read_float
+
+        begin
+            c_get = FFI::MemoryPointer.new(:float, SIZE)
+            self.logical_id = logical_id
+            self.ret = macrobutton_getstatus(@logical_id, c_get, mode)
+            c_get.read_float
+        rescue BoundsError => error
+            puts "ERROR: Logical ID out of range"
+        end
     end
 
     def set_parameter(name, value)
@@ -153,17 +169,22 @@ class BaseRoutines
         """
         self.param_name = name
         self.param_value = value
-
-        if validate(@m1, @m2)
-            if @param_string
-                self.ret = set_paramstring(@param_name, @param_string)
+        begin
+            if validate(@m1, @m2)
+                if @param_string
+                    self.ret = set_paramstring(@param_name, @param_string)
+                else
+                    c_get = FFI::MemoryPointer.new(:float, SIZE)
+                    self.ret = set_paramfloat(@param_name, @param_float)
+                end
+                sleep(DELAY)
             else
-                c_get = FFI::MemoryPointer.new(:float, SIZE)
-                self.ret = set_paramfloat(@param_name, @param_float)
+                raise BoundsError
             end
-            sleep(DELAY)
-        else
-            puts "Parameter out of bounds"
+        rescue VersionError => error
+            puts "ERROR: #{error.message}"
+        rescue BoundsError => error
+            puts "ERROR: #{error.message}"
         end
     end
 
@@ -181,7 +202,7 @@ class BaseRoutines
         end
 
         self.ret = get_paramfloat(name, c_get)
-        val = c_get.read_float.round(1)
+        c_get.read_float.round(1)
     end
 
     def get_parameter_string(name)
