@@ -62,7 +62,7 @@ def setsolo(vmr)
     toggle solo for strips
     test out of bounds values 
     """
-    5.times do
+    10.times do
         (0..8).each do |num|
             puts "Setting Bus[#{num}].solo: on"
             vmr.set_parameter("Bus[#{num}].solo", ON)
@@ -93,16 +93,18 @@ def setvban(vmr)
 end
 
 def setrevdel(vmr)
-    """ toggle reverb/delay (potato only) """
-    puts "Setting Fx.Reverb.On: on"
-    vmr.set_parameter("Fx.Reverb.On", ON)
-    puts "Setting Fx.Reverb.On: off"
-    vmr.set_parameter("Fx.Reverb.On", OFF)
+    5.times do
+        """ toggle reverb/delay (potato only) """
+        puts "Setting Fx.Reverb.On: on"
+        vmr.set_parameter("Fx.Reverb.On", ON)
+        puts "Setting Fx.Reverb.On: off"
+        vmr.set_parameter("Fx.Reverb.On", OFF)
 
-    puts "Setting Fx.Delay.On: on"
-    vmr.set_parameter("Fx.Delay.On", ON)
-    puts "Setting Fx.Delay.On: off"
-    vmr.set_parameter("Fx.Delay.On", OFF)
+        puts "Setting Fx.Delay.On: on"
+        vmr.set_parameter("Fx.Delay.On", ON)
+        puts "Setting Fx.Delay.On: off"
+        vmr.set_parameter("Fx.Delay.On", OFF)
+    end
 end
 
 def setpatchinsert(vmr)
@@ -282,6 +284,22 @@ def recorder(vmr)
     sleep(1)
 end
 
+def cbf_error(vmr)
+    vmr.get_parameter("GARBAGEVALUE")
+end
+
+def lid_error(vmr)
+    (90..99).each do |num|
+        puts "Setting Macrobutton[#{num}]: on"
+        vmr.macro_setstatus(num, ON)
+        puts vmr.macro_getstatus(num)
+
+        puts "Setting Macrobutton[#{num}]: off"
+        vmr.macro_setstatus(num, OFF)
+        puts vmr.macro_getstatus(num)
+    end
+end
+
 def simpletest(args, vmr)
     """ build eval string to invoke test run for each arg variable """
     args.each { |func| method = func.to_s; eval("#{method}(vmr)") }
@@ -332,6 +350,26 @@ if __FILE__ == $PROGRAM_NAME
     elsif args.include? "strips"
         puts "Running strips test"
         vmr.run do
+        end
+    elsif args.include? "revdel"
+        puts "Running reverb/delay test"
+        vmr.run do
+            setrevdel(vmr)
+        end
+    elsif args.include? "pinsert"
+        puts "Running patch insert test"
+        vmr.run do
+            setpatchinsert(vmr)
+        end
+    elsif args.include? "cbferr"
+        puts "Running Callback Function error test"
+        vmr.run do
+            cbf_error(vmr)
+        end
+    elsif args.include? "liderr"
+        puts "Running Logical ID bounds error test"
+        vmr.run do
+            lid_error(vmr)
         end
     else
         vmr.run do
