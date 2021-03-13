@@ -73,7 +73,35 @@ module VMR_API
     DELAY = 0.02
 end
 
-module STRIPS
+module Errors
+    class LoginError < StandardError
+        def message
+            "Failed to login, success return value:"
+        end
+    end
+
+    class APIError < StandardError
+        def message
+            "Callback Function Error, return value:"
+        end
+    end
+
+    class BoundsError < StandardError
+        def message
+            "Value out of bounds"
+        end
+    end
+
+    class VersionError < StandardError
+        def message
+            "Wrong Voicemeeter version"
+        end
+    end
+end
+
+module Strips
+    include Errors
+
     attr_reader :layout, :strip_total, :bus_total, :vban_total
 
     BASIC = 1
@@ -152,13 +180,11 @@ module STRIPS
         @layout[:bus][:p_out].to_i.+(@layout[:bus][:v_out].to_i)
     end
 
-    def validate(name, num = 0)
+    def validate(name, num)
         """ 
         Validate boundaries unless param requires none 
-        example: Reverb and Delay
+        example: Reverb and Delay, then return true
         """
-        num = num.to_i
-
         if name == "strip"
             num < @strip_total
         elsif name == "bus"
@@ -168,22 +194,29 @@ module STRIPS
         elsif name == "composite" 
             num < @composite_total
         elsif name == "insert"
-            num < @insert_total
-        else
-            true
+            if @type == POTATO
+                num < @insert_total
+            else
+                raise VersionError
+            end
+        elsif name == "reverb" || name == "delay"
+            if @type == POTATO
+            else
+                raise VersionError
+            end
         end
     end
 end
 
-module UTILS
-    attr_reader :m, :m1, :m2
+module Utils
+    attr_reader :m1, :m2
 
     def m1=(value)
         @m1 = value.downcase
     end
 
     def m2=(value)
-        @m2 = value
+        @m2 = value.to_i
     end
 
     def test_regex(regex, param)
@@ -194,7 +227,6 @@ module UTILS
     end
 
     def shift(oldnum)
-        num = oldnum.to_i - 1
-        num.to_s
+        oldnum - 1
     end
 end
