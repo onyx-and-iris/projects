@@ -170,6 +170,21 @@ def special(vmr)
     vmr.special_command("DialogShow.VBANCHAT")
 end
 
+def configs(vmr)
+    """ Test load config special command """
+    puts "Loading config test0.xml"
+    vmr.special_command("Load",
+    ".\\test0.xml")
+    sleep(2)
+    puts "Loading config test1.xml"
+    vmr.special_command("Load",
+    ".\\test1.xml")
+    sleep(2)
+    puts "Loading config test2.xml"
+    vmr.special_command("Load",
+    ".\\test2.xml")
+end
+
 def setparamstring(vmr)
     """ 
     get a string parameter eg Strip[0].name
@@ -312,7 +327,6 @@ if __FILE__ == $PROGRAM_NAME
     """
     args = ARGV
     vmr = Remote.new
-    puts args
 
     ON = 1
     OFF = 0
@@ -329,6 +343,7 @@ if __FILE__ == $PROGRAM_NAME
             setparamstring(vmr)
             getparamstring(vmr)
             setparammulti(vmr)
+            setrevdel(vmr)
             
             """ Testing from vmr.run """
             (0..2).each do |num|
@@ -370,6 +385,11 @@ if __FILE__ == $PROGRAM_NAME
         puts "Running Logical ID bounds error test"
         vmr.run do
             lid_error(vmr)
+        end
+    elsif args.include? "conf"
+        puts "Running load configs test"
+        vmr.run do
+            configs(vmr)
         end
     else
         vmr.run do
