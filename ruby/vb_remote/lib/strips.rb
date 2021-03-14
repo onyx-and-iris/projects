@@ -10,77 +10,76 @@ module Strips
     end
 
     def strip_total=(value)
-        @strip_total = value.to_i
+        @strip_total = value
     end
 
     def bus_total=(value)
-        @bus_total = value.to_i
+        @bus_total = value
     end
 
     def vban_total=(value)
-        @layout[:in_vban] = value
-        @layout[:out_vban] = value
         @vban_total = value
     end
 
     def composite_total=(value)
-        if value < 0 || value > 7
-            raise "Value out of bounds"
-        end
         @composite_total = value
     end
 
     def insert_total=(value)
-        if value < 0 || value > 33
-            raise "Value out of bounds"
-        end
         @insert_total = value
     end
 
     def build_strips(type)
-        self.layout =  {
-            :strip => {:p_in => 0, :v_in => 0}, 
-            :bus => {:p_out => 0, :v_out => 0},
-            :in_vban => 0, 
-            :out_vban => 0,
-            :patch_insert => 0
-        }
-
+        """ blueprint strip layouts for each type """
         if type == BASIC
-            factory([2, 1, 2, 0, 4, 0])
+            this_layout = {
+                :strip => {:p_in => 2, :v_in=> 1},
+                :bus => {:p_out => 2, :v_out=> 0},
+                :in_vban => 4, :out_vban => 4,
+                :patch_insert => 0,
+                :composite => 0
+            }
         elsif type == BANANA
-            factory([3, 2, 3, 2, 8, 22])
+            this_layout = {
+                :strip => {:p_in => 3, :v_in=> 2},
+                :bus => {:p_out => 3, :v_out=> 2},
+                :in_vban => 8, :out_vban => 8,
+                :patch_insert => 22,
+                :composite => 7
+            }
         elsif type == POTATO
-            factory([5, 3, 5, 3, 8, 33])
+            this_layout = {
+                :strip => {:p_in => 5, :v_in=> 3},
+                :bus => {:p_out => 5, :v_out=> 3},
+                :in_vban => 8, :out_vban => 8,
+                :patch_insert => 33,
+                :composite => 7
+            }
         end
+
+        deep_dup(this_layout)
+        factory
     end
 
-    def factory(values)
-        num = 0
+    def deep_dup(opts)
+        self.layout = Marshal.load(Marshal.dump(opts))
+    end 
 
-        @layout.each do |key, val|
-            unless @layout[key] && @layout[key][val]
-                val.each do |k, v|
-                    @layout[key][k] = values[num]
-                    num += 1
-                end
-            end
-        end
-        self.vban_total = values[num]
-        num += 1
-        self.composite_total = 7
-        self.insert_total = values[num]
+    def factory
+        """ generate values for boundary testing """
+        self.vban_total = @layout[:in_vban]
+        self.composite_total = @layout[:composite]
+        self.insert_total = @layout[:patch_insert]
 
         self.strip_total = 
-        @layout[:strip][:p_in].to_i.+(@layout[:strip][:v_in].to_i)
+        @layout[:strip][:p_in].+(@layout[:strip][:v_in])
         self.bus_total = 
-        @layout[:bus][:p_out].to_i.+(@layout[:bus][:v_out].to_i)
+        @layout[:bus][:p_out].+(@layout[:bus][:v_out])
     end
 
-    def validate(name, num)
+    def validate(name, num = 0)
         """ 
-        Validate boundaries unless param requires none 
-        example: Reverb and Delay, then return true
+        Validate boundaries unless param requires none
         """
         if name == "strip"
             num < @strip_total
@@ -98,9 +97,12 @@ module Strips
             end
         elsif name == "reverb" || name == "delay"
             if @type == POTATO
+                num
             else
                 raise VersionError
             end
+        else
+            num
         end
     end
 end

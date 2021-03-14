@@ -1,4 +1,4 @@
-require_relative 'routines'
+require 'routines'
 
 def macrostatus(vmr)
     """ 
@@ -9,11 +9,11 @@ def macrostatus(vmr)
         (0..5).each do |num|
             puts "Setting Macrobutton[#{num}]: on"
             vmr.macro_setstatus(num, ON)
-            puts vmr.macro_getstatus(num)
+            puts "New value: #{vmr.macro_getstatus(num)}"
 
             puts "Setting Macrobutton[#{num}]: off"
             vmr.macro_setstatus(num, OFF)
-            puts vmr.macro_getstatus(num)
+            puts "New value: #{vmr.macro_getstatus(num)}"
         end
     end
 end

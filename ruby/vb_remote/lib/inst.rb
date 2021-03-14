@@ -17,11 +17,10 @@ end
 
 def get_vbpath
     vb_dn = 'Voicemeeter, The Virtual Mixing Console'
-    keys = [
+    [
         'Software\Microsoft\Windows\CurrentVersion\Uninstall',
         'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
-    ]
-    keys.each do |key|
+    ].each do |key|
         Win32::Registry::HKEY_LOCAL_MACHINE.open(key) do |reg|
             reg.each_key do |key|             
                 k = reg.open(key)

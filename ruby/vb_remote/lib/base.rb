@@ -6,7 +6,7 @@ module WrapperBase
 
     attr_reader :vmr_dll
 
-    DELAY = 0.02
+    DELAY = 0.05
 
     if ((os_bits = get_arch) == 64)
         dll_name = "VoicemeeterRemote64.dll"
