@@ -32,41 +32,35 @@ module Strips
     def build_strips(type)
         """ blueprint strip layouts for each type """
         if type == BASIC
-            this_layout = {
+            factory({
                 :strip => {:p_in => 2, :v_in=> 1},
                 :bus => {:p_out => 2, :v_out=> 0},
                 :in_vban => 4, :out_vban => 4,
                 :patch_insert => 0,
                 :composite => 0
-            }
+            })
         elsif type == BANANA
-            this_layout = {
+            factory({
                 :strip => {:p_in => 3, :v_in=> 2},
                 :bus => {:p_out => 3, :v_out=> 2},
                 :in_vban => 8, :out_vban => 8,
                 :patch_insert => 22,
                 :composite => 7
-            }
+            })
         elsif type == POTATO
-            this_layout = {
+            factory({
                 :strip => {:p_in => 5, :v_in=> 3},
                 :bus => {:p_out => 5, :v_out=> 3},
                 :in_vban => 8, :out_vban => 8,
                 :patch_insert => 33,
                 :composite => 7
-            }
+            })
         end
-
-        deep_dup(this_layout)
-        factory
     end
 
-    def deep_dup(opts)
+    def factory(opts)
         self.layout = Marshal.load(Marshal.dump(opts))
-    end 
-
-    def factory
-        """ generate values for boundary testing """
+        
         self.vban_total = @layout[:in_vban]
         self.composite_total = @layout[:composite]
         self.insert_total = @layout[:patch_insert]
