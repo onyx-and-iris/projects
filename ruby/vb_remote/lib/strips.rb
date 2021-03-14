@@ -1,5 +1,6 @@
 module Strips
-    attr_reader :layout, :strip_total, :bus_total, :vban_total
+    attr_reader :layout, :strip_total, :bus_total, :vban_total, \
+    :composite_total, :insert_total
 
     BASIC = 1
     BANANA = 2
@@ -52,7 +53,7 @@ module Strips
                 :strip => {:p_in => 5, :v_in=> 3},
                 :bus => {:p_out => 5, :v_out=> 3},
                 :in_vban => 8, :out_vban => 8,
-                :patch_insert => 33,
+                :patch_insert => 35,
                 :composite => 7
             })
         end
@@ -60,7 +61,7 @@ module Strips
 
     def factory(opts)
         self.layout = Marshal.load(Marshal.dump(opts))
-        
+
         self.vban_total = @layout[:in_vban]
         self.composite_total = @layout[:composite]
         self.insert_total = @layout[:patch_insert]
@@ -71,7 +72,7 @@ module Strips
         @layout[:bus][:p_out].+(@layout[:bus][:v_out])
     end
 
-    def validate(name, num = 0)
+    def validate(name, num)
         """ 
         Validate boundaries unless param requires none
         """
@@ -84,19 +85,13 @@ module Strips
         elsif name == "composite" 
             num < @composite_total
         elsif name == "insert"
-            if @type == POTATO
-                num < @insert_total
-            else
-                raise VersionError
-            end
+            return (num < @insert_total) if @type == POTATO
+            raise VersionError
         elsif name == "reverb" || name == "delay"
-            if @type == POTATO
-                num
-            else
-                raise VersionError
-            end
+            return true if @type == POTATO
+            raise VersionError
         else
-            num
+            return true
         end
     end
 end
