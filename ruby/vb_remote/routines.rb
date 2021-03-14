@@ -1,11 +1,12 @@
 require_relative 'base'
+require_relative 'strips'
 
 class BaseRoutines
     """ 
     define basic behaviours of API functions
     mixin modules
     """
-    include VMR_API
+    include WrapperBase
     include Strips
     include Utils
 
@@ -34,6 +35,13 @@ class BaseRoutines
         begin
             if value&.nonzero?
                 raise LoginError
+            else
+                if param_isdirty&.nonzero?
+                    clear_pdirty
+                end
+                if macro_isdirty&.nonzero?
+                    clear_mdirty
+                end
             end
         rescue LoginError => error
             puts "ERROR: #{error.message} #{value}"
@@ -52,11 +60,19 @@ class BaseRoutines
     end
 
     def sp_command=(value)
-        unless ['Shutdown', 'Show', 'Restart', -
-            'Reset', 'DialogShow.VBANCHAT'].include? value
-            raise "Error: Command not supported"
+        unless ['Shutdown', 'Show', 'Restart',
+            'DialogShow.VBANCHAT', 
+            'Reset', 'Save', 'Load'].include? value
+            raise ParamComError
         end
-        @sp_command = value
+        @sp_command = "Command." + value
+    end
+
+    def sp_value=(value)
+        unless value.is_a? (String)
+            raise ParamTypeError
+        end
+        @sp_value = value
     end
 
     def param_name=(value)
@@ -119,13 +135,7 @@ class BaseRoutines
     def do_login
         """ login, return vb type, build strip layouts """
         self.success = login
-
-        if param_isdirty&.nonzero?
-            clear_pdirty
-        end
-
         self.type = get_vbtype
-
         build_strips(@type)
     end
 
@@ -216,16 +226,29 @@ class BaseRoutines
         c_get.read_string
     end
 
-    def special_command(name)
+    def special_command(name, value = nil)
         """ Write only commands """
-        self.sp_command = name
+        begin
+            self.sp_command = name
 
-        self.ret = set_paramfloat("Command.#{@sp_command}", 1.0)
+            if value
+                self.sp_value = value
+                self.ret = set_paramstring("#{@sp_command}", @sp_value)
+            else
+                self.ret = set_paramfloat("#{@sp_command}", 1.0)
+            end
+            sleep(DELAY)
+        rescue ParamComError => error
+            puts "#{error.message}"
+        rescue ParamTypeError => error
+            puts "ERROR: #{error.message}"
+        end
     end
 
     def recorder_command(name, value=1)
         command = "recorder.#{name}"
         self.ret = set_paramfloat(command, value.to_f)
+        sleep(DELAY)
     end
 end
 
