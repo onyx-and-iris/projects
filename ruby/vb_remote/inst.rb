@@ -1,5 +1,8 @@
 require 'win32/registry'
 require 'Pathname'
+require_relative 'errors'
+
+include Errors
 
 def get_arch
     key = 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
@@ -35,6 +38,14 @@ def get_vbpath
         end
     end
     return nil
+end
+
+def vmr_dll=(value)
+    if value.file?
+        @vmr_dll = value
+    else
+        raise DLLNotFoundError
+    end
 end
 
 
