@@ -21,12 +21,11 @@ def get_vbpath
         'Software\Microsoft\Windows\CurrentVersion\Uninstall',
         'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
     ]
-    
     keys.each do |key|
         Win32::Registry::HKEY_LOCAL_MACHINE.open(key) do |reg|
             reg.each_key do |key|             
                 k = reg.open(key)
-                
+
                 displayname     = k["DisplayName"] rescue nil    
                 uninstallpath   = k["UninstallString"] rescue nil
 
@@ -37,7 +36,7 @@ def get_vbpath
             end
         end
     end
-    return nil
+    raise DLLNotFoundError
 end
 
 def vmr_dll=(value)

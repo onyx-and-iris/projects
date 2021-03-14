@@ -5,7 +5,7 @@ module WrapperBase
     extend FFI::Library
 
     attr_reader :vmr_dll
-    
+
     DELAY = 0.02
 
     if ((os_bits = get_arch) == 64)
@@ -15,8 +15,8 @@ module WrapperBase
     end
 
     begin
-        self.vmr_dll = get_vbpath.join(dll_name) 
-    rescue NoMethodError, DLLNotFoundError => error
+        self.vmr_dll = get_vbpath.join(dll_name)
+    rescue DLLNotFoundError => error
         puts "ERROR: #{error.message}"
         exit(false)
     end

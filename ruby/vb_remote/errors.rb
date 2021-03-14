@@ -1,7 +1,7 @@
 module Errors
     class DLLNotFoundError < StandardError
         def message
-            "Could not find DLL for this voicemeeter version"
+            "Could not find DLL. Is Voicemeeter installed correctly?"
         end
     end
 
