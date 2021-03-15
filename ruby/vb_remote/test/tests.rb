@@ -377,7 +377,7 @@ if __FILE__ == $PROGRAM_NAME
             setpatchinsert(vmr)
         end
     elsif args.include? "cbferr"
-        puts "Running Callback Function error test"
+        puts "Running Callback Function error test (expected -3)"
         vmr.run do
             cbf_error(vmr)
         end
@@ -387,7 +387,7 @@ if __FILE__ == $PROGRAM_NAME
             lid_error(vmr)
         end
     elsif args.include? "conf"
-        puts "Running load configs test"
+        puts "Running load configs test "
         vmr.run do
             configs(vmr)
         end
