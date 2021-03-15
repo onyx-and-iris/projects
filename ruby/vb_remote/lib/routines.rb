@@ -20,35 +20,34 @@ class BaseRoutines
     """ Validation writer methods """
     def ret=(value)
         """ C API return value """
-        begin
-            if value&.nonzero?
-                raise APIError
-            end
-        rescue APIError => error
-            puts "ERROR: #{error.message} #{value}"
+        if value&.nonzero?
+            raise APIError
         end
         @ret = value
+
+    rescue APIError => error
+        puts "ERROR: #{error.message} #{value}"
     end
 
     def success=(value)
         """ login success status """
-        begin
-            if value&.nonzero?
-                raise LoginError
-            else
-                if param_isdirty&.nonzero?
-                    clear_pdirty
-                end
-                if macro_isdirty&.nonzero?
-                    clear_mdirty
-                end
+        if value&.nonzero?
+            raise LoginError
+        else
+            if param_isdirty&.nonzero?
+                clear_pdirty
             end
-        rescue LoginError => error
-            puts "ERROR: #{error.message} #{value}"
-            do_logout
-            exit(false)
+            if macro_isdirty&.nonzero?
+                clear_mdirty
+            end
+
+            @success = value
         end
-        @success = value
+
+    rescue LoginError => error
+        puts "ERROR: #{error.message} #{value}"
+        do_logout
+        exit(false)
     end
 
     def type=(value)
@@ -128,7 +127,6 @@ class BaseRoutines
         """ 1 = basic, 2 = banana, 3 = potato """
         c_get = FFI::MemoryPointer.new(:long, SIZE)
         self.ret = get_type(c_get)
-        
         c_get.read_long
     end
 
@@ -148,13 +146,12 @@ class BaseRoutines
         set macrobutton by number, state and mode
         poll m_dirty to signify value change
         """
-        begin
-            self.logical_id = logical_id
-            self.ret = macrobutton_setstatus(@logical_id, state.to_f, mode)
-            sleep(DELAY)
-        rescue BoundsError => error
-            puts "ERROR: Logical ID out of range"
-        end  
+        self.logical_id = logical_id
+        self.ret = macrobutton_setstatus(@logical_id, state.to_f, mode)
+        sleep(DELAY)
+
+    rescue BoundsError => error
+        puts "ERROR: Logical ID out of range" 
     end
 
     def macro_getstatus(logical_id, mode=2)
@@ -162,14 +159,13 @@ class BaseRoutines
             clear_mdirty
         end
 
-        begin
-            c_get = FFI::MemoryPointer.new(:float, SIZE)
-            self.logical_id = logical_id
-            self.ret = macrobutton_getstatus(@logical_id, c_get, mode)
-            c_get.read_float
-        rescue BoundsError => error
-            puts "ERROR: Logical ID out of range"
-        end
+        c_get = FFI::MemoryPointer.new(:float, SIZE)
+        self.logical_id = logical_id
+        self.ret = macrobutton_getstatus(@logical_id, c_get, mode)
+        c_get.read_float
+
+    rescue BoundsError => error
+        puts "ERROR: Logical ID out of range"
     end
 
     def set_parameter(name, value)
@@ -179,70 +175,67 @@ class BaseRoutines
         """
         self.param_name = name
         self.param_value = value
-        begin
-            if validate(@m1, @m2)
-                if @param_string
-                    self.ret = set_paramstring(@param_name, @param_string)
-                else
-                    c_get = FFI::MemoryPointer.new(:float, SIZE)
-                    self.ret = set_paramfloat(@param_name, @param_float)
-                end
-                sleep(DELAY)
+
+        if validate(@m1, @m2)
+            if @param_string
+                self.ret = set_paramstring(@param_name, @param_string)
             else
-                raise BoundsError
+                c_get = FFI::MemoryPointer.new(:float, SIZE)
+                self.ret = set_paramfloat(@param_name, @param_float)
             end
-        rescue VersionError => error
-            puts "ERROR: #{error.message}"
-        rescue BoundsError => error
-            puts "ERROR: #{error.message}"
+            sleep(DELAY)
+        else
+            raise BoundsError
         end
+    rescue VersionError => error
+        puts "ERROR: #{error.message}"
+    rescue BoundsError => error
+        puts "ERROR: #{error.message}"
     end
 
     def set_parameter_multi(param_hash)
         self.param_options = param_hash
-
         self.ret = set_parammulti(@param_options)
         sleep(DELAY)
     end
 
     def get_parameter(name)
-        c_get = FFI::MemoryPointer.new(:float, SIZE)
         if param_isdirty&.nonzero?
             clear_pdirty
         end
 
+        c_get = FFI::MemoryPointer.new(:float, SIZE)
         self.ret = get_paramfloat(name, c_get)
         c_get.read_float.round(1)
     end
 
     def get_parameter_string(name)
         """ implicity return from pointer variable """
-        c_get = FFI::MemoryPointer.new(:string, BUFF, true)
         if param_isdirty&.nonzero?
             clear_pdirty
         end
 
+        c_get = FFI::MemoryPointer.new(:string, BUFF, true)
         self.ret = get_paramstring(name, c_get)
         c_get.read_string
     end
 
     def special_command(name, value = nil)
         """ Write only commands """
-        begin
-            self.sp_command = name
+        self.sp_command = name
 
-            if value
-                self.sp_value = value
-                self.ret = set_paramstring("#{@sp_command}", @sp_value)
-            else
-                self.ret = set_paramfloat("#{@sp_command}", 1.0)
-            end
-            sleep(DELAY)
-        rescue ParamComError => error
-            puts "#{error.message}"
-        rescue ParamTypeError => error
-            puts "ERROR: #{error.message}"
+        if value
+            self.sp_value = value
+            self.ret = set_paramstring("#{@sp_command}", @sp_value)
+        else
+            self.ret = set_paramfloat("#{@sp_command}", 1.0)
         end
+        sleep(DELAY)
+
+    rescue ParamComError => error
+        puts "#{error.message}"
+    rescue ParamTypeError => error
+        puts "ERROR: #{error.message}"
     end
 
     def recorder_command(name, value=1)
