@@ -11,8 +11,8 @@ class BaseRoutines
     include Utils
 
     attr_accessor :type
-    attr_reader :ret, :success, :sp_command, :param_string, :param_options, \
-    :param_float, :param_name
+    attr_reader :ret, :logged_in, :logged_out, :sp_command, \
+    :param_string, :param_options, :param_float, :param_name
 
     SIZE = 1
     BUFF = 512
@@ -29,7 +29,7 @@ class BaseRoutines
         puts "ERROR: #{error.message} #{value}"
     end
 
-    def success=(value)
+    def logged_in=(value)
         """ login success status """
         if value&.nonzero?
             raise LoginError
@@ -41,13 +41,22 @@ class BaseRoutines
                 clear_mdirty
             end
 
-            @success = value
+            @logged_in = value
         end
 
     rescue LoginError => error
         puts "ERROR: #{error.message} #{value}"
         do_logout
         exit(false)
+    end
+
+    def logged_out=(value)
+        if value&.nonzero?
+            raise LogoutError
+        end
+        @logged_out = value
+    rescue LogoutError => error
+        puts "ERROR: #{error.message}"
     end
 
     def type=(value)
@@ -132,13 +141,13 @@ class BaseRoutines
 
     def do_login
         """ login, return vb type, build strip layouts """
-        self.success = login
+        self.logged_in = login
         self.type = get_vbtype
         build_strips(@type)
     end
 
     def do_logout
-        logout
+        self.logged_out = logout
     end
 
     def macro_setstatus(logical_id, state, mode=2)
@@ -155,7 +164,7 @@ class BaseRoutines
     end
 
     def macro_getstatus(logical_id, mode=2)
-        if macro_isdirty
+        if macro_isdirty&.nonzero?
             clear_mdirty
         end
 
@@ -175,6 +184,7 @@ class BaseRoutines
         """
         self.param_name = name
         self.param_value = value
+        @param_string = nil
 
         if validate(@m1, @m2)
             if @param_string
@@ -248,13 +258,20 @@ end
 class Remote < BaseRoutines
     """ 
     subclass to BaseRoutines. 
-    Performs log in/out routines cleanly. Yields a block argument
+    Performs log in/out routines cleanly. 
+    May yield a block argument otherwise simply login.
     """
+    def initialize(opt = nil)
+        self.run if opt
+    end
+
     def run
         do_login
         
-        yield
+        if block_given?
+            yield
 
-        do_logout
+            do_logout
+        end
     end
 end

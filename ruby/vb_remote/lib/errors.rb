@@ -11,6 +11,12 @@ module Errors
         end
     end
 
+    class LogoutError < StandardError
+        def message
+            "There was an error logging out"
+        end
+    end
+
     class APIError < StandardError
         def message
             "Callback Function Error, return value:"
