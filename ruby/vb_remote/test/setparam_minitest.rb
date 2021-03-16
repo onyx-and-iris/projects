@@ -57,8 +57,16 @@ class SetParamsMulti < Minitest::Test
                 "Bus[#{num}].gain",
                 "Bus[#{num}].mono"
             ].each do |param|
+                a = ["mute", "A2", "mono"]
+                b = param
+                if a.any? { |s| b.include? s }
+                    expected = ON
+                else
+                    expected = 1.0
+                end
+
                 @@vmr.get_parameter(param)
-                assert_equal(ON, @@vmr.val)
+                assert_equal(expected, @@vmr.val)
             end
         end
     end
@@ -81,8 +89,16 @@ class SetParamsMulti < Minitest::Test
                 "Bus[#{num}].gain",
                 "Bus[#{num}].mono"
             ].each do |param|
+                a = ["mute", "A2", "mono"]
+                b = param
+                if a.any? { |s| b.include? s }
+                    expected = OFF
+                else
+                    expected = 0.0
+                end
+
                 @@vmr.get_parameter(param)
-                assert_equal(OFF, @@vmr.val)
+                assert_equal(expected, @@vmr.val)
             end
         end
     end
