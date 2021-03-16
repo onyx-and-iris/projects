@@ -56,7 +56,7 @@ def setmono(vmr)
         end
     end
 end
-
+ 
 def setsolo(vmr)
     """ 
     toggle solo for strips
@@ -132,6 +132,8 @@ def getparams(vmr)
         puts vmr.get_parameter("Strip[#{num}].mute")
         puts "Getting Strip[#{num}].gain"
         puts vmr.get_parameter("Strip[#{num}].gain")
+        puts "Getting Strip[#{num}].A2"
+        puts vmr.get_parameter("Strip[#{num}].A2")
     end
 end
 
@@ -240,8 +242,6 @@ def setparammulti(vmr)
     set several parameters using a hash 
     test values out of range
     """
-    param_hash = Hash.new
-
     10.times do
         param_hash = {
             :strip_1 => {"mute" => ON, "gain" => ON, "A2" => ON},
