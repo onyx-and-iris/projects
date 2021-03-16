@@ -220,17 +220,17 @@ end
 def setandgetparamstring(vmr)
     puts "Setting Strip Label names test0"
     (0..2).each do |num|
-        vmr.set_parameter_string("Strip[#{num}].Label", "testing[0]")
+        vmr.set_parameter("Strip[#{num}].Label", "testing[0]")
         puts vmr.get_parameter_string("Strip[#{num}].Label")
     end
     puts "Setting Strip Label names test1"
     (0..2).each do |num|
-        vmr.set_parameter_string("Strip[#{num}].Label", "testing[1]")
+        vmr.set_parameter("Strip[#{num}].Label", "testing[1]")
         puts vmr.get_parameter_string("Strip[#{num}].Label")
     end
     puts "Setting Strip Label names reset"
     (0..2).each do |num|
-        vmr.set_parameter_string("Strip[#{num}].Label", "reset")
+        vmr.set_parameter("Strip[#{num}].Label", "reset")
         puts vmr.get_parameter_string("Strip[#{num}].Label")
     end
 end
