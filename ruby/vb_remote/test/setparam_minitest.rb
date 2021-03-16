@@ -48,30 +48,18 @@ class SetParamsMulti < Minitest::Test
     def test_it_sets_multiple_params_on_by_hash
         @@vmr.set_parameter_multi(@@param_hash)
         assert_equal(SUCCESS, @@vmr.ret)
-        (0..4).each do |num|
-            @@vmr.get_parameter("Strip[#{num}].mute")
-            assert_equal(ON, @@vmr.val)
-        end
-        (0..4).each do |num|
-            @@vmr.get_parameter("Strip[#{num}].gain")
-            assert_equal(ON, @@vmr.val)
-        end
-        (0..4).each do |num|
-            @@vmr.get_parameter("Strip[#{num}].A2")
-            assert_equal(ON, @@vmr.val)
-        end
-
-        (0..4).each do |num|
-            @@vmr.get_parameter("Bus[#{num}].mute")
-            assert_equal(ON, @@vmr.val)
-        end
-        (0..4).each do |num|
-            @@vmr.get_parameter("Bus[#{num}].gain")
-            assert_equal(ON, @@vmr.val)
-        end
-        (0..4).each do |num|
-            @@vmr.get_parameter("Bus[#{num}].mono")
-            assert_equal(ON, @@vmr.val)
+        0.upto(4) do |num|
+            [
+                "Strip[#{num}].mute",
+                "Strip[#{num}].gain",
+                "Strip[#{num}].A2",
+                "Bus[#{num}].mute",
+                "Bus[#{num}].gain",
+                "Bus[#{num}].mono"
+            ].each do |param|
+                @@vmr.get_parameter(param)
+                assert_equal(ON, @@vmr.val)
+            end
         end
     end
 
@@ -84,30 +72,18 @@ class SetParamsMulti < Minitest::Test
 
         @@vmr.set_parameter_multi(@@param_hash)
         assert_equal(SUCCESS, @@vmr.ret)
-        (0..4).each do |num|
-            @@vmr.get_parameter("Strip[#{num}].mute")
-            assert_equal(OFF, @@vmr.val)
-        end
-        (0..4).each do |num|
-            @@vmr.get_parameter("Strip[#{num}].gain")
-            assert_equal(OFF, @@vmr.val)
-        end
-        (0..4).each do |num|
-            @@vmr.get_parameter("Strip[#{num}].A2")
-            assert_equal(OFF, @@vmr.val)
-        end
-
-        (0..4).each do |num|
-            @@vmr.get_parameter("Bus[#{num}].mute")
-            assert_equal(OFF, @@vmr.val)
-        end
-        (0..4).each do |num|
-            @@vmr.get_parameter("Bus[#{num}].gain")
-            assert_equal(OFF, @@vmr.val)
-        end
-        (0..4).each do |num|
-            @@vmr.get_parameter("Bus[#{num}].mono")
-            assert_equal(OFF, @@vmr.val)
+        0.upto(4) do |num|
+            [
+                "Strip[#{num}].mute",
+                "Strip[#{num}].gain",
+                "Strip[#{num}].A2",
+                "Bus[#{num}].mute",
+                "Bus[#{num}].gain",
+                "Bus[#{num}].mono"
+            ].each do |param|
+                @@vmr.get_parameter(param)
+                assert_equal(OFF, @@vmr.val)
+            end
         end
     end
 end

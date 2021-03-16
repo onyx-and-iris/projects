@@ -57,30 +57,19 @@ class GetParamsFloat < Minitest::Test
 end
 
 class GetParamsString < Minitest::Test
-    def test_it_gets_strip_0to2_label_value0
+    def test_it_gets_strips_0to2_label_values
         (0..2).each do |num|
-            @@vmr.set_parameter("Strip[#{num}].Label", "testing[0]")
-            assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter_string("Strip[#{num}].Label")
-            assert_equal("testing[0]", @@vmr.val)
-        end
-    end
-
-    def test_it_gets_strip_0to2_label_value1
-        (0..2).each do |num|
-            @@vmr.set_parameter("Strip[#{num}].Label", "testing[1]")
-            assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter_string("Strip[#{num}].Label")
-            assert_equal("testing[1]", @@vmr.val)        
-        end
-    end
-
-    def test_it_gets_strip_0to2_label_value2
-        (0..2).each do |num|
-            @@vmr.set_parameter("Strip[#{num}].Label", "testing[2]")
-            assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter_string("Strip[#{num}].Label")
-            assert_equal("testing[2]", @@vmr.val)
+            [
+                "testing[0]",
+                "testing[1]",
+                "testing[2]",
+                "reset"
+            ].each do |label|
+                @@vmr.set_parameter("Strip[#{num}].Label", label)
+                assert_equal(SUCCESS, @@vmr.ret)
+                @@vmr.get_parameter_string("Strip[#{num}].Label")
+                assert_equal(label, @@vmr.val)
+            end
         end
     end
 end

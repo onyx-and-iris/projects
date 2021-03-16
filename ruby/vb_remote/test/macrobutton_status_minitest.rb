@@ -45,9 +45,11 @@ class MacroButtonStatusSuccess < Minitest::Test
 end
 
 class MacroButtonStatusBoundsError < Minitest::Test
-    def test_it_raises_a_testing_error_for_macrobutton_99
-        assert_raises(TestingError) do
-            @@vmr.macro_setstatus(99, ON, 2)
+    def test_it_raises_a_testing_error_for_macrobutton_90to99
+        90.upto(99) do |num|
+            assert_raises(TestingError) do
+                @@vmr.macro_setstatus(num, ON, 2)
+            end
         end
     end
 end
