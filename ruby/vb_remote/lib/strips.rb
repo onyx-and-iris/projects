@@ -97,7 +97,7 @@ module Strips
 end
 
 module Utils
-    attr_reader :m1, :m2
+    attr_reader :m1, :m2, :m3
 
     def m1=(value)
         @m1 = value.downcase
@@ -107,14 +107,27 @@ module Utils
         @m2 = value.to_i
     end
 
+    def m3=(value)
+        @m3 = value
+    end
+
     def test_regex(regex, param)
         regex.match(param) do |m|
             self.m1 = m[1]
             self.m2 = m[2]
+            self.m3 = m[3]
         end
     end
 
     def shift(oldnum)
         oldnum - 1
+    end
+
+    def type_return(param, value)
+        return value.to_i if [
+            "mono", "solo", "mute",
+            "A1", "A2", "A3", "B1", "B2", "B3"
+        ].include? param
+        return value.round(1) if ["gain"].include? param
     end
 end
