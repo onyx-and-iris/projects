@@ -43,4 +43,7 @@ module Errors
 
     class ParamTypeError < StandardError
     end
+
+    class TestingError < StandardError
+    end
 end
