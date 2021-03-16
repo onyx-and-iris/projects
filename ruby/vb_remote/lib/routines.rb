@@ -89,7 +89,7 @@ class BaseRoutines
         If no matches continue with assignment but there
         will be no boundary testing
         """
-        if test_regex(/^(\w+)\[(\d+)\]/, value)
+        if test_regex(/^(\w+)\[(\d+)\].(\w+)/, value)
         elsif test_regex(/^vban.(\w+)\[(\d+)\]/, value)
         elsif test_regex(/^Fx.(\w+).On/, value)
         elsif test_regex(/^patch.(\w+)\[(\d+)\]/, value)
@@ -127,7 +127,7 @@ class BaseRoutines
 
     def logical_id=(value)
         if value < 0 || value > 69
-            raise TestingError if @testing 
+            raise TestingError if @testing
             raise BoundsError
         end
         @logical_id = value
@@ -206,9 +206,16 @@ class BaseRoutines
     end
 
     def set_parameter_multi(param_hash)
+        if param_isdirty&.nonzero?
+            clear_pdirty
+        end
+
         self.param_options = param_hash
         self.ret = set_parammulti(@param_options)
-        sleep(DELAY)
+
+        if param_isdirty&.zero?
+            wait_pdirty
+        end
     end
 
     def get_parameter(name)
@@ -216,9 +223,10 @@ class BaseRoutines
             clear_pdirty
         end
 
+        self.param_name = name
         c_get = FFI::MemoryPointer.new(:float, SIZE)
         self.ret = get_paramfloat(name, c_get)
-        @val = c_get.read_float.round(1)
+        @val = type_return(@m3, c_get.read_float)
     end
 
     def get_parameter_string(name)
