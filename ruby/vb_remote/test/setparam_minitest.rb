@@ -46,6 +46,12 @@ end
 
 class SetParamsMulti < Minitest::Test
     def test_it_sets_multiple_params_on_by_hash
+        @@param_hash.each do |key, index|
+            index.each do |k, v|
+                @@param_hash[key][k] = ON
+            end
+        end
+
         @@vmr.set_parameter_multi(@@param_hash)
         assert_equal(SUCCESS, @@vmr.ret)
         0.upto(4) do |num|
