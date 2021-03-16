@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require_relative 'minitest_helper'
 
-class MacroButtonStatus < Minitest::Test
+class MacroButtonStatusSuccess < Minitest::Test
     def test_it_sets_macrobuttons_0to2_state_on
         (0..2).each do |num|
             @@vmr.macro_setstatus(num, ON, 1)
@@ -41,6 +41,14 @@ class MacroButtonStatus < Minitest::Test
         (0..2).each do |num| 
             @@vmr.macro_setstatus(num, OFF, 3)
             assert_equal(SUCCESS, @@vmr.ret)
+        end
+    end
+end
+
+class MacroButtonStatusBoundsError < Minitest::Test
+    def test_it_raises_a_testing_error_for_macrobutton_99
+        assert_raises(TestingError) do
+            @@vmr.macro_setstatus(99, ON, 2)
         end
     end
 end
