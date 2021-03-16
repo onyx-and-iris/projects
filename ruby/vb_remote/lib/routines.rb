@@ -10,8 +10,8 @@ class BaseRoutines
     include Strips
     include Utils
 
-    attr_accessor :type
-    attr_reader :ret, :logged_in, :logged_out, :sp_command, \
+    attr_accessor :val, :testing
+    attr_reader :ret, :type, :logged_in, :logged_out, :sp_command, \
     :param_string, :param_options, :param_float, :param_name
 
     SIZE = 1
@@ -127,6 +127,7 @@ class BaseRoutines
 
     def logical_id=(value)
         if value < 0 || value > 69
+            raise TestingError if @testing 
             raise BoundsError
         end
         @logical_id = value
@@ -182,9 +183,10 @@ class BaseRoutines
         determine if string or float parameter
         then set parameter by name, value
         """
+        @param_string = nil
+        @param_float = nil
         self.param_name = name
         self.param_value = value
-        @param_string = nil
 
         if validate(@m1, @m2)
             if @param_string
@@ -216,7 +218,7 @@ class BaseRoutines
 
         c_get = FFI::MemoryPointer.new(:float, SIZE)
         self.ret = get_paramfloat(name, c_get)
-        c_get.read_float.round(1)
+        @val = c_get.read_float.round(1)
     end
 
     def get_parameter_string(name)
@@ -227,7 +229,7 @@ class BaseRoutines
 
         c_get = FFI::MemoryPointer.new(:string, BUFF, true)
         self.ret = get_paramstring(name, c_get)
-        c_get.read_string
+        @val = c_get.read_string
     end
 
     def special_command(name, value = nil)
@@ -262,6 +264,9 @@ class Remote < BaseRoutines
     May yield a block argument otherwise simply login.
     """
     def initialize(opt = nil)
+        if opt == "minitest"
+            @testing = opt
+        end
         self.run if opt
     end
 
