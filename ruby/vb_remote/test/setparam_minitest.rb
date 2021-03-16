@@ -1,4 +1,3 @@
-require 'minitest/autorun'
 require_relative 'minitest_helper'
 
 class SetParamsFloat < Minitest::Test
