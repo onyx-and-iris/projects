@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require_relative 'minitest_helper'
 
-class TestRemote < Minitest::Test
+class SetVban < Minitest::Test
     def test_it_sets_vban_instream_0to2_on
         (0..2).each do |num|
             @@vmr.set_parameter("vban.instream[#{num}].on", ON)
