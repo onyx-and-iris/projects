@@ -15,6 +15,7 @@ class RandomMaps:
         self.player_count = player_count
         self.backtrace = {10:3, 20:5, 30:8}
         self.buffer = []
+        self.nextmap = None
 
         if self.player_count <= 10:
             self.limit = self.backtrace[10]
@@ -23,16 +24,7 @@ class RandomMaps:
         elif self.player_count <= 30:
             self.limit = self.backtrace[30]
 
-    def get_map(self):
-        self.load_maps()
-
-        self.randomize()
-
-        self.save_maps()
-
-        return self.buffer[-1]
-
-    def load_maps(self):
+    def __enter__(self):
         try:
             with open(self.map_file, 'rb') as mapfile:
                 self.buffer = pickle.load(mapfile)
@@ -42,6 +34,8 @@ class RandomMaps:
                 pass
         except EOFError:
             pass
+        finally:
+            return self
 
     def randomize(self):
         """ is map in buffer? if not append """
@@ -62,17 +56,19 @@ class RandomMaps:
             else:
                 print(f'{next_map} was already in buffer trying again...')
 
-    def save_maps(self):
+        self.nextmap = self.buffer[-1]
+
+    def pop_buffer(self):
+        while (len(self.buffer) >= self.limit):
+            self.buffer.pop(0)
+
+    def __exit__(self, exception_type, exception_value, traceback):
         try:
             with open(self.map_file, 'wb') as mapfile:
                 pickle.dump(self.buffer, mapfile)
             print(f'Buffer SAVED: {self.buffer}')
         except:
             print('Error writing buffer to file')
-
-    def pop_buffer(self):
-        while (len(self.buffer) >= self.limit):
-            self.buffer.pop(0)
 
 
 if __name__ == '__main__':
@@ -86,8 +82,9 @@ if __name__ == '__main__':
         print('=================================================')
         print(f'Running test with player count of {player_count}')
         print('=================================================')
-        generate = RandomMaps(player_count)    
-        next_map = generate.get_map()
-        print(f'Next map will be: {next_map}')
+        with RandomMaps(player_count) as generate:
+            generate.randomize()
+            
+        print(f'Next map will be: {generate.nextmap}')
     else:
         print('"Usage: python .\\randommap.py -n" where n is integer')
