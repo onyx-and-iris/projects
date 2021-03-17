@@ -1,0 +1,49 @@
+---
+1: !ruby/object:Runner
+  name_first: Asha
+  name_last: Philip
+  event: 100m
+  pb: '11.1'
+  age: 30
+  country: England
+  id: 1
+2: !ruby/object:Runner
+  name_first: Laura
+  name_last: Muir
+  event: 1500m
+  pb: '3:55'
+  age: 28
+  country: Scotland
+  id: 2
+3: !ruby/object:Runner
+  name_first: Mohammad
+  name_last: Farah
+  event: 10000m
+  pb: '26:46'
+  age: 38
+  country: England
+  id: 3
+4: !ruby/object:Runner
+  name_first: Dina
+  name_last: Asher-Smith
+  event: 100m
+  pb: '10.83'
+  age: 25
+  country: England
+  id: 4
+5: !ruby/object:Runner
+  name_first: Adam
+  name_last: Gemili
+  event: 100m
+  pb: '9.97'
+  age: 27
+  country: England
+  id: 5
+6: !ruby/object:Runner
+  name_first: Amy
+  name_last: Hunt
+  event: 200m
+  pb: '22.42'
+  age: 18
+  country: England
+  id: 6
