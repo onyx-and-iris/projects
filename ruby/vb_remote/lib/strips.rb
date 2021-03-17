@@ -33,7 +33,7 @@ module Strips
     def build_strips(type)
         """ blueprint strip layouts for each type """
         if type == BASIC
-            factory({
+            blueprint({
                 :strip => {:p_in => 2, :v_in=> 1},
                 :bus => {:p_out => 2, :v_out=> 0},
                 :in_vban => 4, :out_vban => 4,
@@ -41,7 +41,7 @@ module Strips
                 :composite => 0
             })
         elsif type == BANANA
-            factory({
+            blueprint({
                 :strip => {:p_in => 3, :v_in=> 2},
                 :bus => {:p_out => 3, :v_out=> 2},
                 :in_vban => 8, :out_vban => 8,
@@ -49,7 +49,7 @@ module Strips
                 :composite => 7
             })
         elsif type == POTATO
-            factory({
+            blueprint({
                 :strip => {:p_in => 5, :v_in=> 3},
                 :bus => {:p_out => 5, :v_out=> 3},
                 :in_vban => 8, :out_vban => 8,
@@ -59,8 +59,8 @@ module Strips
         end
     end
 
-    def factory(opts)
-        self.layout = Marshal.load(Marshal.dump(opts))
+    def blueprint(opts)
+        self.layout = opts
 
         self.vban_total = @layout[:in_vban]
         self.composite_total = @layout[:composite]
@@ -90,8 +90,6 @@ module Strips
         elsif name == "reverb" || name == "delay"
             return true if @type == POTATO
             raise VersionError
-        else
-            return true
         end
     end
 end
@@ -126,8 +124,10 @@ module Utils
     def type_return(param, value)
         return value.to_i if [
             "mono", "solo", "mute",
-            "A1", "A2", "A3", "B1", "B2", "B3"
+            "A1", "A2", "A3", "B1", "B2", "B3",
+            "macrobutton"
         ].include? param
         return value.round(1) if ["gain"].include? param
+        value
     end
 end

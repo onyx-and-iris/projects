@@ -172,7 +172,7 @@ class BaseRoutines
         c_get = FFI::MemoryPointer.new(:float, SIZE)
         self.logical_id = logical_id
         self.ret = macrobutton_getstatus(@logical_id, c_get, mode)
-        c_get.read_float
+        @val = type_return("macrobutton", c_get.read_float)
 
     rescue BoundsError => error
         puts "ERROR: Logical ID out of range"
