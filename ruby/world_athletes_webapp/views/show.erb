@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='UTF-8' />
+        <title>Runner - <%= @runner.fullname %></title>
+    </head>
+    <body>
+        <h1><%= @runner.fullname %></h1>
+        <table>
+            <tr>
+                <td><strong>Age:</strong></td>
+                <td><%= @runner.age %></td>
+            </tr>    
+            <tr>
+                <td><strong>Country:</strong></td>
+                <td><%= @runner.country %></td>
+            </tr>    
+            <tr>
+                <td><strong>Event:</strong></td>
+                <td><%= @runner.event %></td>
+            </tr>
+            <tr>    
+                <td><strong>PB:</strong></td>
+                <td><%= @runner.pb %></td>
+            </tr>    
+        </table>
+        <a href="/runners">Back to Index</a>
+    </body>
+</html>
+

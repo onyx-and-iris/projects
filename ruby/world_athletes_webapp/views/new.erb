@@ -6,7 +6,7 @@
     </head>
     <body>
         <h1>Add Another Runner</h1>
-        <form>
+        <form method="post" action="/runners/create">
             <table>
                 <tr>
                     <td><label for="name_first">First Name:</label></td>
@@ -17,7 +17,23 @@
                     <td><input type="text" name="name_last"></td>
                 </tr>    
                 <tr>
-                    <td><input type="submit"></td>
+                    <td><label for="age">Age:</label></td>
+                    <td><input type="text" name="age"></td>
+                </tr>    
+                <tr>
+                    <td><label for="country">Country:</label></td>
+                    <td><input type="text" name="country"></td>
+                </tr>    
+                <tr>
+                    <td><label for="event">Event:</label></td>
+                    <td><input type="text" name="event"></td>
+                </tr>
+                <tr>    
+                    <td><label for="pb">PB:</label></td>
+                    <td><input type="text" name="pb"></td>
+                </tr>    
+                <tr>    
+                     <td><input type="submit"></td>
                 </tr>
             </table>
         </form>

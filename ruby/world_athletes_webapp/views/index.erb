@@ -8,7 +8,10 @@
         <h1>World Runners</h1>
         <ul>
             <% @runners.each do |runner| %>
-                <li><%= runner.fullname %></li>
+                <li>
+                <a href ="/runners/<%= runner.id %>"><%= runner.fullname %></a>
+                </li>
+                </br>
             <% end %>
         </ul>
         <a href="/runners/new">Add Another Runner</a>
