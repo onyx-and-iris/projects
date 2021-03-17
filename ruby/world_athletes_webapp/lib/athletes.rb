@@ -1,8 +1,13 @@
 class Athlete
 	""" Superclass  Athlete """
+    attr_accessor :id
 	attr_reader :name_first, :name_last, :age, :pb, :country, :event
  
 	""" Writer methods validate input """
+    def id=(value)
+        @id = value
+    end
+
 	def name_first=(value)
 		if value.empty?
 			raise "ERROR: Name cannot be blank string!"
