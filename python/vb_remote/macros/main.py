@@ -1,6 +1,8 @@
 import macrobuttons
 import voicemeeter
 import argparse
+import time
+
 
 from sys import exit
 from custom import FileOps
@@ -31,6 +33,7 @@ def main(layer, arg):
     with voicemeeter.remote('potato') as oai:
         """ call .run() for appropriate class """    
         by_class(this_macro, switch, oai).run()
+        time.sleep(0.1)
 
     saved_states[layer][arg][1] = switch
 
