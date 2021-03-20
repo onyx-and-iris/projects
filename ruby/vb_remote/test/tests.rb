@@ -73,6 +73,22 @@ def setsolo(vmr)
     end
 end
 
+def setgain(vmr)
+    """ 
+    toggle solo for strips
+    test out of bounds values 
+    """
+    10.times do
+        (0..8).each do |num|
+            puts "Setting Bus[#{num}].gain: on"
+            vmr.set_parameter("Bus[#{num}].gain", ON)
+
+            puts "Setting Bus[#{num}].gain: off"
+            vmr.set_parameter("Bus[#{num}].gain", OFF)
+        end
+    end
+end
+
 def setvban(vmr)
     """ 
     toggle vban in/oustreams, test out of bounds
