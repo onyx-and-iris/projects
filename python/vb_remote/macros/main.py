@@ -3,42 +3,49 @@ import voicemeeter
 import argparse
 import time
 
-
 from sys import exit
 from custom import FileOps
+
+
+class MacroButtonRun:
+    def __init__(self, layer, arg):
+        """ set macro + switch vars, load save states,
+        call desired class/method then update save states """
+        self.layer = layer
+        self.arg = arg
+        self.this_macro = macros[self.layer][self.arg][0]
+        self.switch = macros[self.layer][self.arg][1]
+
+    def __enter__(self):
+        """ get saved states from pickle file """
+        self.saved_states = file_io.read_db()
+        self.saved_state = self.saved_states[self.layer][self.arg][1]
+        
+        if self.switch == self.saved_state:
+            self.switch = 1 - self.switch
+
+        return self
+
+    def run(self):
+        """ Do we need Audio or Scenes class? """    
+        by_class = getattr(macrobuttons, self.layer.capitalize())
+
+        with voicemeeter.remote('potato') as oai:
+            """ call .run() for appropriate class """    
+            by_class(self.this_macro, self.switch, oai).run()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.saved_states[self.layer][self.arg][1] = self.switch
+
+        """ write updates to file """
+        file_io.update_db(self.saved_states)
 
 def reset():
     with voicemeeter.remote('potato') as oai:
         reset = macrobuttons.Reset('reset', 0, oai)
         reset.reset(macros)
     file_io.update_db(macros)
-    exit()
-
-def main(layer, arg):
-    """ set macro + switch vars, load save states,
-    call desired class/method then update save states """
-    this_macro = macros[layer][arg][0]
-    switch = macros[layer][arg][1]
-
-    """ get saved states from pickle file """
-    saved_states = file_io.read_db()
-    saved_state = saved_states[layer][arg][1]
-
-    if switch == saved_state:
-        switch = 1 - switch
-
-    """ Do we need Audio or Scenes class? Then instantiate """    
-    by_class = getattr(macrobuttons, layer.capitalize())
-
-    with voicemeeter.remote('potato') as oai:
-        """ call .run() for appropriate class """    
-        by_class(this_macro, switch, oai).run()
-        time.sleep(0.1)
-
-    saved_states[layer][arg][1] = switch
-
-    """ write updates to file """
-    file_io.update_db(saved_states)
+    exit(True)
 
 
 if __name__ == '__main__':
@@ -92,5 +99,6 @@ if __name__ == '__main__':
     elif args.scenes:
         layer = 'scenes'
         arg = args.scenes
-        
-    main(layer, arg)
+
+    with MacroButtonRun(layer, arg) as mb:
+        mb.run()
