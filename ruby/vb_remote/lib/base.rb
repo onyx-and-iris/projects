@@ -16,7 +16,7 @@ module WrapperBase
         self.vmr_dll = get_vbpath.join(dll_name)
     rescue DLLNotFoundError => error
         puts "ERROR: #{error.message}"
-        exit(false)
+        raise
     end
 
     ffi_lib @vmr_dll
@@ -66,5 +66,21 @@ module WrapperBase
     def wait_mdirty
         until vmr_mdirty&.nonzero?
         end
+    end
+
+    def exec(func, *args)
+        torun = 'vmr_' + func.to_s
+        if args.empty?
+            val = send(torun)
+        else
+            val = send(torun, *args)
+        end
+        
+        if torun.include? 'set_'
+            sleep(0.05)
+        else
+            sleep(0.001)
+        end
+        val
     end
 end
