@@ -127,27 +127,10 @@ class BaseRoutines
 
     def logical_id=(value)
         if value < 0 || value > 69
-            raise TestingError if @testing
             raise BoundsError
         end
         @logical_id = value
     end
-
-	def exec(func, *args)
-		torun = 'vmr_' + func.to_s
-		if args.empty?
-			val = send(torun)
-		else
-			val = send(torun, *args)
-		end
-		
-		if torun.include? 'set_'
-			sleep(0.05)
-		else
-			sleep(0.001)
-		end
-		val
-	end
 
     def vbtype
         """ 1 = basic, 2 = banana, 3 = potato """
@@ -158,14 +141,14 @@ class BaseRoutines
     end
 	
     def login
-		self.logged_in = exec(__method__)
-		self.type = self.vbtype
+        self.logged_in = exec(__method__)
+        self.type = self.vbtype
         build_strips(@type)
-	end
-	
-	def logout
-		self.logged_out = exec(__method__)
-	end
+    end
+
+    def logout
+        self.logged_out = exec(__method__)
+    end
 
     def macro_setstatus(logical_id, state, mode=2)
         """ 
@@ -173,11 +156,11 @@ class BaseRoutines
         poll m_dirty to signify value change
         """
         self.logical_id = logical_id
-		self.ret = exec(__method__, @logical_id, state.to_f, mode)
-        #sleep(DELAY)
+        self.ret = exec(__method__, @logical_id, state.to_f, mode)
 
     rescue BoundsError => error
-        puts "ERROR: Logical ID out of range" 
+        puts "ERROR: Logical ID out of range"
+        raise
     end
 
     def macro_getstatus(logical_id, mode=2)
@@ -187,7 +170,7 @@ class BaseRoutines
 
         c_get = FFI::MemoryPointer.new(:float, SIZE)
         self.logical_id = logical_id
-		self.ret = exec(__method__, @logical_id, c_get, mode)
+        self.ret = exec(__method__, @logical_id, c_get, mode)
         @val = type_return("macrobutton", c_get.read_float)
 
     rescue BoundsError => error
@@ -206,11 +189,10 @@ class BaseRoutines
 
         if validate(@m1, @m2)
             if @param_string
-				self.ret = exec(__method__.to_s + '_string', @param_name, @param_string)
+                self.ret = exec(__method__.to_s + '_string', @param_name, @param_string)
             else
-				self.ret = exec(__method__.to_s + '_float', @param_name, @param_float)
+                self.ret = exec(__method__.to_s + '_float', @param_name, @param_float)
             end
-            #sleep(DELAY)
         else
             raise BoundsError
         end
@@ -237,22 +219,17 @@ class BaseRoutines
         if vmr_pdirty&.nonzero?
             clear_pdirty
         end
-
         self.param_name = name
-        c_get = FFI::MemoryPointer.new(:float, SIZE)
-		self.ret = exec(__method__.to_s + '_float', name, c_get)
-        @val = type_return(@m3, c_get.read_float)
-    end
 
-    def get_parameter_string(name)
-        """ implicity return from pointer variable """
-        if vmr_pdirty&.nonzero?
-            clear_pdirty
+        if @is_real_number.include? @m3
+            c_get = FFI::MemoryPointer.new(:float, SIZE)
+            self.ret = exec(__method__.to_s + '_float', @param_name, c_get)
+            @val = type_return(@m3, c_get.read_float)
+        else
+            c_get = FFI::MemoryPointer.new(:string, BUFF, true)
+            self.ret = exec(__method__.to_s + '_string', @param_name, c_get)
+            @val = c_get.read_string
         end
-
-        c_get = FFI::MemoryPointer.new(:string, BUFF, true)
-		self.ret = exec(__method__, name, c_get)
-        @val = c_get.read_string
     end
 
     def special_command(name, value = nil)
@@ -261,11 +238,10 @@ class BaseRoutines
 
         if value
             self.sp_value = value
-			self.ret = exec('set_parameter_string', "#{@sp_command}", @sp_value)
+            self.ret = exec('set_parameter_string', "#{@sp_command}", @sp_value)
         else
-			self.ret = exec('set_parameter_float', "#{@sp_command}", 1.0)
+            self.ret = exec('set_parameter_float', "#{@sp_command}", 1.0)
         end
-        #sleep(DELAY)
 
     rescue ParamComError => error
         puts "ERROR: #{error.message}"
@@ -275,7 +251,7 @@ class BaseRoutines
 
     def recorder_command(name, value=1)
         command = "recorder.#{name}"
-		self.ret = exec('set_parameter_float', command, value.to_f)
+        self.ret = exec('set_parameter_float', command, value.to_f)
         #sleep(DELAY)
     end
 end

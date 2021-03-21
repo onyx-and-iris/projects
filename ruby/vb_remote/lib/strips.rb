@@ -1,4 +1,5 @@
 module Strips
+    attr_accessor :is_numeric, :is_bool, :is_float
     attr_reader :layout, :strip_total, :bus_total, :vban_total, \
     :composite_total, :insert_total
 
@@ -28,6 +29,10 @@ module Strips
 
     def insert_total=(value)
         @insert_total = value
+    end
+
+    def is_real_number=(value)
+        @is_real_number = value
     end
 
     def build_strips(type)
@@ -70,6 +75,8 @@ module Strips
         @layout[:strip][:p_in].+(@layout[:strip][:v_in])
         self.bus_total = 
         @layout[:bus][:p_out].+(@layout[:bus][:v_out])
+
+        types
     end
 
     def validate(name, num)
@@ -91,6 +98,18 @@ module Strips
             return true if @type == POTATO
             raise VersionError
         end
+    end
+
+    def types
+        @is_bool = [
+            "mono", "solo", "mute",
+            "A1", "A2", "A3", "B1", "B2", "B3",
+            "macrobutton"
+        ]
+
+        @is_float = ["gain"]
+
+        self.is_real_number = @is_bool.|(@is_float)
     end
 end
 
@@ -122,12 +141,8 @@ module Utils
     end
 
     def type_return(param, value)
-        return value.to_i if [
-            "mono", "solo", "mute",
-            "A1", "A2", "A3", "B1", "B2", "B3",
-            "macrobutton"
-        ].include? param
-        return value.round(1) if ["gain"].include? param
+        return value.to_i if @is_bool.include? param
+        return value.round(1) if @is_float.include? param
         value
     end
 end
