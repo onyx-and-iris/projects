@@ -70,17 +70,9 @@ module WrapperBase
 
     def exec(func, *args)
         torun = 'vmr_' + func.to_s
-        if args.empty?
-            val = send(torun)
-        else
-            val = send(torun, *args)
-        end
-        
-        if torun.include? 'set_'
-            sleep(0.05)
-        else
-            sleep(0.001)
-        end
+        val = send(torun, *args)
+
+        sleep(0.05) if torun.include? 'set_'
         val
     end
 end
