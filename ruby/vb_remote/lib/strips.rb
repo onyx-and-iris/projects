@@ -1,5 +1,5 @@
 module Strips
-    attr_accessor :is_numeric, :is_bool, :is_float
+    attr_accessor :is_real_number, :is_bool, :is_float
     attr_reader :layout, :strip_total, :bus_total, :vban_total, \
     :composite_total, :insert_total
 
