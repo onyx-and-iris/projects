@@ -230,8 +230,8 @@ def getparamstring(vmr)
     get a string parameter eg Strip[0].device.name
     """
     (0..2).each do |num|
-        puts vmr.get_parameter_string("Strip[#{num}].Label")
-        puts vmr.get_parameter_string("Strip[#{num}].device.name")
+        puts vmr.get_parameter("Strip[#{num}].Label")
+        puts vmr.get_parameter("Strip[#{num}].device.name")
     end
 end
 
@@ -239,17 +239,17 @@ def setandgetparamstring(vmr)
     puts "Setting Strip Label names test0"
     (0..2).each do |num|
         vmr.set_parameter("Strip[#{num}].Label", "testing[0]")
-        puts vmr.get_parameter_string("Strip[#{num}].Label")
+        puts vmr.get_parameter("Strip[#{num}].Label")
     end
     puts "Setting Strip Label names test1"
     (0..2).each do |num|
         vmr.set_parameter("Strip[#{num}].Label", "testing[1]")
-        puts vmr.get_parameter_string("Strip[#{num}].Label")
+        puts vmr.get_parameter("Strip[#{num}].Label")
     end
     puts "Setting Strip Label names reset"
     (0..2).each do |num|
         vmr.set_parameter("Strip[#{num}].Label", "reset")
-        puts vmr.get_parameter_string("Strip[#{num}].Label")
+        puts vmr.get_parameter("Strip[#{num}].Label")
     end
 end
 
@@ -364,8 +364,8 @@ if __FILE__ == $PROGRAM_NAME
             """ Testing from vmr.run """
             (0..2).each do |num|
                 puts "Getting Strip[#{num}] Label and device.name"
-                puts vmr.get_parameter_string("Strip[#{num}].Label")
-                puts vmr.get_parameter_string("Strip[#{num}].device.name")
+                puts vmr.get_parameter("Strip[#{num}].Label")
+                puts vmr.get_parameter("Strip[#{num}].device.name")
             end
         end
     elsif args.include? "loop"

@@ -67,7 +67,7 @@ class GetParamsString < Minitest::Test
             ].each do |label|
                 @@vmr.set_parameter("Strip[#{num}].Label", label)
                 assert_equal(SUCCESS, @@vmr.ret)
-                @@vmr.get_parameter_string("Strip[#{num}].Label")
+                @@vmr.get_parameter("Strip[#{num}].Label")
                 assert_equal(label, @@vmr.val)
             end
         end
