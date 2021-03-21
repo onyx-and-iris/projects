@@ -5,6 +5,7 @@ https://pypi.org/project/PySLOBS/
 import json
 import logging
 import pickle
+import time
 
 from websocket import create_connection, WebSocketTimeoutException
 
@@ -112,8 +113,6 @@ class Switchscene:
       if self.socket:
           self.socket.close()
           self.socket = None
-          if self._on_close:
-              self._on_close()
               
   def store_tok(self):
     password = input("Enter Streamlabs API Token\n")
