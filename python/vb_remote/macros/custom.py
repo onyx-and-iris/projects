@@ -6,7 +6,7 @@ from sys import stderr
 
 
 class Commands:
-    def vban_sendtext(self, ip, text, port=6980, s_name='Command1'):
+    def vban_sendtext(ip, text, port=6980, s_name='Command1'):
         """ 
         Credits go to TheStaticTurtle 
         https://github.com/TheStaticTurtle/pyVBAN 
