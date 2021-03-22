@@ -9,12 +9,6 @@ class PickleFile:
         self.db = {}
         self.file_db = 'records.pkl'
 
-    def write_file(self):
-        records = open(self.file_db, 'wb')
-
-        pickle.dump(self.db, records)
-        records.close
-
     def read_file(self):
         """ attempt read from file if not exist then create file """
         try:
@@ -29,6 +23,10 @@ class PickleFile:
             pass
 
         return self.db
+
+    def write_file(self):
+        with open(self.file_db, 'w') as records:
+            pickle.dump(self.db, records)
 
     def truncate(self):
         with open(self.file_db, 'wb') as records:
