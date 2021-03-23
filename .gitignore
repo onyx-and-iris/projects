@@ -3,6 +3,7 @@
 **/*.pkl
 **/*.toml
 **/*.json
+**/*.yml
 **/*.dat
 **/*.backup
 
