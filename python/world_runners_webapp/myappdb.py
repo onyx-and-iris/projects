@@ -1,3 +1,4 @@
+import os
 import runnersjson
 import pickle
 import json
@@ -16,7 +17,7 @@ app = Flask(__name__)
 
 app.config['dbconfig'] = {}
 
-app.secret_key = 'ULi6gq@zuE1wOZ$DdPEZoQ@!CM*G$42$'
+app.secret_key = os.environ.get('SECRET_KEY')
 
 def log_request(req: 'flask_request', res: str) -> None:
     """ using loopback/req.remote_addr """
