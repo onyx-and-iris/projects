@@ -2,12 +2,21 @@ import runnersjson
 import pickle
 import json
 
-from flask import Flask, render_template, request, escape
+from flask import (
+                Flask, 
+                render_template, 
+                request, 
+                escape,
+                session
+                )
 from dblog import ConnectDB
+from checker import check_logged_in
 
 app = Flask(__name__)
 
 app.config['dbconfig'] = {}
+
+app.secret_key = 'ULi6gq@zuE1wOZ$DdPEZoQ@!CM*G$42$'
 
 def log_request(req: 'flask_request', res: str) -> None:
     """ using loopback/req.remote_addr """
@@ -52,6 +61,7 @@ def entry_page() -> 'html':
 
 
 @app.route('/viewlog')
+@check_logged_in
 def view_log() -> 'html':
     """ create a list of lists and assign to jinja2 vars """
     with ConnectDB(app.config['dbconfig']) as cursor:
@@ -66,6 +76,17 @@ def view_log() -> 'html':
                             the_title='View Log',
                             the_row_titles=titles,
                             the_data=res,)
+
+@app.route('/login')
+def do_login() -> str:
+    session['logged_in'] = True
+    return 'Logged In'
+
+@app.route('/logout')
+def do_logout():
+    session.pop('logged_in')
+    return 'Logged out'
+
 
 if __name__ == '__main__':
     token = 'token.pkl'
