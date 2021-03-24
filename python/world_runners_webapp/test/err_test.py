@@ -46,7 +46,7 @@ class TestErrors(unittest.TestCase):
                 BAD QUERY """
                 cursor.execute(_SQL)
             
-            self.assertRaises(SQLError, func)
+        self.assertRaises(SQLError, func)
 
     def test_it_tests_an_invalid_user(self):
         """ expect CredentialsError """
