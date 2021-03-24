@@ -21,19 +21,29 @@ app.secret_key = os.environ.get('SECRET_KEY')
 
 def log_request(req: 'flask_request', res: str) -> None:
     """ using loopback/req.remote_addr """
-    with ConnectDB(app.config['dbconfig']) as cursor:
-        _SQL = """
-            insert into log
-            (shortname, ip, browser_string, data)
-            values
-            (%s, %s, %s, %s) """
-        _DATA = (
-            req.form['name'],
-            '127.0.0.1',
-            req.user_agent.browser,
-            json.dumps(res),)
+    try:
+        with ConnectDB(app.config['dbconfig']) as cursor:
+            _SQL = """
+                insert into log
+                (shortname, ip, browser_string, data)
+                values
+                (%s, %s, %s, %s) """
+            _DATA = (
+                req.form['name'],
+                '127.0.0.1',
+                req.user_agent.browser,
+                json.dumps(res),)
 
-        cursor.execute(_SQL, _DATA)
+            cursor.execute(_SQL, _DATA)
+    except ConnectionError as e:
+        print('Is DB server running? Error:', str(e))
+    except CredentialsError as e:
+        print('Login Credentials Error:', str(e))
+    except SQLError as e:
+        print('SQL Query Error:', str(e))
+    except Exception as e:
+        print('There was an error:', str(e))
+    return 'Error'
 
 @app.route('/worldrunner', methods=['POST'])
 def get_record() -> 'html':
