@@ -1,10 +1,10 @@
 import asyncio
 import logging
 import math
-from time import sleep
-
 import socket
+import argparse
 
+from time import sleep
 from pyslobs import (
     SlobsConnection,
     ScenesService,
@@ -95,38 +95,38 @@ async def spin(conn):
         
 async def listen(conn, s):
     events = ['follow', 'subscription', 'bits', 'host', 'donation']
+    status = 'offline' if args.t else 'live'
     ss = StreamingService(conn)
 
-    print('Going LIVE')
-    await ss.toggle_streaming()
+    if status == 'live':
+        print('Going LIVE')
+        await ss.toggle_streaming()
+    else:
+        print('Entering testing mode')
     data = await ss.get_model()
 
-    while data.streaming_status == 'offline':
-        data = await ss.get_model()
-        sleep(0.2)
+    if status == 'live':
+        while data.streaming_status == status:
+            data = await ss.get_model()
+            sleep(0.2)
 
     print('Listening for Streamlabs events')
     try:
-        while data.streaming_status == 'live':
-            try:
-                resp = s.recv(1024).decode('utf-8')
+        while data.streaming_status == status:
+            resp = s.recv(1024).decode('utf-8')
 
-                if resp in events:
-                    print(f'Just got a {resp}')
-                    s.send(resp.encode())
-                    await spin(conn)
-                    s.close()
+            if resp in events:
+                print(f'Just got a {resp}')
+                s.send(resp.encode())
+                await spin(conn)
+                s.close()
 
-                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    s.connect((HOST, PORT))
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect((HOST, PORT))
 
-                data = await ss.get_model()
-
-            except socket.timeout as e:
-                data = await ss.get_model()
-                continue
-    except Exception:
-        logging.exception('Error func listen')
+            data = await ss.get_model()
+    except Exception as e:
+        logging.exception('Error: ', str(e))
     finally:
         await conn.close()
 
@@ -137,11 +137,15 @@ async def main(conn, s):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', action='store_true')
+    args = parser.parse_args()
+
     logging.basicConfig(level=logging.INFO)
 
     conn = SlobsConnection(config_from_ini_else_stdin())
 
-    HOST = 'oai.vps'
+    HOST = '127.0.0.1' if args.t else 'oai.vps'
     PORT = 60000
 
     try:

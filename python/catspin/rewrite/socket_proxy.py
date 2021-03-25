@@ -2,6 +2,9 @@
 import socketio
 import pickle
 import socket
+import argparse
+
+from threading import Thread
 
 class Streamlabs():
     def __init__(self, token):
@@ -11,7 +14,7 @@ class Streamlabs():
         self.sio.on('event', self.EventHandler)
         self.sio.on('disconnect', self.DisconnectHandler)
 
-        self.HOST = ''
+        self.HOST = '127.0.0.1' if args.t else ''
         self.PORT = 60000
         try:
             self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -21,15 +24,19 @@ class Streamlabs():
 
         self.s.bind ((self.HOST, self.PORT))
         self.s.listen()
+        self.conn = None
 
-    def MakeConnection(self):
+    def MakeConnections(self):
         try:
-          self.sio.connect("https://sockets.streamlabs.com?token=" +
+            self.sio.connect("https://sockets.streamlabs.com?token=" +
                            self.token)
-          self.conn, self.addr = self.s.accept()
+            t = Thread(target=self.MakeClientConn)
+            t.start()
         except ValueError as e:
           pass
-
+    def MakeClientConn(self):
+        self.conn, self.addr = self.s.accept()
+        print('Client connected')
     def MakeDisconnect(self):
         self.sio.disconnect()    
 
@@ -41,51 +48,35 @@ class Streamlabs():
         """ run on defined event """
         events = ['follow', 'subscription', 'bits', 'host', 'donation']
 
-        if not self.conn:
-            self.conn, self.addr = self.s.accept()
-
-        if 'for' in data:
-            if data['for'] == 'twitch_account':
-                if data['type'] in events:
-                    while True:
-                        try:
-                            type = data['type']
-                            self.conn.send(type.encode())
+        if self.conn:
+            try:
+                if 'for' in data and data['for'] == 'twitch_account':
+                    if data['type'] in events:
+                        while True:
+                            event_type = data['type']
+                            self.conn.send(event_type.encode())
                             validated = self.conn.recv(1024).decode('utf-8')
-                            if validated == type:
+                            if validated == event_type:
                                 print('Validated event with client')
                             elif not validated:
-                                print('Did not validated with client')
-                                self.conn, self.addr = self.s.accept()
-                                continue
+                                raise 'Did not validated with client'
                                 
                             resp = self.conn.recv(1024).decode('utf-8')
                             if not resp:
                                 self.conn.close()
-                                self.conn = None
-                                break
-                        except BrokenPipeError:
-                            if self.conn:
-                                self.conn.close()
-                                self.conn = None
-                            else:
-                                break
-                        finally:
-                            if not self.conn:
-                                self.conn, self.addr = self.s.accept()
-                            
-                else:
-                    print(data['type'])
-            
-            elif data['type'] == 'donation':
-                print(data)
-                try:
-                    type = 'donation'
-                    self.conn.send(type.encode())
-                    print('Just got a {type}') 
-                except BrokenPipeError:
+                            break
+                elif data['type'] == 'donation':
+                    event_type = 'donation'
+                    self.conn.send(event_type.encode())
+            except Exception as e:
+                print('No client found, Error:', str(e))
+                if self.conn:
                     self.conn.close()
-                    self.conn = None
+            finally:
+                t = Thread(target=self.MakeClientConn)
+                t.start()
+        else:
+            print('No client connected... skipping')
 
                
     def DisconnectHandler(self):
@@ -93,6 +84,10 @@ class Streamlabs():
         print('disconnected')
         
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', action='store_true')
+    args = parser.parse_args()
+
     file_t = 'token.pkl'
     while True:
         try:
@@ -108,5 +103,4 @@ if __name__ == '__main__':
                 pickle.dump(token, token_file)
  
     ws = Streamlabs(token)
-    ws.MakeConnection()
-    
+    ws.MakeConnections()
