@@ -10,6 +10,11 @@ from flask import (
                 escape,
                 session
                 )
+from errors import (
+                    ConnectionError,
+                    CredentialsError,
+                    SQLError,
+                    )
 from dblog import ConnectDB
 from checker import check_logged_in
 
