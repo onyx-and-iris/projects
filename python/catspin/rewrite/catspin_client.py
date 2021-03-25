@@ -106,7 +106,7 @@ async def listen(conn, s):
     data = await ss.get_model()
 
     if status == 'live':
-        while data.streaming_status == status:
+        while data.streaming_status != status:
             data = await ss.get_model()
             sleep(0.2)
 
