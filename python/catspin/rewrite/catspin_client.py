@@ -4,6 +4,7 @@ import math
 import socket
 import argparse
 
+from threading import Thread
 from time import sleep
 from pyslobs import (
     SlobsConnection,
@@ -92,47 +93,58 @@ async def spin(conn):
         logging.exception("Unexpected exception")
     finally:
         pass
-        
-async def listen(conn, s):
-    events = ['follow', 'subscription', 'bits', 'host', 'donation']
-    status = 'offline' if args.t else 'live'
-    ss = StreamingService(conn)
 
-    if status == 'live':
-        print('Going LIVE')
-        await ss.toggle_streaming()
-    else:
-        print('Entering testing mode')
-    data = await ss.get_model()
+class Connections:
+    def __init__(self):
+        self.resp = None
 
-    if status == 'live':
-        while data.streaming_status != status:
-            data = await ss.get_model()
-            sleep(0.2)
+    def listen_for_event(self, s):
+        self.resp = s.recv(1024).decode('utf-8')
 
-    print('Listening for Streamlabs events')
-    try:
-        while data.streaming_status == status:
-            resp = s.recv(1024).decode('utf-8')
+    async def listen(self, conn, s):
+        events = ['follow', 'subscription', 'bits', 'host', 'donation']
+        status = 'offline' if args.t else 'live'
+        ss = StreamingService(conn)
 
-            if resp in events:
-                print(f'Just got a {resp}')
-                s.send(resp.encode())
-                await spin(conn)
-                s.close()
+        if status == 'live':
+            print('Going LIVE')
+            await ss.toggle_streaming()
+        else:
+            print('Entering testing mode')
+        data = await ss.get_model()
 
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.connect((HOST, PORT))
+        if status == 'live':
+            while data.streaming_status != status:
+                data = await ss.get_model()
+                sleep(0.2)
 
-            data = await ss.get_model()
-    except Exception as e:
-        logging.exception('Error: ', str(e))
-    finally:
-        await conn.close()
+        print('Listening for Streamlabs events')
+        try:
+            t = Thread(target=self.listen_for_event, args=(s,))
+            t.start()
+            while data.streaming_status == status:
+                if self.resp and self.resp in events:
+                    print(f'Just got a {self.resp}')
+                    s.send(self.resp.encode())
+                    await spin(conn)
+                    s.close()
+                    self.resp = None
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    s.connect((HOST, PORT))
+                    t = Thread(target=self.listen_for_event, args=(s,))
+                    t.start()
+
+                data = await ss.get_model()
+                sleep(0.1)
+        except Exception as e:
+            logging.exception('Error: ', str(e))
+        finally:
+            await conn.close()
 
 async def main(conn, s):
+    connect = Connections()
     await asyncio.gather(conn.background_processing(),
-    listen(conn, s)
+    connect.listen(conn, s)
     )
 
 
