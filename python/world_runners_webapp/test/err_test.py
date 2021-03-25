@@ -17,6 +17,9 @@ class TestQuery(unittest.TestCase):
         with open('../token.pkl', 'rb') as token:
             self.cred = pickle.load(token)
 
+    def tearDown(self):
+        pass
+
     def test_it_tests_a_valid_shortname_query(self):
         with ConnectDB(self.cred) as cursor:
             _SQL = """ 
@@ -28,15 +31,15 @@ class TestQuery(unittest.TestCase):
         
         self.assertEqual(res, [('mo',)])
 
-    def tearDown(self):
-        pass
-
 
 class TestErrors(unittest.TestCase):
     def setUp(self):
         self.cred = dict()
         with open('../token.pkl', 'rb') as token:
             self.cred = pickle.load(token)
+
+    def tearDown(self):
+        pass
 
     def test_it_tests_an_invalid_query(self):
         """ expected SQLError handles in exit dunder """
@@ -60,7 +63,7 @@ class TestErrors(unittest.TestCase):
     def test_it_tests_an_invalid_pass(self):
         """ expect CredentialsError """
         def func():
-            self.cred['user'] = 'wrongpass'
+            self.cred['password'] = 'wrongpass'
             with ConnectDB(self.cred) as cursor:
                 pass 
             
@@ -84,8 +87,6 @@ class TestErrors(unittest.TestCase):
             
         self.assertRaises(ConnectionError, func)
 
-    def tearDown(self):
-        pass
 
 if __name__ == '__main__':
     unittest.main()
