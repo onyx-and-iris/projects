@@ -129,13 +129,13 @@ class Connections:
                     await spin(conn)
                     s.close()
                     self.resp = None
+
                     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     s.connect((HOST, PORT))
                     t = Thread(target=self.listen_for_event, args=(s,))
                     t.start()
 
                 data = await ss.get_model()
-                sleep(0.1)
         except Exception as e:
             logging.exception('Error: ', str(e))
         finally:

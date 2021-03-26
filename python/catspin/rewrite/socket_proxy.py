@@ -6,6 +6,9 @@ import argparse
 
 from threading import Thread
 
+class ValidateError(Exception):
+    pass
+
 class Streamlabs():
     def __init__(self, token):
         self.token = token
@@ -44,6 +47,17 @@ class Streamlabs():
         """ are we connected? """
         print('connected')
 
+    def validate(self, event_type):
+        self.conn.send(event_type.encode())
+        validated = self.conn.recv(1024).decode('utf-8')
+        if validated == event_type:
+            print(f'Validated event {event_type} with client')
+        else:
+            raise ValidateError('Did not validate with client')
+        resp = self.conn.recv(1024).decode('utf-8')
+        if not resp:
+            self.conn.close()        
+
     def EventHandler(self, data):
         """ run on defined event """
         events = ['follow', 'subscription', 'bits', 'host', 'donation']
@@ -52,26 +66,16 @@ class Streamlabs():
             try:
                 if 'for' in data and data['for'] == 'twitch_account':
                     if data['type'] in events:
-                        while True:
-                            event_type = data['type']
-                            self.conn.send(event_type.encode())
-                            validated = self.conn.recv(1024).decode('utf-8')
-                            if validated == event_type:
-                                print('Validated event with client')
-                            elif not validated:
-                                raise 'Did not validated with client'
-                                
-                            resp = self.conn.recv(1024).decode('utf-8')
-                            if not resp:
-                                self.conn.close()
-                            break
+                        event_type = data['type']
+                        self.validate(event_type)
                 elif data['type'] == 'donation':
                     event_type = 'donation'
-                    self.conn.send(event_type.encode())
+                    self.validate(event_type)
             except Exception as e:
-                print('No client found, Error:', str(e))
+                print('Error:', str(e))
                 if self.conn:
                     self.conn.close()
+                    self.conn = None
             finally:
                 t = Thread(target=self.MakeClientConn)
                 t.start()
