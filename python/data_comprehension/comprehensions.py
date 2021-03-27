@@ -10,9 +10,11 @@ from datetime import datetime
 class NoCSVFileError(Exception):
     pass
 
+
 class Utils:
     def print_data(self, data):
         """ print each list per line or pretty print nested dicts """
+        print(len(data), 'records generated')
         if isinstance(data, list):
             for each_list in data:
                 print(each_list)
@@ -21,6 +23,7 @@ class Utils:
 
     def deep_copy(self, data) -> dict:
         return copy.deepcopy(data)      
+
 
 class ParseData(Utils):
     def __init__(self, data: str):
@@ -48,26 +51,30 @@ class InitializeData(Utils):
         """ returns data as nested dict type """
         self.fetch_data()
         with open(self.data_file) as data:
+
             self.data = {}
-            n = 0  
             for line in csv.DictReader(data):
-                self.data[n] = line
-                n += 1
-                if n == int(limit):
+                if int(line['gameid']) > limit:
                     break
+                self.data[line['gameid']] = line
+
         return self.data
 
     def list_data(self, limit: int) -> list:
-        """ returns data as nested list type """
+        """ returns data as nested lists, skips header """
         self.fetch_data()
+
+        print('Generating LIST data')
         with open(self.data_file) as data:
+            csvreader = csv.reader(data)
+            next(csvreader)
+            
             self.data = []
-            n = 0
             for line in csv.reader(data):
-                self.data.append(line)
-                n += 1
-                if n == int(limit):
+                if int(line[0]) > limit:
                     break
+                self.data.append(line)
+
         return self.data
 
     def fetch_data(self):
@@ -83,18 +90,21 @@ class InitializeData(Utils):
         else:
             print('Loading data from file...')   
   
-
 def main(args):
     csv_obj = InitializeData()
 
     if args.f:
         csv_obj.fetch_data()
     elif args.l:
-        data = csv_obj.list_data(args.l)
+        limit = int(args.l)
+        data = csv_obj.list_data(limit)
         csv_obj.print_data(data)
         exit()
     elif args.d:
-        data = csv_obj.dict_data(args.d)
+        limit = int(args.d)
+        data = csv_obj.dict_data(limit)
+        csv_obj.print_data(data)
+        exit()
 
     parse = ParseData(data)
     newdata = parse.convert_date_in_dicts()
@@ -102,6 +112,7 @@ def main(args):
     csv_obj.print_data(data)
     print('AFTER CONVERSION:')
     parse.print_data(newdata)  
+
 
 if __name__ == '__main__':
     """ initiate the parser """
