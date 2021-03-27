@@ -5,6 +5,7 @@
 **/*.json
 **/*.yml
 **/*.dat
+**/*.csv
 **/*.backup
 
 **/__pycache__
