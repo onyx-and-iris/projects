@@ -100,9 +100,6 @@ def main(args):
 
     if args.p:
         parse = ParseData(data)
-    if args.p == 'date':
-        data = parse.convert(args.p)
-    elif args.p == 'year':
         data = parse.convert(args.p)
     if args.w:
         parse.print_data(data)
