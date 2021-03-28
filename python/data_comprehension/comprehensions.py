@@ -9,6 +9,9 @@ from datetime import datetime
 class NoCSVFileError(Exception):
     pass
 
+class DataTypeError(Exception):
+    pass
+
 
 class Utils:
     def print_data(self, data):
@@ -22,20 +25,31 @@ class Utils:
 
 
 class ParseData(Utils):
-    def __init__(self, data: str):
+    def __init__(self, data: dict):
         self.data = data
 
-    def gen_date(self, data: dict) -> dict:
+    def unique_values(self, data: list) -> list:
+        return list(set(data))
+
+    def gen_date(self, data: dict) -> str:
         date_object = datetime.strptime(data['date'], '%Y-%m-%d')
         return datetime.strftime(date_object, '%d/%m/%Y')
 
     def convert(self, type_conversion):
-        if type_conversion == 'date':
-            copy = {d: self.gen_date(self.data[d]) for d in self.data}
-        elif type_conversion == 'year':
-            copy = {self.data[d]['winnername']: self.data[d]['losername'] \
-            for d in self.data \
-            if self.gen_date(self.data[d]).split('/')[2] in ['2000']}
+        if isinstance(self.data, dict):
+            if type_conversion == 'date':
+                copy = {d: self.gen_date(self.data[d]) for d in self.data}
+            elif type_conversion == 'year':
+                copy = {self.data[d]['winnername']: self.data[d]['losername'] \
+                for d in self.data \
+                if self.gen_date(self.data[d]).split('/')[2] in ['1998']}
+
+        elif isinstance(self.data, list):
+            if type_conversion  == 'dup':
+                copy = [l[4] for l in self.data]
+                copy = self.unique_values(copy)
+        else:
+            raise DataTypeError('Wrong data type error')
 
         return copy
 
@@ -101,8 +115,8 @@ def main(args):
     if args.p:
         parse = ParseData(data)
         data = parse.convert(args.p)
-    if args.w:
-        parse.print_data(data)
+        if args.w:
+            parse.print_data(data)
 
 
 if __name__ == '__main__':
