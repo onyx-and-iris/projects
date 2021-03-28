@@ -3,7 +3,6 @@ import requests
 import os
 import csv
 import pprint
-import copy
 
 from datetime import datetime
 
@@ -19,29 +18,26 @@ class Utils:
             for each_list in data:
                 print(each_list)
         elif isinstance(data, dict):
-            pprint.pprint(data)
-
-    def deep_copy(self, data) -> dict:
-        return copy.deepcopy(data)      
+            pprint.pprint(data)    
 
 
 class ParseData(Utils):
     def __init__(self, data: str):
         self.data = data
 
-    def convert_date_in_dicts(self) -> dict:
-        """ 
-        Convert date format for each nested dict.
-        Return copy to preserve original.
-        """
-        copy = self.deep_copy(self.data)
-        for each_dict in copy:
-            date_str = copy[each_dict]['date']
-            date_object = datetime.strptime(date_str, '%Y-%m-%d')
-            copy[each_dict]['date'] = \
-            datetime.strftime(date_object, '%d/%m/%Y').replace('0', '')
-        return copy
+    def gen_date(self, data: dict) -> dict:
+        date_object = datetime.strptime(data['date'], '%Y-%m-%d')
+        return datetime.strftime(date_object, '%d/%m/%Y')
 
+    def convert(self, type_conversion):
+        if type_conversion == 'date':
+            copy = {d: self.gen_date(self.data[d]) for d in self.data}
+        elif type_conversion == 'year':
+            copy = {self.data[d]['winnername']: self.data[d]['losername'] \
+            for d in self.data \
+            if self.gen_date(self.data[d]).split('/')[2] in ['2000']}
+
+        return copy
 
 class InitializeData(Utils):
     def __init__(self):
@@ -96,30 +92,31 @@ def main(args):
     if args.f:
         csv_obj.fetch_data()
     elif args.l:
-        limit = int(args.l)
-        data = csv_obj.list_data(limit)
-        csv_obj.print_data(data)
-        exit()
+        data = csv_obj.list_data(args.l)
     elif args.d:
-        limit = int(args.d)
-        data = csv_obj.dict_data(limit)
+        data = csv_obj.dict_data(args.d)
+    if args.v:
         csv_obj.print_data(data)
-        exit()
 
-    parse = ParseData(data)
-    newdata = parse.convert_date_in_dicts()
-    print('BEFORE CONVERSION:')
-    csv_obj.print_data(data)
-    print('AFTER CONVERSION:')
-    parse.print_data(newdata)  
+    if args.p:
+        parse = ParseData(data)
+    if args.p == 'date':
+        data = parse.convert(args.p)
+    elif args.p == 'year':
+        data = parse.convert(args.p)
+    if args.w:
+        parse.print_data(data)
 
 
 if __name__ == '__main__':
     """ initiate the parser """
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', action='store_true')
-    parser.add_argument('-l', nargs=None)
-    parser.add_argument('-d', nargs=None)
+    parser.add_argument('-l', nargs=None, type=int)
+    parser.add_argument('-d', nargs=None, type=int)
+    parser.add_argument('-v', action='store_true')
+    parser.add_argument('-p', nargs=None)
+    parser.add_argument('-w', action='store_true')
 
     args = parser.parse_args()
 
