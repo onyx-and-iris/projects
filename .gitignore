@@ -6,7 +6,10 @@
 **/*.yml
 **/*.dat
 **/*.csv
+**/*.txt
 **/*.backup
+
+**/*.exe
 
 **/__pycache__
 
