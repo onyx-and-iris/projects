@@ -1,10 +1,9 @@
 #include "runners.h"
 
-#include <string.h>
-
 #ifndef H_RUNNERS_H
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #endif
 
 /*
@@ -14,23 +13,21 @@
 */
 int main ( void ) {
     runner *_initialized = NULL;
-    int numRecords = 0;
+    int num_records = 0;
 
     _initialized = read_from_file();
-    exit(EXIT_SUCCESS);
+    //exit(EXIT_SUCCESS);
 
     //1)
     if( !_initialized )
         _initialized = init();
-
     //2)
-    numRecords = get_record( _initialized );
+    num_records = get_record( _initialized );
 
-    printf("%d records in linked list\n", numRecords);
+    printf("%d records in linked list\n", num_records);
 
-    if(write_to_file( _initialized ) == numRecords)
-        fprintf(stdout, "%i records written succesfully\n", numRecords);
-
+    if(write_to_file( _initialized ) == num_records)
+        fprintf(stdout, "%i records written succesfully\n", num_records);
     //3)
     cleanup( _initialized );
 
@@ -58,7 +55,6 @@ runner *init() {
 
     fprintf(stdout, "Please enter name of athlete:\n");
     for( ; fgets(name, BUFF, stdin) != NULL; i = next ) {
-        trim_newline(name);
         next = create_record( name );
         //1)
         if (start == NULL)
@@ -74,46 +70,40 @@ runner *init() {
 }
 
 /*
-    1) assign memory on heap for this record
-    2) strdup: call to malloc, save to heap
-    3) clear newline from stdin 
+    *) strdup: call to malloc, save to heap
+    *) getchar() used to consume newline
 */
 runner *create_record( char *name ) {
     int age;
     float pb;
+    int len = 0;
     char country[BUFF];
     char event[BUFF];
-
-    fprintf(stdout, "Creating record for %s:\n", name);
-    //1)
     runner *x = malloc(sizeof(*x));
 
-    //2)
     x->name = strdup(name);
- 
+    trim_newline(x->name);
+    fprintf(stdout, "Creating record for %s:\n", x->name);
+
     fprintf(stdout, "Age:\n");
-    if( fscanf(stdin, "%i", &age) == 1 );
+    if( fscanf(stdin, "%i", &age) == 1 )
         x->age = age;
-    //3)    
-    fflush(stdin);
+    getchar();
 
     fprintf(stdout, "Country:\n");
     fgets(country, BUFF, stdin);
     trim_newline(country);
-    //2)
     x->country = strdup(country);
 
     fprintf(stdout, "Event:\n");
     fgets(event, BUFF, stdin);
     trim_newline(event);
-    //2)
     x->event = strdup(event);
 
     fprintf(stdout, "PB:\n");
-    if( fscanf(stdin, "%f", &pb) == 1)
+    if( fscanf(stdin, "%f", &pb) == 1 )
         x->pb = pb;
-    //3) 
-    fflush(stdin);
+    getchar();
 
     x->next = NULL;
 
@@ -143,7 +133,7 @@ int get_record( runner *x ) {
 
         i = next;
 
-    } while(next != NULL);
+    } while( next != NULL );
 
     return count;
 }
@@ -152,7 +142,7 @@ void cleanup( runner *x ) {
     runner *i = NULL;
     runner *next = NULL;
 
-    for(i = x; x->next != NULL; i = i->next) {
+    for( i = x; x->next != NULL; i = i->next ) {
         next = i;
 
         free(i->name);
