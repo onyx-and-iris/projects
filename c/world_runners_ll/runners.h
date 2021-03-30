@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define BUFF 32
 
@@ -16,6 +17,7 @@ typedef struct runner {
 
 int write_to_file( runner * );
 runner *read_from_file();
+runner *get_single_record( FILE * );
 
 runner *init();
 void trim_newline( char * );
