@@ -16,7 +16,6 @@ int main ( void ) {
     int num_records = 0;
 
     _initialized = read_from_file();
-    //exit(EXIT_SUCCESS);
 
     //1)
     if( !_initialized )
@@ -26,8 +25,9 @@ int main ( void ) {
 
     printf("%d records in linked list\n", num_records);
 
-    if(write_to_file( _initialized ) == num_records)
-        fprintf(stdout, "%i records written succesfully\n", num_records);
+    if( write_to_file( _initialized ) == num_records )
+        fprintf(stdout, "%i records written succesfully\n",
+                        num_records);
     //3)
     cleanup( _initialized );
 

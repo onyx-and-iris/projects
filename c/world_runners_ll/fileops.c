@@ -11,9 +11,9 @@ runner *get_single_record( FILE *records ) {
 
     runner *i = malloc(sizeof(*i));
 
-    i->name = malloc(sizeof(BUFF));
-    i->country = malloc(sizeof(BUFF));
-    i->event = malloc(sizeof(BUFF));
+    i->name = malloc(BUFF);
+    i->country = malloc(BUFF);
+    i->event = malloc(BUFF);
 
     if ( fread(i->name, BUFF, 1, records) == 1 ) {
         fprintf(stdout, "\nReading record for %s from file\n", i->name);
@@ -33,32 +33,34 @@ runner *get_single_record( FILE *records ) {
             fprintf(stdout, "Read %.2f from file\n", i->pb);
         }
         return i;        
-    } else {
-        return NULL;
     }
+    return NULL;
 }
 
 runner *read_from_file() {
     int count = 0;
 
     runner *start = NULL;
+    runner *this = NULL;
     runner *last = NULL;
     FILE *records = fopen("records.dat", "r");
 
     if(records != NULL) {
         //1)
         do {
-            last = get_single_record( records );
-/*
+            this = get_single_record( records );
+
             if (start == NULL)
-                start = next;
+                start = this;
            
             if (last != NULL)
-                last->next = i;
-*/
+                last->next = this;
+
+            last = this;
+
             ++count;
 
-        } while ( last != NULL );
+        } while ( this != NULL );
         fclose(records);
 
     } else {
@@ -66,7 +68,7 @@ runner *read_from_file() {
     }
 
     if(count) {
-        fprintf(stdout, "%i records read from file\n", count);
+        fprintf(stdout, "%i records read from file\n", --count);
         return start;
     } else {
         fprintf(stdout, "No records read from file\n");
