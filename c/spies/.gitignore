@@ -1,2 +1,8 @@
-!valgrind.log
+# Ignore compiled files
+*
+!*.*
+!*./
+
+# But include makefile
+!Makefile
 
