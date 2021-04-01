@@ -72,7 +72,7 @@ module WrapperBase
         torun = 'vmr_' + func.to_s
         val = send(torun, *args)
 
-        sleep(0.05) if torun.include? 'set_'
+        sleep(0.035) if torun.include? 'set_'
         val
     end
 end
