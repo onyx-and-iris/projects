@@ -1,7 +1,11 @@
 require "rake/testtask"
 
-task default: "test"
+Rake::TestTask.new :pass do |task|
+task.pattern = "test/pass/*_minitest.rb"
+task.warning = false 
+end
 
-Rake::TestTask.new do |task|
- task.pattern = "test/*_minitest.rb"
+Rake::TestTask.new :errors do |task|
+task.pattern = "test/errors/*_minitest.rb"
+task.warning = false 
 end
