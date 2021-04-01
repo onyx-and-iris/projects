@@ -76,7 +76,6 @@ runner *init() {
 runner *create_record( char *name ) {
     int age;
     float pb;
-    int len = 0;
     char country[BUFF];
     char event[BUFF];
     runner *x = malloc(sizeof(*x));
@@ -140,11 +139,8 @@ int get_record( runner *x ) {
 
 void cleanup( runner *x ) {
     runner *i = NULL;
-    runner *next = NULL;
 
-    for( i = x; x->next != NULL; i = i->next ) {
-        next = i;
-
+    for( i = x; i->next != NULL; i = i->next ) {
         free(i->name);
         free(i->country);
         free(i->event);
