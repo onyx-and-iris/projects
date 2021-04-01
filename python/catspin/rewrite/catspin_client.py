@@ -136,6 +136,7 @@ class Connections:
                     t.start()
 
                 data = await ss.get_model()
+                sleep(0.2)
         except Exception as e:
             logging.exception('Error: ', str(e))
         finally:
@@ -162,11 +163,10 @@ if __name__ == "__main__":
 
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((HOST, PORT))
     except socket.error:
         print('Failed to create socket')
         sys.exit()
     print('socket created')
-
-    s.connect((HOST, PORT))
 
     asyncio.run(main(conn, s))
