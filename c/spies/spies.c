@@ -1,3 +1,11 @@
+/********************************************************************************
+    Head First C, by
+    David Griffiths & Dawn Griffiths
+    ISBN: 978-1449399917
+    A demonstration of a tree data structure with memory leak (fixed).
+    Valgrind output included.
+********************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,6 +89,7 @@ int main( void )
                 "Give me a question that is TRUE for %s but not for %s? ",
                 suspect, current->question);
                 fgets(question, 80, stdin);
+                free(current->question);
                 current->question = strdup(question);
 
                 break;
