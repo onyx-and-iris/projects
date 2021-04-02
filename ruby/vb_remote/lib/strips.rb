@@ -3,10 +3,6 @@ module Strips
     attr_reader :layout, :strip_total, :bus_total, :vban_total, \
     :composite_total, :insert_total
 
-    BASIC = 1
-    BANANA = 2
-    POTATO = 3
-
     def layout=(value)
         @layout = value
     end

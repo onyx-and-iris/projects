@@ -4,6 +4,10 @@ require_relative 'errors'
 
 include Errors
 
+BASIC = 1
+BANANA = 2
+POTATO = 3
+
 def get_arch
     key = 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
     Win32::Registry::HKEY_LOCAL_MACHINE.open(key) do |reg|
@@ -36,6 +40,21 @@ def get_vbpath
         end
     end
     raise DLLNotFoundError
+end
+
+def inst_exe=(value)
+    if value == BASIC
+        exe = "voicemeeter.exe"
+    elsif value == BANANA
+        exe = "voicemeeterpro.exe"
+    elsif value == POTATO
+        exe = "voicemeeter8.exe"
+    end
+    if get_vbpath.join(exe).executable?
+        @inst_exe = String(get_vbpath.join(exe))
+    else
+        raise EXENotFoundError
+    end
 end
 
 def vmr_dll=(value)
