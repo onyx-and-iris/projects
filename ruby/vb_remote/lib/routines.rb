@@ -1,5 +1,6 @@
 require_relative 'base'
 require_relative 'strips'
+require 'open3'
 
 class BaseRoutines
     """ 
@@ -10,9 +11,9 @@ class BaseRoutines
     include Strips
     include Utils
 
-    attr_accessor :val, :testing
+    attr_accessor :val
     attr_reader :ret, :type, :logged_in, :logged_out, :sp_command, \
-    :param_string, :param_options, :param_float, :param_name
+    :param_string, :param_options, :param_float, :param_name, :instdir
 
     SIZE = 1
     BUFF = 512
@@ -31,7 +32,9 @@ class BaseRoutines
 
     def logged_in=(value)
         """ login success status """
-        if value&.nonzero?
+        if value == 1
+            runvb
+        elsif value < 0
             raise LoginError
         else
             if vmr_pdirty&.nonzero?
@@ -46,7 +49,7 @@ class BaseRoutines
 
     rescue LoginError => error
         puts "ERROR: #{error.message} #{value}"
-        do_logout
+        logout
         exit(false)
     end
 
@@ -132,22 +135,30 @@ class BaseRoutines
         @logical_id = value
     end
 
+    def runvb
+        self.inst_exe = @type
+        Open3.popen3(@inst_exe, '')
+        sleep(1)
+    rescue EXENotFoundError => error
+        puts "ERROR: #{error.message}"
+    end
+
     def vbtype
         """ 1 = basic, 2 = banana, 3 = potato """
         c_get = FFI::MemoryPointer.new(:long, SIZE)
 
-        self.ret = exec(__method__, c_get)
+        self.ret = run_as(__method__, c_get)
         c_get.read_long
     end
 	
     def login
-        self.logged_in = exec(__method__)
+        self.logged_in = run_as(__method__)
         self.type = self.vbtype
         build_strips(@type)
     end
 
     def logout
-        self.logged_out = exec(__method__)
+        self.logged_out = run_as(__method__)
     end
 
     def macro_setstatus(logical_id, state, mode=2)
@@ -156,7 +167,7 @@ class BaseRoutines
         poll m_dirty to signify value change
         """
         self.logical_id = logical_id
-        self.ret = exec(__method__, @logical_id, state.to_f, mode)
+        self.ret = run_as(__method__, @logical_id, state.to_f, mode)
 
     rescue BoundsError => error
         puts "ERROR: Logical ID out of range"
@@ -170,7 +181,7 @@ class BaseRoutines
 
         c_get = FFI::MemoryPointer.new(:float, SIZE)
         self.logical_id = logical_id
-        self.ret = exec(__method__, @logical_id, c_get, mode)
+        self.ret = run_as(__method__, @logical_id, c_get, mode)
         @val = type_return("macrobutton", c_get.read_float)
 
     rescue BoundsError => error
@@ -189,9 +200,9 @@ class BaseRoutines
 
         if validate(@m1, @m2)
             if @param_string
-                self.ret = exec(__method__.to_s + '_string', @param_name, @param_string)
+                self.ret = run_as(__method__.to_s + '_string', @param_name, @param_string)
             else
-                self.ret = exec(__method__.to_s + '_float', @param_name, @param_float)
+                self.ret = run_as(__method__.to_s + '_float', @param_name, @param_float)
             end
         else
             raise BoundsError
@@ -203,16 +214,8 @@ class BaseRoutines
     end
 
     def set_parameter_multi(param_hash)
-        if vmr_pdirty&.nonzero?
-            clear_pdirty
-        end
-
         self.param_options = param_hash
-        self.ret = exec(__method__, @param_options)
-
-        if vmr_pdirty&.zero?
-            wait_pdirty
-        end
+        self.ret = run_as(__method__, @param_options)
     end
 
     def get_parameter(name)
@@ -223,11 +226,11 @@ class BaseRoutines
 
         if @is_real_number.include? @m3
             c_get = FFI::MemoryPointer.new(:float, SIZE)
-            self.ret = exec(__method__.to_s + '_float', @param_name, c_get)
+            self.ret = run_as(__method__.to_s + '_float', @param_name, c_get)
             @val = type_return(@m3, c_get.read_float)
         else
             c_get = FFI::MemoryPointer.new(:string, BUFF, true)
-            self.ret = exec(__method__.to_s + '_string', @param_name, c_get)
+            self.ret = run_as(__method__.to_s + '_string', @param_name, c_get)
             @val = c_get.read_string
         end
     end
@@ -238,9 +241,9 @@ class BaseRoutines
 
         if value
             self.sp_value = value
-            self.ret = exec('set_parameter_string', "#{@sp_command}", @sp_value)
+            self.ret = run_as('set_parameter_string', "#{@sp_command}", @sp_value)
         else
-            self.ret = exec('set_parameter_float', "#{@sp_command}", 1.0)
+            self.ret = run_as('set_parameter_float', "#{@sp_command}", 1.0)
         end
 
     rescue ParamComError => error
@@ -251,8 +254,7 @@ class BaseRoutines
 
     def recorder_command(name, value=1)
         command = "recorder.#{name}"
-        self.ret = exec('set_parameter_float', command, value.to_f)
-        #sleep(DELAY)
+        self.ret = run_as('set_parameter_float', command, value.to_f)
     end
 end
 
@@ -262,11 +264,15 @@ class Remote < BaseRoutines
     Performs log in/out routines cleanly. 
     May yield a block argument otherwise simply login.
     """
-    def initialize(opt = nil)
-        if opt == "minitest"
-            @testing = opt
+    def initialize(type = nil, login = nil)
+        if type == "basic"
+            self.type = BASIC
+        elsif type == "banana"
+            self.type = BANANA
+        elsif type == "potato"
+            self.type = POTATO
         end
-        self.run if opt
+        self.run if login == "login"
     end
 
     def run
