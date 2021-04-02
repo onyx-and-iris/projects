@@ -19,33 +19,26 @@ class MacroButtonRun:
     def __enter__(self):
         """ get saved states from pickle file """
         self.saved_states = file_io.read_db()
-        self.saved_state = self.saved_states[self.layer][self.arg][1]
-        
-        if self.switch == self.saved_state:
-            self.switch = 1 - self.switch
+        self.switch = 1 - self.saved_states[self.layer][self.arg][1]
 
         return self
 
     def run(self):
-        """ Do we need Audio or Scenes class? """    
-        by_class = getattr(macrobuttons, self.layer.capitalize())
-
-        with voicemeeter.remote('potato') as oai:
-            """ call .run() for appropriate class """    
-            by_class(self.this_macro, self.switch, oai).run()
+        """ call .run() for appropriate class """ 
+        with voicemeeter.remote('potato') as oai:  
+            by_class(self.this_macro, oai, self.switch).run()
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.saved_states[self.layer][self.arg][1] = self.switch
-
         """ write updates to file """
+        self.saved_states[self.layer][self.arg][1] = self.switch
         file_io.update_db(self.saved_states)
 
 def reset():
     with voicemeeter.remote('potato') as oai:
-        reset = macrobuttons.Reset('reset', 0, oai)
+        reset = macrobuttons.Reset('reset', oai)
         reset.reset(macros)
     file_io.update_db(macros)
-    exit(True)
+    exit(False)
 
 
 if __name__ == '__main__':
@@ -99,6 +92,8 @@ if __name__ == '__main__':
     elif args.scenes:
         layer = 'scenes'
         arg = args.scenes
+
+    by_class = getattr(macrobuttons, layer.capitalize())
 
     with MacroButtonRun(layer, arg) as mb:
         mb.run()

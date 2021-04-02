@@ -8,7 +8,7 @@ from custom import Commands
 
 
 class Macros:
-    def __init__(self, macro, switch, oai):
+    def __init__(self, macro, oai, switch = None):
         """ superclass constructor """
         self.macro = macro
         self.switch = switch
@@ -29,8 +29,8 @@ class Macros:
         
 
 class Audio(Macros):
-    def __init__(self, macro, switch, oai):
-        Macros.__init__(self, macro, switch, oai)
+    def __init__(self, macro, oai, switch):
+        Macros.__init__(self, macro, oai, switch)
 
     def run(self):
         self.oai.show()
@@ -145,8 +145,8 @@ class Audio(Macros):
         pass
 
 class Scenes(Macros):
-    def __init__(self, macro, switch, oai):
-        Macros.__init__(self, macro, switch, oai)
+    def __init__(self, macro, oai, switch):
+        Macros.__init__(self, macro, oai, switch)
 
     def run(self):
         self.oai.show()
@@ -231,8 +231,8 @@ class Scenes(Macros):
         print('End scene enabled.')
 
 class Reset(Macros):
-    def __init__(self, macro, switch, oai):
-        Macros.__init__(self, macro, switch, oai)
+    def __init__(self, macro, oai):
+        Macros.__init__(self, macro, oai)
 
     def reset(self, default_states):
         """ reset to default states """
