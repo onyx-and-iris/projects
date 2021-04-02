@@ -1,11 +1,23 @@
 require "rake/testtask"
 
-Rake::TestTask.new :pass do |task|
-task.pattern = "test/pass/*_minitest.rb"
-task.warning = false 
+task default: %w[basic:pass]
+
+namespace :basic do
+    desc "PASS tests for type BASIC"
+    Rake::TestTask.new :pass do |task|
+    task.pattern = "test/basic/pass/*_minitest.rb"
+    task.warning = false 
+    end
+
+    Rake::TestTask.new :errors do |task|
+    desc "ERROR tests for type BASIC"
+    task.pattern = "test/basic/errors/*_minitest.rb"
+    task.warning = false 
+    end
 end
 
-Rake::TestTask.new :errors do |task|
-task.pattern = "test/errors/*_minitest.rb"
-task.warning = false 
+namespace :banana do
+end
+
+namespace :potato do
 end
