@@ -5,6 +5,12 @@ module Errors
         end
     end
 
+    class EXENotFoundError < StandardError
+        def message
+            "Could not find EXE. Is Voicemeeter installed correctly?"
+        end
+    end
+
     class LoginError < StandardError
         def message
             "Failed to login, success return value:"
