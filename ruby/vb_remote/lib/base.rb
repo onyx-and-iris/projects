@@ -68,11 +68,11 @@ module WrapperBase
         end
     end
 
-    def exec(func, *args)
+    def run_as(func, *args)
         torun = 'vmr_' + func.to_s
         val = send(torun, *args)
 
-        sleep(0.035) if torun.include? 'set_'
+        sleep(0.032) if torun.include? 'set_'
         val
     end
 end
