@@ -7,7 +7,7 @@ class MiniTest::Test
     SUCCESS = 0
     ERROR = 1
 
-    @@vmr = Remote.new("banana", "login")
+    @@vmr = Remote.new("potato", "login")
 
     @@param_hash = {
         :strip_1 => {"mute" => ON, "gain" => ON, "A2" => ON},

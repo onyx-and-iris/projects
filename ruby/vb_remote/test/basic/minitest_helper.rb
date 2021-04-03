@@ -24,6 +24,6 @@ class MiniTest::Test
     end
 
     def after_tests
-        @@vmr.do_logout
+        @@vmr.logout
     end 
 end
