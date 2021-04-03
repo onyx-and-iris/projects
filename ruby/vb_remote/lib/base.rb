@@ -47,6 +47,8 @@ module WrapperBase
     attach_function :vmr_set_parameter_multi, :VBVMR_SetParameters, \
     [:string], :long
 
+    DELAY = 0.032
+
     """ Timer functions """
     def clear_pdirty
         while vmr_pdirty&.nonzero?
@@ -72,7 +74,7 @@ module WrapperBase
         torun = 'vmr_' + func.to_s
         val = send(torun, *args)
 
-        sleep(0.032) if torun.include? 'set_'
+        sleep(DELAY) if torun.include? 'set_'
         val
     end
 end
