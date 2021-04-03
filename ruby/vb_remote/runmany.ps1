@@ -26,7 +26,6 @@ Function ParseLogs {
         param([string]$logfile)
         $summary_file = "test/${t}/summary.log"
         $RESULT_PATTERN = "^[0-9]+\s"
-        $counter = 0
         $delay = $(Get-content -Path "lib/base.rb" | Select-String -AllMatches "DELAY = (\d+.\d+)")
         $delay = $delay.Matches[0].Groups[1].Value
 
@@ -43,26 +42,27 @@ Function ParseLogs {
                 if ($line -match $RESULT_PATTERN) {
                         $values = $line.split(",")
 
-                        $num = $values[0].split()[0]
-                        $res = $values[0].split()[1]
-                        $DATA[$res] += [int]$num
+                        $value = $values[0].split()[0]
+                        $name = $values[0].split()[1]
+                        $DATA[$name] += [int]$value
 
                         1..4 | ForEach-Object {
-                                $num = $values[$_].split()[1]
-                                $res = $values[$_].split()[2]
-                                $DATA[$res] += [int]$num                       
+                                $value = $values[$_].split()[1]
+                                $name = $values[$_].split()[2]
+                                $DATA[$name] += [int]$value                       
                         }
-                        $counter++
                 }
         }
 
-        "==================================`n" +`
-        "Version: ${t} | Test type: ${type}`n" +`
-        "==================================" | Tee-Object -FilePath $summary_file -Append
-        "${counter} tests run with a delay of ${delay}" | Tee-Object -FilePath $summary_file -Append
+        $savefile = LogRotate -logfile $logfile
+        $log_backupfile = Split-Path $savefile -leaf
+        
+        "============================================`n" + `
+        "Version: ${t} | Test type: ${type}`n" + `
+        "Logfile for this test run: ${log_backupfile}`n" + `
+        "==============================================" | Tee-Object -FilePath $summary_file -Append
+        "${num} tests run with a delay of ${delay}" | Tee-Object -FilePath $summary_file -Append
         ${DATA} | ForEach-Object { $_ } | Tee-Object -FilePath $summary_file -Append
-
-        LogRotate -logfile $logfile
 }
 
 Function LogRotate {
@@ -76,7 +76,6 @@ Function LogRotate {
                 do {
                         try {
                                 $savefile = "$($_.Fullname)_$i.backup"
-                                Write-Host $savefile
                                 Rename-Item -Path $_.FullName `
                                 -NewName $savefile -ErrorAction "Stop"
 
@@ -88,7 +87,7 @@ Function LogRotate {
                         }      
                 } until ($StopLoop -eq $true)
         }
-
+        $savefile
 }
 
 if ($MyInvocation.InvocationName -ne ".")
