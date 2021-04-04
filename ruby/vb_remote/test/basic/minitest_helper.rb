@@ -23,7 +23,7 @@ class MiniTest::Test
     def teardown
     end
 
-    def after_tests
+    MiniTest.after_run do
         @@vmr.logout
-    end 
+    end
 end
