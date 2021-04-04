@@ -264,7 +264,7 @@ class Remote < BaseRoutines
     Performs log in/out routines cleanly. 
     May yield a block argument otherwise simply login.
     """
-    def initialize(type = nil, login = nil)
+    def initialize(type = nil, do_login = nil)
         if type == "basic"
             self.type = BASIC
         elsif type == "banana"
@@ -272,7 +272,7 @@ class Remote < BaseRoutines
         elsif type == "potato"
             self.type = POTATO
         end
-        self.run if login == "login"
+        self.run if do_login == "login"
     end
 
     def run

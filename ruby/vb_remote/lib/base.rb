@@ -47,7 +47,7 @@ module WrapperBase
     attach_function :vmr_set_parameter_multi, :VBVMR_SetParameters, \
     [:string], :long
 
-    DELAY = 0.032
+    DELAY = 0.038
 
     """ Timer functions """
     def clear_pdirty
