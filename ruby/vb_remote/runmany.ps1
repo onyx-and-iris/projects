@@ -1,6 +1,7 @@
 param(
         [parameter(Mandatory=$false)]
         [Int] $num = 1,
+        [switch]$cycle,
         [parameter(Mandatory=$true)]
         [ValidateSet("basic","banana","potato")]
         [string]$t,
@@ -11,12 +12,19 @@ param(
 if ($p) { $type = "pass" }
 elseif ($e) { $type = "error" }
 
+$global:failures = 0
+
 Function RunTests {
+        param([int]$cycle_num)
+        if ($cycle_num) {
+                $num = $cycle_num
+        }
+
         $_runtests = "rake ${t}:${type}" 
         $logfile = "test/${t}/${t}_${type}.log"
 
         1..$num | ForEach-Object `
-        { "Running test $_" | Tee-Object -FilePath $logfile -Append
+        { "Running test $_ of $num" | Tee-Object -FilePath $logfile -Append
         Invoke-Expression $_runtests | Tee-Object -FilePath $logfile -Append }
 
         ParseLogs -logfile $logfile
@@ -63,6 +71,8 @@ Function ParseLogs {
         "==============================================" | Tee-Object -FilePath $summary_file -Append
         "${num} tests run with a delay of ${delay}" | Tee-Object -FilePath $summary_file -Append
         ${DATA} | ForEach-Object { $_ } | Tee-Object -FilePath $summary_file -Append
+
+        $global:failures = $DATA["failures"]
 }
 
 Function LogRotate {
@@ -92,5 +102,10 @@ Function LogRotate {
 
 if ($MyInvocation.InvocationName -ne ".")
 {
-        RunTests
+        if ($cycle) {
+                @(100, 200, 500, 1000) | ForEach-Object {
+                        RunTests -cycle_num $_
+                        if ($global:failures -gt 0) { break }
+                }
+        } else { RunTests }
 }
