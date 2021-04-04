@@ -65,9 +65,12 @@ class BaseRoutines
     def type=(value)
         """ vb type """
         unless (1..3).include? value
-            raise "Invalid vb type"
+            raise VBTypeError
         end
-        @type = value
+        @type = value    
+    rescue VBTypeError => error
+        puts "ERROR: #{error.message}"
+        raise
     end
 
     def sp_command=(value)
@@ -271,8 +274,13 @@ class Remote < BaseRoutines
             self.type = BANANA
         elsif type == "potato"
             self.type = POTATO
+        else
+            raise VBTypeError
         end
         self.run if do_login == "login"
+    rescue VBTypeError => error
+        puts "ERROR: #{error.message}"
+        raise
     end
 
     def run

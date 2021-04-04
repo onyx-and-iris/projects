@@ -11,6 +11,12 @@ module Errors
         end
     end
 
+    class VBTypeError < StandardError
+        def message
+            "Unknown Voicemeeter type"
+        end
+    end
+
     class LoginError < StandardError
         def message
             "Failed to login, success return value:"
