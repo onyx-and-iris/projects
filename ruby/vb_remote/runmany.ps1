@@ -6,11 +6,12 @@ param(
         [ValidateSet("basic","banana","potato")]
         [string]$t,
         [parameter(Mandatory=$false)]
-        [switch]$p,[switch]$e
+        [switch]$p,[switch]$e,[switch]$m
         )
 
 if ($p) { $type = "pass" }
 elseif ($e) { $type = "error" }
+elseif ($m) { $type = "macros" }
 
 $global:failures = 0
 
@@ -99,6 +100,7 @@ Function LogRotate {
         }
         $savefile
 }
+
 
 if ($MyInvocation.InvocationName -ne ".")
 {
