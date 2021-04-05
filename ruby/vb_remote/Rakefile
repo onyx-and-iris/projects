@@ -17,7 +17,7 @@ namespace :basic do
 
     Rake::TestTask.new :macros do |task|
         desc "Isolate Macrobutton tests for type BASIC"
-        task.pattern = "test/basic/pass/macrobutton*_minitest.rb"
+        task.pattern = "test/basic/pass/macrobutton_*.rb"
         task.warning = false 
     end 
 end
@@ -37,7 +37,7 @@ namespace :banana do
 
     Rake::TestTask.new :macros do |task|
         desc "Isolate Macrobutton tests for type BANANA"
-        task.pattern = "test/banana/pass/macrobutton*_minitest.rb"
+        task.pattern = "test/banana/pass/macrobutton_*.rb"
         task.warning = false 
     end 
 end
@@ -57,7 +57,7 @@ namespace :potato do
 
     Rake::TestTask.new :macros do |task|
         desc "Isolate Macrobutton tests for type POTATO"
-        task.pattern = "test/potato/pass/macrobutton*_minitest.rb"
+        task.pattern = "test/potato/pass/macrobutton_*.rb"
         task.warning = false 
     end 
 end

@@ -12,7 +12,7 @@ class BaseRoutines
     include Strips
     include Utils
 
-    attr_accessor :val
+    attr_accessor :val, :param_cache
     attr_reader :ret, :type, :logged_in, :logged_out, :sp_command, \
     :param_string, :param_options, :param_float, :param_name, :instdir
 
@@ -90,6 +90,19 @@ class BaseRoutines
         @sp_value = value
     end
 
+    def param_cache=(*args)
+        if args[0][0] == "macros"
+            logical_id = args[0][1]
+            mode = args[0][2]
+            state = args[0][3]
+            @param_cache["mb_#{logical_id}_#{mode}"] = state           
+        elsif args[0][0] == "params"
+            param = args[0][1]
+            value = args[0][2]
+            @param_cache[param] = value
+        end
+    end
+
     def param_name=(value)
         """ 
         Test against available regex
@@ -126,6 +139,8 @@ class BaseRoutines
                     build_str.append(
                         "#{name.capitalize}[#{num.to_s}].#{k} = #{v}"
                     )
+                    self.param_cache = 
+                    ["params", "#{name.capitalize}[#{num.to_s}].#{k}", v]
                 end
             end
         end
@@ -137,6 +152,22 @@ class BaseRoutines
             raise BoundsError
         end
         @logical_id = value
+    end
+
+    def initialize(type, do_login)
+        if type
+            if type == "basic"
+                self.type = BASIC
+            elsif type == "banana"
+                self.type = BANANA
+            elsif type == "potato"
+                self.type = POTATO
+            else
+                raise VBTypeError
+            end
+        end
+
+        @param_cache = Hash.new
     end
 
     def runvb
@@ -168,10 +199,10 @@ class BaseRoutines
     def macro_setstatus(logical_id, state, mode=2)
         """ 
         set macrobutton by number, state and mode
-        poll m_dirty to signify value change
         """
         self.logical_id = logical_id
         self.ret = run_as(__method__, @logical_id, state.to_f, mode)
+        self.param_cache = ["macros", logical_id, mode, state]
 
     rescue BoundsError => error
         puts "ERROR: Logical ID out of range"
@@ -179,8 +210,11 @@ class BaseRoutines
     end
 
     def macro_getstatus(logical_id, mode=2)
-        if vmr_mdirty&.nonzero?
+        if vmr_mdirty
             clear_mdirty
+            if @param_cache.key?("mb_#{logical_id}_#{mode}")
+                return @param_cache["mb_#{logical_id}_#{mode}"]
+            end
         end
 
         c_get = FFI::MemoryPointer.new(:float, SIZE)
@@ -204,9 +238,13 @@ class BaseRoutines
 
         if validate(@m1, @m2)
             if @param_string
-                self.ret = run_as(__method__.to_s + '_string', @param_name, @param_string)
+                self.ret = 
+                run_as(__method__.to_s + '_string', @param_name, @param_string)
+                self.param_cache = ["params", @param_name, @param_string]
             else
-                self.ret = run_as(__method__.to_s + '_float', @param_name, @param_float)
+                self.ret = 
+                run_as(__method__.to_s + '_float', @param_name, @param_float)
+                self.param_cache = ["params", @param_name, @param_float]
             end
         else
             raise BoundsError
@@ -223,10 +261,17 @@ class BaseRoutines
     end
 
     def get_parameter(name)
-        if vmr_pdirty&.nonzero?
-            clear_pdirty
-        end
         self.param_name = name
+        if vmr_pdirty
+            clear_pdirty
+            if @param_cache.key?(@param_name)
+                if @is_real_number.include? @m3
+                    return type_return(@m3, @param_cache[@param_name])
+                else
+                    return @param_cache[@param_name]
+                end
+            end
+        end
 
         if @is_real_number.include? @m3
             c_get = FFI::MemoryPointer.new(:float, SIZE)
@@ -269,17 +314,7 @@ class Remote < BaseRoutines
     May yield a block argument otherwise simply login.
     """
     def initialize(type = nil, do_login = nil)
-        if type
-            if type == "basic"
-                self.type = BASIC
-            elsif type == "banana"
-                self.type = BANANA
-            elsif type == "potato"
-                self.type = POTATO
-            else
-                raise VBTypeError
-            end
-        end
+        super(type, do_login)
         self.run if do_login == "login"
     rescue VBTypeError => error
         puts "ERROR: #{error.message}"
@@ -293,6 +328,30 @@ class Remote < BaseRoutines
             yield
 
             logout
+        end
+    end
+
+    def button_state(id: nil, state: nil)
+        if id && state
+            macro_setstatus(id, state, 1)
+        elsif id
+            return macro_getstatus(id, 1)            
+        end
+    end
+
+    def button_stateonly(id: nil, state: nil)
+        if id && state
+            macro_setstatus(id, state, 2)
+        elsif id
+            return macro_getstatus(id, 2)            
+        end
+    end
+
+    def button_trigger(id: nil, state: nil)
+        if id && state
+            macro_setstatus(id, state, 3)
+        elsif id
+            return macro_getstatus(id, 3)            
         end
     end
 end
