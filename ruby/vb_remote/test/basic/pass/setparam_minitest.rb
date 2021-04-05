@@ -71,8 +71,7 @@ class SetParamsMulti < Minitest::Test
                     expected = 1.0
                 end
 
-                @@vmr.get_parameter(param)
-                assert_equal(expected, @@vmr.val)
+                assert_equal(expected, @@vmr.get_parameter(param))
             end
         end
     end
@@ -103,8 +102,7 @@ class SetParamsMulti < Minitest::Test
                     expected = 0.0
                 end
 
-                @@vmr.get_parameter(param)
-                assert_equal(expected, @@vmr.val)
+                assert_equal(expected, @@vmr.get_parameter(param))
             end
         end
     end

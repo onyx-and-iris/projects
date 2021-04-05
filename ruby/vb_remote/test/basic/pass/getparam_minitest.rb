@@ -5,8 +5,7 @@ class GetParamsFloat < Minitest::Test
         (0..1).each do |num|
             @@vmr.set_parameter("Strip[#{num}].mono", ON)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Strip[#{num}].mono")
-            assert_equal(ON, @@vmr.val)
+            assert_equal(ON, @@vmr.get_parameter("Strip[#{num}].mono"))
         end
     end
 
@@ -14,8 +13,7 @@ class GetParamsFloat < Minitest::Test
         (0..1).each do |num|
             @@vmr.set_parameter("Strip[#{num}].mono", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Strip[#{num}].mono")
-            assert_equal(OFF, @@vmr.val)
+            assert_equal(OFF, @@vmr.get_parameter("Strip[#{num}].mono"))
         end
     end
 
@@ -23,8 +21,7 @@ class GetParamsFloat < Minitest::Test
         (0..2).each do |num|
             @@vmr.set_parameter("Strip[#{num}].solo", ON)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Strip[#{num}].solo")
-            assert_equal(ON, @@vmr.val)
+            assert_equal(ON, @@vmr.get_parameter("Strip[#{num}].solo"))
         end
     end
 
@@ -32,8 +29,7 @@ class GetParamsFloat < Minitest::Test
         (0..2).each do |num|
             @@vmr.set_parameter("Strip[#{num}].solo", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Strip[#{num}].solo")
-            assert_equal(OFF, @@vmr.val)
+            assert_equal(OFF, @@vmr.get_parameter("Strip[#{num}].solo"))
         end
     end
 
@@ -41,8 +37,7 @@ class GetParamsFloat < Minitest::Test
         (0..2).each do |num|
             @@vmr.set_parameter("Strip[#{num}].mute", ON)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Strip[#{num}].mute")
-            assert_equal(ON, @@vmr.val)
+            assert_equal(ON, @@vmr.get_parameter("Strip[#{num}].mute"))
         end
     end
 
@@ -50,8 +45,7 @@ class GetParamsFloat < Minitest::Test
         (0..2).each do |num|
             @@vmr.set_parameter("Strip[#{num}].mute", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Strip[#{num}].mute")
-            assert_equal(OFF, @@vmr.val)
+            assert_equal(OFF, @@vmr.get_parameter("Strip[#{num}].mute"))
         end
     end
 
@@ -59,8 +53,7 @@ class GetParamsFloat < Minitest::Test
         (0..1).each do |num|
             @@vmr.set_parameter("Bus[#{num}].mute", ON)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Bus[#{num}].mute")
-            assert_equal(ON, @@vmr.val)
+            assert_equal(ON, @@vmr.get_parameter("Bus[#{num}].mute"))
         end
     end
 
@@ -68,8 +61,7 @@ class GetParamsFloat < Minitest::Test
         (0..1).each do |num|
             @@vmr.set_parameter("Bus[#{num}].mute", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Bus[#{num}].mute")
-            assert_equal(OFF, @@vmr.val)
+            assert_equal(OFF, @@vmr.get_parameter("Bus[#{num}].mute"))
         end
     end
 
@@ -77,8 +69,7 @@ class GetParamsFloat < Minitest::Test
         (0..1).each do |num|
             @@vmr.set_parameter("Bus[#{num}].mono", ON)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Bus[#{num}].mono")
-            assert_equal(ON, @@vmr.val)
+            assert_equal(ON, @@vmr.get_parameter("Bus[#{num}].mono"))
         end
     end
 
@@ -86,8 +77,7 @@ class GetParamsFloat < Minitest::Test
         (0..1).each do |num|
             @@vmr.set_parameter("Bus[#{num}].mono", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
-            @@vmr.get_parameter("Bus[#{num}].mono")
-            assert_equal(OFF, @@vmr.val)
+            assert_equal(OFF, @@vmr.get_parameter("Bus[#{num}].mono"))
         end
     end
 end
@@ -103,8 +93,7 @@ class GetParamsString < Minitest::Test
             ].each do |label|
                 @@vmr.set_parameter("Strip[#{num}].Label", label)
                 assert_equal(SUCCESS, @@vmr.ret)
-                @@vmr.get_parameter("Strip[#{num}].Label")
-                assert_equal(label, @@vmr.val)
+                assert_equal(label, @@vmr.get_parameter("Strip[#{num}].Label"))
             end
         end
     end
