@@ -3,21 +3,61 @@ require "rake/testtask"
 task default: %w[basic:pass]
 
 namespace :basic do
-    desc "PASS tests for type BASIC"
     Rake::TestTask.new :pass do |task|
-    task.pattern = "test/basic/pass/*_minitest.rb"
-    task.warning = false 
+        desc "PASS tests for type BASIC"
+        task.pattern = "test/basic/pass/*_minitest.rb"
+        task.warning = false 
     end
 
     Rake::TestTask.new :errors do |task|
-    desc "ERROR tests for type BASIC"
-    task.pattern = "test/basic/errors/*_minitest.rb"
-    task.warning = false 
+        desc "ERROR tests for type BASIC"
+        task.pattern = "test/basic/errors/*_minitest.rb"
+        task.warning = false 
     end
+
+    Rake::TestTask.new :macros do |task|
+        desc "Isolate Macrobutton tests for type BASIC"
+        task.pattern = "test/basic/pass/macrobutton*_minitest.rb"
+        task.warning = false 
+    end 
 end
 
 namespace :banana do
+    Rake::TestTask.new :pass do |task|
+        desc "PASS tests for type BANANA"
+        task.pattern = "test/banana/pass/*_minitest.rb"
+        task.warning = false 
+    end
+    
+    Rake::TestTask.new :errors do |task|
+        desc "ERROR tests for type BANANA"
+        task.pattern = "test/banana/errors/*_minitest.rb"
+        task.warning = false 
+    end
+
+    Rake::TestTask.new :macros do |task|
+        desc "Isolate Macrobutton tests for type BANANA"
+        task.pattern = "test/banana/pass/macrobutton*_minitest.rb"
+        task.warning = false 
+    end 
 end
 
 namespace :potato do
+    Rake::TestTask.new :pass do |task|
+        desc "PASS tests for type POTATO"
+        task.pattern = "test/potato/pass/*_minitest.rb"
+        task.warning = false 
+    end
+
+    Rake::TestTask.new :errors do |task|
+        desc "ERROR tests for type POTATO"
+        task.pattern = "test/potato/errors/*_minitest.rb"
+        task.warning = false 
+    end
+
+    Rake::TestTask.new :macros do |task|
+        desc "Isolate Macrobutton tests for type POTATO"
+        task.pattern = "test/potato/pass/macrobutton*_minitest.rb"
+        task.warning = false 
+    end 
 end
