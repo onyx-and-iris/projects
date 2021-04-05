@@ -1,6 +1,7 @@
+require 'open3'
+
 require_relative 'base'
 require_relative 'strips'
-require 'open3'
 
 class BaseRoutines
     """ 
@@ -268,14 +269,16 @@ class Remote < BaseRoutines
     May yield a block argument otherwise simply login.
     """
     def initialize(type = nil, do_login = nil)
-        if type == "basic"
-            self.type = BASIC
-        elsif type == "banana"
-            self.type = BANANA
-        elsif type == "potato"
-            self.type = POTATO
-        else
-            raise VBTypeError
+        if type
+            if type == "basic"
+                self.type = BASIC
+            elsif type == "banana"
+                self.type = BANANA
+            elsif type == "potato"
+                self.type = POTATO
+            else
+                raise VBTypeError
+            end
         end
         self.run if do_login == "login"
     rescue VBTypeError => error
