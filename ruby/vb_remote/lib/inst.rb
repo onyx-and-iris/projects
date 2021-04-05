@@ -48,7 +48,11 @@ def inst_exe=(value)
     elsif value == BANANA
         exe = "voicemeeterpro.exe"
     elsif value == POTATO
-        exe = "voicemeeter8.exe"
+        if @os_bits == 64
+            exe = "voicemeeter8x64.exe"
+        else
+            exe = "voicemeeter8.exe"
+        end
     end
     if get_vbpath.join(exe).executable?
         @inst_exe = String(get_vbpath.join(exe))

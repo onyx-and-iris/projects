@@ -4,11 +4,11 @@ require_relative 'inst'
 module WrapperBase
     extend FFI::Library
 
-    attr_reader :vmr_dll
+    attr_reader :vmr_dll, :os_bits
 
-    if ((os_bits = get_arch) == 64)
+    if ((@os_bits = get_arch) == 64)
         dll_name = "VoicemeeterRemote64.dll"
-    elsif os_bits == 32
+    elsif @os_bits == 32
         dll_name = "VoicemeeterRemote.dll"
     end
 
