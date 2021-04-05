@@ -273,6 +273,9 @@ def setparammulti(vmr)
             :bus_1 => {"mute" => ON, "gain" => ON, "mono" => ON},
             :bus_2 => {"mute" => ON, "gain" => ON, "mono" => ON},
             :bus_3 => {"mute" => ON, "gain" => ON, "mono" => ON},
+            :bus_4 => {"mute" => ON, "gain" => ON, "mono" => ON},
+            :bus_5 => {"mute" => ON, "gain" => ON, "mono" => ON},
+            :bus_6 => {"mute" => ON, "gain" => ON, "mono" => ON},
             :bus_12 => {"mute" => ON, "gain" => ON, "mono" => ON},
             :bus_15 => {"mute" => ON, "gain" => ON, "mono" => ON}
         }

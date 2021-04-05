@@ -1,8 +1,8 @@
 require_relative '../minitest_helper'
 
 class GetParamsFloat < Minitest::Test
-    def test_it_gets_strip_0to1_mono_value_on
-        (0..1).each do |num|
+    def test_it_gets_strip_0to2_mono_value_on
+        (0..2).each do |num|
             @@vmr.set_parameter("Strip[#{num}].mono", ON)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Strip[#{num}].mono")
@@ -10,8 +10,8 @@ class GetParamsFloat < Minitest::Test
         end
     end
 
-    def test_it_gets_strip_0to1_mono_value_off
-        (0..1).each do |num|
+    def test_it_gets_strip_0to2_mono_value_off
+        (0..2).each do |num|
             @@vmr.set_parameter("Strip[#{num}].mono", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Strip[#{num}].mono")
@@ -19,8 +19,8 @@ class GetParamsFloat < Minitest::Test
         end
     end
 
-    def test_it_gets_strip_0to2_solo_value_on
-        (0..2).each do |num|
+    def test_it_gets_strip_0to4_solo_value_on
+        (0..4).each do |num|
             @@vmr.set_parameter("Strip[#{num}].solo", ON)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Strip[#{num}].solo")
@@ -28,8 +28,8 @@ class GetParamsFloat < Minitest::Test
         end
     end
 
-    def test_it_gets_strip_0to2_solo_value_off
-        (0..2).each do |num|
+    def test_it_gets_strip_0to4_solo_value_off
+        (0..4).each do |num|
             @@vmr.set_parameter("Strip[#{num}].solo", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Strip[#{num}].solo")
@@ -37,8 +37,8 @@ class GetParamsFloat < Minitest::Test
         end
     end
 
-    def test_it_gets_strip_0to2_mute_value_on
-        (0..2).each do |num|
+    def test_it_gets_strip_0to4_mute_value_on
+        (0..4).each do |num|
             @@vmr.set_parameter("Strip[#{num}].mute", ON)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Strip[#{num}].mute")
@@ -46,8 +46,8 @@ class GetParamsFloat < Minitest::Test
         end
     end
 
-    def test_it_gets_strip_0to2_mute_value_off
-        (0..2).each do |num|
+    def test_it_gets_strip_0to4_mute_value_off
+        (0..4).each do |num|
             @@vmr.set_parameter("Strip[#{num}].mute", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Strip[#{num}].mute")
@@ -55,8 +55,8 @@ class GetParamsFloat < Minitest::Test
         end
     end
 
-    def test_it_gets_bus_0to1_mute_value_on
-        (0..1).each do |num|
+    def test_it_gets_bus_0to4_mute_value_on
+        (0..4).each do |num|
             @@vmr.set_parameter("Bus[#{num}].mute", ON)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Bus[#{num}].mute")
@@ -64,8 +64,8 @@ class GetParamsFloat < Minitest::Test
         end
     end
 
-    def test_it_gets_bus_0to1_mute_value_off
-        (0..1).each do |num|
+    def test_it_gets_bus_0to4_mute_value_off
+        (0..4).each do |num|
             @@vmr.set_parameter("Bus[#{num}].mute", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Bus[#{num}].mute")
@@ -73,8 +73,8 @@ class GetParamsFloat < Minitest::Test
         end
     end
 
-    def test_it_gets_bus_0to1_mono_value_on
-        (0..1).each do |num|
+    def test_it_gets_bus_0to4_mono_value_on
+        (0..4).each do |num|
             @@vmr.set_parameter("Bus[#{num}].mono", ON)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Bus[#{num}].mono")
@@ -82,8 +82,8 @@ class GetParamsFloat < Minitest::Test
         end
     end
 
-    def test_it_gets_bus_0to1_mono_value_off
-        (0..1).each do |num|
+    def test_it_gets_bus_0to4_mono_value_off
+        (0..4).each do |num|
             @@vmr.set_parameter("Bus[#{num}].mono", OFF)
             assert_equal(SUCCESS, @@vmr.ret)
             @@vmr.get_parameter("Bus[#{num}].mono")
