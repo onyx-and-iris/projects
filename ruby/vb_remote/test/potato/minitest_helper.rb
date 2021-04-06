@@ -7,7 +7,7 @@ class MiniTest::Test
     SUCCESS = 0
     ERROR = 1
 
-    @@vmr = Remote.new("potato", "login")
+    @@vmr = Remote.new("potato", logmein=true)
 
     @@param_hash = {
         :strip_1 => {

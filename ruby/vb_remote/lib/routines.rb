@@ -156,7 +156,7 @@ class Routines
         @logical_id = value
     end
 
-    def initialize(type = nil, do_login = nil)
+    def initialize(type = nil)
         if type
             if type == "basic"
                 self.type = BASIC
@@ -315,9 +315,9 @@ class Remote < Routines
     Performs log in/out routines cleanly. 
     May yield a block argument otherwise simply login.
     """
-    def initialize(type = nil, do_login = nil)
-        super(type, do_login)
-        self.run if do_login == "login"
+    def initialize(type = nil, logmein = false)
+        super(type)
+        self.run if logmein
 
     rescue VBTypeError => error
         puts "ERROR: #{error.message}"
