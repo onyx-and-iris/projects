@@ -200,6 +200,70 @@ module BuildStrips
                 return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
             end
         end
+
+        def A1(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def A2(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def A3(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def A4(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def A5(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+        
+        def B1(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def B2(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def B3(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
     end
 
     class Bus
