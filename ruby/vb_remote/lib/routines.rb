@@ -2,15 +2,17 @@ require 'open3'
 
 require_relative 'base'
 require_relative 'strips'
+require_relative 'alias'
 
-class BaseRoutines
+class Routines
     """ 
     define basic behaviours of API functions
     mixin modules
     """
-    include WrapperBase
-    include Strips
+    include FunctionHooks
+    include BuildStrips
     include Utils
+    include Alias
 
     attr_accessor :val, :param_cache
     attr_reader :ret, :type, :logged_in, :logged_out, :sp_command, \
@@ -154,7 +156,7 @@ class BaseRoutines
         @logical_id = value
     end
 
-    def initialize(type, do_login)
+    def initialize(type = nil, do_login = nil)
         if type
             if type == "basic"
                 self.type = BASIC
@@ -307,15 +309,16 @@ class BaseRoutines
     end
 end
 
-class Remote < BaseRoutines
+class Remote < Routines
     """ 
-    subclass to BaseRoutines. 
+    subclass to BaseRoutines.
     Performs log in/out routines cleanly. 
     May yield a block argument otherwise simply login.
     """
     def initialize(type = nil, do_login = nil)
         super(type, do_login)
         self.run if do_login == "login"
+
     rescue VBTypeError => error
         puts "ERROR: #{error.message}"
         raise
@@ -323,35 +326,11 @@ class Remote < BaseRoutines
 
     def run
         login
-        
+
         if block_given?
             yield
 
             logout
-        end
-    end
-
-    def button_state(id: nil, state: nil)
-        if id && state
-            macro_setstatus(id, state, 1)
-        elsif id
-            return macro_getstatus(id, 1)            
-        end
-    end
-
-    def button_stateonly(id: nil, state: nil)
-        if id && state
-            macro_setstatus(id, state, 2)
-        elsif id
-            return macro_getstatus(id, 2)            
-        end
-    end
-
-    def button_trigger(id: nil, state: nil)
-        if id && state
-            macro_setstatus(id, state, 3)
-        elsif id
-            return macro_getstatus(id, 3)            
         end
     end
 end

@@ -1,7 +1,11 @@
-module Strips
-    attr_accessor :is_real_number, :is_bool, :is_float
+module BuildStrips
+    attr_accessor :is_real_number, :is_bool, :is_float, :num, :strip, :bus, 
+    :this_type
     attr_reader :layout, :strip_total, :bus_total, :vban_total, \
     :composite_total, :insert_total
+
+    ON = 1
+    OFF = 0
 
     def layout=(value)
         @layout = value
@@ -31,9 +35,18 @@ module Strips
         @is_real_number = value
     end
 
+    def strip=(value)
+        @strip = value 
+    end
+
+    def bus=(value)
+        @bus = value
+    end
+
     def build_strips(type)
         """ blueprint strip layouts for each type """
-        if type == BASIC
+        @this_type = type
+        if @this_type == BASIC
             blueprint({
                 :strip => {:p_in => 2, :v_in=> 1},
                 :bus => {:p_out => 2, :v_out=> 0},
@@ -41,7 +54,7 @@ module Strips
                 :patch_insert => 0,
                 :composite => 0
             })
-        elsif type == BANANA
+        elsif @this_type == BANANA
             blueprint({
                 :strip => {:p_in => 3, :v_in=> 2},
                 :bus => {:p_out => 3, :v_out=> 2},
@@ -49,7 +62,7 @@ module Strips
                 :patch_insert => 22,
                 :composite => 7
             })
-        elsif type == POTATO
+        elsif @this_type == POTATO
             blueprint({
                 :strip => {:p_in => 5, :v_in=> 3},
                 :bus => {:p_out => 5, :v_out=> 3},
@@ -72,7 +85,9 @@ module Strips
         self.bus_total = 
         @layout[:bus][:p_out].+(@layout[:bus][:v_out])
 
-        types
+        strip_factory
+        bus_factory
+        define_types
     end
 
     def validate(name, num)
@@ -96,7 +111,7 @@ module Strips
         end
     end
 
-    def types
+    def define_types
         @is_bool = [
             "mono", "solo", "mute",
             "A1", "A2", "A3", "B1", "B2", "B3",
@@ -106,6 +121,142 @@ module Strips
         @is_float = ["gain"]
 
         self.is_real_number = @is_bool.|(@is_float)
+    end
+
+    def strip_factory
+        self.strip = []
+        (0..@strip_total).each_with_index do |num, index|
+            @strip[num] = Strip.new(index, @this_type)
+        end
+    end
+
+    def bus_factory
+        self.bus = []
+        (0..@bus_total).each_with_index do |num, index|
+            @bus[num] = Bus.new(index, @this_type)
+        end
+    end
+
+    class Strip
+        attr_accessor :index, :this_type
+
+        def index=(value)
+            @index = value
+        end
+
+        def this_type=(value)
+            @this_type = value
+        end
+
+        def initialize(index, type)
+            self.index = shift(index)
+            self.this_type = type
+        end
+
+        def shift(oldnum)
+            oldnum - 1
+        end
+
+        def set_parameter(param, value)
+            set = Routines.new
+            set.build_strips(@this_type)
+            set.set_parameter(param, value)
+        end
+
+        def get_parameter(param)
+            get = Routines.new
+            get.build_strips(@this_type)
+            get.get_parameter(param)
+        end
+
+        def mute(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def solo(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def mono(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def gain(value = nil)
+            if value
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            end
+        end
+    end
+
+    class Bus
+        attr_accessor :index, :this_type
+
+        def initialize(index, type)
+            self.index = shift(index)
+            self.this_type = type
+        end
+
+        def shift(oldnum)
+            oldnum - 1
+        end
+
+        def set_parameter(param, value)
+            set = Routines.new
+            set.build_strips(@this_type)
+            set.set_parameter(param, value)
+        end
+
+        def get_parameter(param)
+            get = Routines.new
+            get.build_strips(@this_type)
+            get.get_parameter(param)
+        end
+
+        def mute(value = nil)
+            if value
+                self.set_parameter("Bus[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Bus[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def solo(value = nil)
+            if value
+                self.set_parameter("Bus[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Bus[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def mono(value = nil)
+            if value
+                self.set_parameter("Bus[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Bus[#{@index}].#{__method__.to_s}")
+            end
+        end
+
+        def gain(value = nil)
+            if value
+                self.set_parameter("Bus[#{@index}].#{__method__.to_s}", value)
+            else
+                return self.get_parameter("Bus[#{@index}].#{__method__.to_s}")
+            end
+        end
     end
 end
 

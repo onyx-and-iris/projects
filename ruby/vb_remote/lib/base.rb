@@ -1,7 +1,7 @@
 require 'ffi'
 require_relative 'inst'
 
-module WrapperBase
+module FunctionHooks
     extend FFI::Library
 
     attr_reader :vmr_dll, :os_bits
