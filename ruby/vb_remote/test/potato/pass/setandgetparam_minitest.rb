@@ -309,16 +309,20 @@ class SetParamsMulti < Minitest::Test
 
         @@vmr.set_parameter_multi(@@param_hash)
         assert_equal(SUCCESS, @@vmr.ret)
-        0.upto(1) do |num|
+        0.upto(4) do |num|
             [
                 "Strip[#{num}].mute",
                 "Strip[#{num}].gain",
                 "Strip[#{num}].A1",
+                "Strip[#{num}].A2",
+                "Strip[#{num}].A3",
+                "Strip[#{num}].B1",
+                "Strip[#{num}].B2",
                 "Bus[#{num}].mute",
                 "Bus[#{num}].gain",
                 "Bus[#{num}].mono"
             ].each do |param|
-                a = ["mute", "A1", "mono"]
+                a = ["mute", "A1", "A2", "A3", "B1", "B2", "mono"]
                 b = param
                 if a.any? { |s| b.include? s }
                     expected = ON
@@ -326,7 +330,8 @@ class SetParamsMulti < Minitest::Test
                     expected = 1.0
                 end
 
-                assert_equal(expected, @@vmr.get_parameter(param))
+                @@vmr.get_parameter(param)
+                assert_equal(expected, @@vmr.val)
             end
         end
     end
@@ -340,16 +345,20 @@ class SetParamsMulti < Minitest::Test
 
         @@vmr.set_parameter_multi(@@param_hash)
         assert_equal(SUCCESS, @@vmr.ret)
-        0.upto(1) do |num|
+        0.upto(4) do |num|
             [
                 "Strip[#{num}].mute",
                 "Strip[#{num}].gain",
                 "Strip[#{num}].A1",
+                "Strip[#{num}].A2",
+                "Strip[#{num}].A3",
+                "Strip[#{num}].B1",
+                "Strip[#{num}].B2",
                 "Bus[#{num}].mute",
                 "Bus[#{num}].gain",
                 "Bus[#{num}].mono"
             ].each do |param|
-                a = ["mute", "A1", "mono"]
+                a = ["mute", "A1", "A2", "A3", "B1", "B2", "mono"]
                 b = param
                 if a.any? { |s| b.include? s }
                     expected = OFF
@@ -357,11 +366,13 @@ class SetParamsMulti < Minitest::Test
                     expected = 0.0
                 end
 
-                assert_equal(expected, @@vmr.get_parameter(param))
+                @@vmr.get_parameter(param)
+                assert_equal(expected, @@vmr.val)
             end
         end
     end
 end
+
 
 class SetAndGetParamsString < Minitest::Test
     def test_it_gets_strips_0to2_label_values

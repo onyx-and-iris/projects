@@ -1,6 +1,6 @@
 require_relative '../minitest_helper'
 
-class MacroButtonStatusSuccess < Minitest::Test
+class MacroButtonStatus < Minitest::Test
     def test_it_sets_macrobutton0_state_on
         @@vmr.macro_setstatus(0, ON, 1)
         assert_equal(SUCCESS, @@vmr.ret)
