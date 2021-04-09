@@ -71,6 +71,11 @@ module BuildStrips
                 :composite => 7
             })
         end
+
+        if @first_order
+            strip_factory
+            bus_factory
+        end
     end
 
     def blueprint(opts)
@@ -85,8 +90,6 @@ module BuildStrips
         self.bus_total = 
         @layout[:bus][:p_out].+(@layout[:bus][:v_out])
 
-        strip_factory
-        bus_factory
         define_types
     end
 
@@ -162,14 +165,12 @@ module BuildStrips
         end
 
         def set(param, value)
-            set = Routines.new
-            set.build_strips(@this_type)
+            set = Routines.new(@this_type, false)
             set.set_parameter(param, value)
         end
 
         def get(param)
-            get = Routines.new
-            get.build_strips(@this_type)
+            get = Routines.new(@this_type, false)
             get.get_parameter(param)
         end
 
@@ -329,14 +330,12 @@ module BuildStrips
         end
 
         def set(param, value)
-            set = Routines.new
-            set.build_strips(@this_type)
+            set = Routines.new(@this_type, false)
             set.set_parameter(param, value)
         end
 
         def get(param)
-            get = Routines.new
-            get.build_strips(@this_type)
+            get = Routines.new(@this_type, false)
             get.get_parameter(param)
         end
 

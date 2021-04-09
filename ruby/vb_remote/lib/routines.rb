@@ -14,7 +14,7 @@ class Routines
     include Utils
     include Alias
 
-    attr_accessor :val, :param_cache
+    attr_accessor :val, :param_cache, :first_order
     attr_reader :ret, :type, :logged_in, :logged_out, :sp_command, \
     :param_string, :param_options, :param_float, :param_name, :instdir
 
@@ -168,17 +168,27 @@ class Routines
         @logical_id = value
     end
 
-    def initialize(type = nil)
+    def first_order=(value)
+        @first_order = value
+    end
+
+    def initialize(type = nil, first_order = true)
+        self.first_order = first_order
+        
         if type
-            if type == "basic"
+            if type == "basic" || type == 1
                 self.type = BASIC
-            elsif type == "banana"
+            elsif type == "banana" || type == 2
                 self.type = BANANA
-            elsif type == "potato"
+            elsif type == "potato" || type == 3
                 self.type = POTATO
             else
                 raise VBTypeError
             end
+
+            if @first_order == false
+                build_strips(type)
+            end            
         end
 
         @param_cache = Hash.new
