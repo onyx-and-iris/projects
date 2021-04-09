@@ -6,12 +6,16 @@ param(
         [ValidateSet("basic","banana","potato")]
         [string]$t,
         [parameter(Mandatory=$false)]
-        [switch]$p,[switch]$e,[switch]$m
+        [switch]$p,[switch]$e,[switch]$m,
+        [switch]$s,[switch]$v,[switch]$a
         )
 
 if ($p) { $type = "pass" }
 elseif ($e) { $type = "error" }
 elseif ($m) { $type = "macros" }
+elseif ($s) { $type = "setandget" }
+elseif ($v) { $type = "vban" }
+elseif ($a) { $type = "alias" }
 
 $global:failures = 0
 

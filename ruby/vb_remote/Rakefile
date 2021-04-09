@@ -25,6 +25,12 @@ namespace :basic do
         desc "Isolate Setter and Getter tests for type BASIC"
         task.pattern = "test/basic/pass/setandget*.rb"
         task.warning = false 
+    end
+
+    Rake::TestTask.new :alias do |task|
+        desc "Isolate Setter and Getter tests for type BASIC"
+        task.pattern = "test/basic/pass/*_withalias_minitest.rb"
+        task.warning = false 
     end 
 
     Rake::TestTask.new :vban do |task|
