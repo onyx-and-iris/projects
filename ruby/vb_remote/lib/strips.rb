@@ -113,7 +113,7 @@ module BuildStrips
 
     def define_types
         @is_bool = [
-            "mono", "solo", "mute",
+            "mono", "solo", "mute", "mc", "k",
             "A1", "A2", "A3", "B1", "B2", "B3",
             "macrobutton"
         ]
@@ -169,35 +169,81 @@ module BuildStrips
             get.get_parameter(param)
         end
 
+        def mute=(value)
+            value = (value ? 1 : 0)
+            self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+        """ !get.zero? """
         def mute(value = nil)
-            if value
-                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            if value.nil?
+                self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
             else
-                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
             end
+        end
+
+        def solo=(value)
+            value = (value ? 1 : 0)
+            self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
         end
 
         def solo(value = nil)
-            if value
-                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            if value.nil?
+                self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
             else
-                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
             end
+        end
+
+        def mono=(value)
+            value = (value ? 1 : 0)
+            self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
         end
 
         def mono(value = nil)
-            if value
-                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            if value.nil?
+                self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
             else
-                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
             end
         end
 
-        def gain(value = nil)
-            if value
-                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+        def mc=(value)
+            value = (value ? 1 : 0)
+            self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def mc(value = nil)
+            if value.nil?
+                self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
             else
-                return self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            end
+        end
+
+        def k=(value)
+            value = (value ? 1 : 0)
+            self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def k(value = nil)
+            if value.nil?
+                self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            else
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+            end
+        end
+
+        def gain=(value)
+            value = (value ? 1 : 0)
+            self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def gain(value = nil)
+            if value.nil?
+                self.get_parameter("Strip[#{@index}].#{__method__.to_s}")
+            else
+                self.set_parameter("Strip[#{@index}].#{__method__.to_s}", value)
             end
         end
 
