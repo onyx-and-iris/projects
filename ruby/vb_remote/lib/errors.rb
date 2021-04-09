@@ -55,4 +55,10 @@ module Errors
 
     class ParamTypeError < StandardError
     end
+
+    class ParamValueError < StandardError
+        def message
+            "Parameter value out of range"
+        end
+    end
 end

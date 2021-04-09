@@ -124,8 +124,20 @@ class Routines
         if value.is_a? (String)
             @param_string = value
         else
-            @param_float = value
+            if ["instream", "outstream"].include? @m1
+                param = "vban"
+            else
+                param = @m3
+            end
+            if validate(param, value)
+                @param_float = value
+            else
+                raise ParamValueError 
+            end
         end
+    rescue ParamValueError => error
+        puts "ERROR: #{error.message}"
+        raise
     end
 
     def param_options=(value)
