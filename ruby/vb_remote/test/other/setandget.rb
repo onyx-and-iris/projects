@@ -33,7 +33,7 @@ vmr.run do
         vmr.strip[num].mono(OFF)
         puts vmr.strip[num].mono
     end
-
+=begin
     (1..2).each do |num|
         vmr.bus[num].mute(ON)
         puts vmr.bus[num].mute
@@ -54,4 +54,5 @@ vmr.run do
         vmr.bus[num].gain(OFF)
         puts vmr.bus[num].gain
     end
+=end
 end
