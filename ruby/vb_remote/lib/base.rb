@@ -47,7 +47,7 @@ module FunctionHooks
     attach_function :vmr_set_parameter_multi, :VBVMR_SetParameters, \
     [:string], :long
 
-    DELAY = 0.030
+    DELAY = 0.04
 
     """ Timer functions """
     def clear_pdirty

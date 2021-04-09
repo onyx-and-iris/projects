@@ -72,10 +72,8 @@ module BuildStrips
             })
         end
 
-        if @first_order
-            strip_factory
-            bus_factory
-        end
+        strip_factory
+        bus_factory
     end
 
     def blueprint(opts)
@@ -133,18 +131,160 @@ module BuildStrips
     def strip_factory
         self.strip = []
         (0..@strip_total).each_with_index do |num, index|
-            @strip[num] = Strip.new(index, @this_type)
+            @strip[num] = Strip.new(self, index, @this_type)
         end
     end
 
     def bus_factory
         self.bus = []
         (0..@bus_total).each_with_index do |num, index|
-            @bus[num] = Bus.new(index, @this_type)
+            @bus[num] = Bus.new(self, index, @this_type)
         end
     end
 
     class Strip
+        attr_accessor :index, :this_type, :run
+
+        def index=(value)
+            @index = value
+        end
+
+        def this_type=(value)
+            @this_type = value
+        end
+
+        def initialize(run, index, type)
+            @run = run
+            self.index = shift(index)
+            self.this_type = type
+        end
+
+        def shift(oldnum)
+            oldnum - 1
+        end
+
+        def set(param, value)
+            @run.set_parameter(param, value)
+        end
+
+        def get(param)
+            @run.get_parameter(param)
+        end
+
+        def mute=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def mute
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def solo=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def solo
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def mono=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def mono
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def mc=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def mc
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def k=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def k
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def gain=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def gain
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def A1=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def A1
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def A2=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def A2
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def A3=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def A3
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def A4=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def A4
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def A5=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def A5
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def B1=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+        
+        def B1
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def B2=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def B2
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+
+        def B3=(value)
+            set("Strip[#{@index}].#{__method__.to_s}", value)
+        end
+
+        def B3
+            get("Strip[#{@index}].#{__method__.to_s}")
+        end
+    end
+
+    class Bus
         attr_accessor :index, :this_type
 
         def index=(value)
@@ -155,220 +295,54 @@ module BuildStrips
             @this_type = value
         end
 
-        def initialize(index, type)
+        def initialize(run, index, type)
+            @run = run
             self.index = shift(index)
             self.this_type = type
         end
 
-        def shift(oldnum)
-            oldnum - 1
-        end
-
         def set(param, value)
-            set = Routines.new(@this_type, false)
-            set.set_parameter(param, value)
+            @run.set_parameter(param, value)
         end
 
         def get(param)
-            get = Routines.new(@this_type, false)
-            get.get_parameter(param)
+            return @run.get_parameter(param)
+        end
+
+        def shift(oldnum)
+            oldnum - 1
         end
 
         def mute=(value)
-            value = (value ? 1 : 0)
-            self.set("Strip[#{@index}].#{__method__.to_s}", value)
+            set("Bus[#{@index}].#{__method__.to_s}", value)
         end
-        """ !get.zero? """
-        def mute(value = nil)
-            if value.nil?
-                self.get("Strip[#{@index}].#{__method__.to_s}")
-            else
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            end
+
+        def mute
+            get("Bus[#{@index}].#{__method__.to_s}")
         end
 
         def solo=(value)
-            value = (value ? 1 : 0)
-            self.set("Strip[#{@index}].#{__method__.to_s}", value)
+            set("Bus[#{@index}].#{__method__.to_s}", value)
         end
 
-        def solo(value = nil)
-            if value.nil?
-                self.get("Strip[#{@index}].#{__method__.to_s}")
-            else
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            end
+        def solo
+            get("Bus[#{@index}].#{__method__.to_s}")
         end
-
+        
         def mono=(value)
-            value = (value ? 1 : 0)
-            self.set("Strip[#{@index}].#{__method__.to_s}", value)
+            set("Bus[#{@index}].#{__method__.to_s}", value)
         end
 
-        def mono(value = nil)
-            if value.nil?
-                self.get("Strip[#{@index}].#{__method__.to_s}")
-            else
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            end
-        end
-
-        def mc=(value)
-            value = (value ? 1 : 0)
-            self.set("Strip[#{@index}].#{__method__.to_s}", value)
-        end
-
-        def mc(value = nil)
-            if value.nil?
-                self.get("Strip[#{@index}].#{__method__.to_s}")
-            else
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            end
-        end
-
-        def k=(value)
-            value = (value ? 1 : 0)
-            self.set("Strip[#{@index}].#{__method__.to_s}", value)
-        end
-
-        def k(value = nil)
-            if value.nil?
-                self.get("Strip[#{@index}].#{__method__.to_s}")
-            else
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            end
+        def mono
+            get("Bus[#{@index}].#{__method__.to_s}")
         end
 
         def gain=(value)
-            value = (value ? 1 : 0)
-            self.set("Strip[#{@index}].#{__method__.to_s}", value)
+            set("Bus[#{@index}].#{__method__.to_s}", value)
         end
 
-        def gain(value = nil)
-            if value.nil?
-                self.get("Strip[#{@index}].#{__method__.to_s}")
-            else
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            end
-        end
-
-        def A1(value = nil)
-            if value
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Strip[#{@index}].#{__method__.to_s}")
-            end
-        end
-
-        def A2(value = nil)
-            if value
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Strip[#{@index}].#{__method__.to_s}")
-            end
-        end
-
-        def A3(value = nil)
-            if value
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Strip[#{@index}].#{__method__.to_s}")
-            end
-        end
-
-        def A4(value = nil)
-            if value
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Strip[#{@index}].#{__method__.to_s}")
-            end
-        end
-
-        def A5(value = nil)
-            if value
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Strip[#{@index}].#{__method__.to_s}")
-            end
-        end
-        
-        def B1(value = nil)
-            if value
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Strip[#{@index}].#{__method__.to_s}")
-            end
-        end
-
-        def B2(value = nil)
-            if value
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Strip[#{@index}].#{__method__.to_s}")
-            end
-        end
-
-        def B3(value = nil)
-            if value
-                self.set("Strip[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Strip[#{@index}].#{__method__.to_s}")
-            end
-        end
-    end
-
-    class Bus
-        attr_accessor :index, :this_type
-
-        def initialize(index, type)
-            self.index = shift(index)
-            self.this_type = type
-        end
-
-        def shift(oldnum)
-            oldnum - 1
-        end
-
-        def set(param, value)
-            set = Routines.new(@this_type, false)
-            set.set_parameter(param, value)
-        end
-
-        def get(param)
-            get = Routines.new(@this_type, false)
-            get.get_parameter(param)
-        end
-
-        def mute(value = nil)
-            if value
-                self.set("Bus[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Bus[#{@index}].#{__method__.to_s}")
-            end
-        end
-
-        def solo(value = nil)
-            if value
-                self.set("Bus[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Bus[#{@index}].#{__method__.to_s}")
-            end
-        end
-
-        def mono(value = nil)
-            if value
-                self.set("Bus[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Bus[#{@index}].#{__method__.to_s}")
-            end
-        end
-
-        def gain(value = nil)
-            if value
-                self.set("Bus[#{@index}].#{__method__.to_s}", value)
-            else
-                return self.get("Bus[#{@index}].#{__method__.to_s}")
-            end
+        def gain
+            get("Bus[#{@index}].#{__method__.to_s}")
         end
     end
 end
@@ -398,6 +372,10 @@ module Utils
 
     def shift(oldnum)
         oldnum - 1
+    end
+
+    def bool_to_float(param, value)
+        value = (value ? 1 : 0).to_f
     end
 
     def type_return(param, value)

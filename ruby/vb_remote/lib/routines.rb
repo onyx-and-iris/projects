@@ -10,11 +10,11 @@ class Routines
     mixin modules
     """
     include FunctionHooks
-    include BuildStrips
     include Utils
+    include BuildStrips
     include Alias
 
-    attr_accessor :val, :param_cache, :first_order
+    attr_accessor :val, :param_cache
     attr_reader :ret, :type, :logged_in, :logged_out, :sp_command, \
     :param_string, :param_options, :param_float, :param_name, :instdir
 
@@ -129,6 +129,7 @@ class Routines
             else
                 param = @m3
             end
+
             if validate(param, value)
                 @param_float = value
             else
@@ -168,13 +169,7 @@ class Routines
         @logical_id = value
     end
 
-    def first_order=(value)
-        @first_order = value
-    end
-
-    def initialize(type = nil, first_order = true)
-        self.first_order = first_order
-        
+    def initialize(type = nil)
         if type
             if type == "basic" || type == 1
                 self.type = BASIC
@@ -185,10 +180,6 @@ class Routines
             else
                 raise VBTypeError
             end
-
-            if @first_order == false
-                build_strips(type)
-            end            
         end
 
         @param_cache = Hash.new
