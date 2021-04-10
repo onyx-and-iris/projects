@@ -110,7 +110,7 @@ module BuildStrips
             return true if @type == POTATO
             raise VersionError
         elsif @is_bool.include? name
-            return num == 0 || num == 1
+            return [0,1].include? num
         elsif name == "gain"
             return num.between?(-60, 12)
         end
@@ -131,32 +131,31 @@ module BuildStrips
     def strip_factory
         self.strip = []
         (0..@strip_total).each_with_index do |num, index|
-            @strip[num] = Strip.new(self, index, @this_type)
+            @strip[num] = Strip.new(self, index)
         end
     end
 
     def bus_factory
         self.bus = []
         (0..@bus_total).each_with_index do |num, index|
-            @bus[num] = Bus.new(self, index, @this_type)
+            @bus[num] = Bus.new(self, index)
         end
     end
 
     class Strip
-        attr_accessor :index, :this_type, :run
+        attr_accessor :index, :run
+
+        def run=(value)
+            @run = value
+        end
 
         def index=(value)
             @index = value
         end
 
-        def this_type=(value)
-            @this_type = value
-        end
-
-        def initialize(run, index, type)
-            @run = run
+        def initialize(run, index)
+            self.run = run
             self.index = shift(index)
-            self.this_type = type
         end
 
         def shift(oldnum)
@@ -164,149 +163,182 @@ module BuildStrips
         end
 
         def set(param, value)
-            @run.set_parameter(param, value)
+            param.chomp!('=')
+            if [false,true].include? value
+                if @run.is_bool.include? param
+                    value = (value ? 1 : 0)
+                end
+            end
+            @run.set_parameter("Strip[#{@index}].#{param}", value)
         end
 
         def get(param)
-            @run.get_parameter(param)
+            if @run.is_bool.include? param
+                val = @run.get_parameter("Strip[#{@index}].#{param}")
+                return !val.zero?
+            end
+            @run.get_parameter("Strip[#{@index}].#{param}")
         end
 
         def mute=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def mute
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def mute(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.mute = value
         end
 
         def solo=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def solo
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def solo(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.solo = value
         end
 
         def mono=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def mono
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def mono(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.mono = value
         end
 
         def mc=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def mc
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def mc(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.mc = value
         end
 
         def k=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def k
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def k(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.k = value
         end
 
         def gain=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def gain
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def gain(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.gain = value
         end
 
         def A1=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def A1
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def A1(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.A1 = value
         end
 
         def A2=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def A2
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def A2(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.A2 = value
         end
 
         def A3=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def A3
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def A3(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.A3 = value
         end
 
         def A4=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def A4
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def A4(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.A4 = value
         end
 
         def A5=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def A5
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def A5(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.A5 = value
         end
 
         def B1=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
         
-        def B1
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def B1(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.B1 = value
         end
 
         def B2=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def B2
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def B2(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.B2 = value
         end
 
         def B3=(value)
-            set("Strip[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def B3
-            get("Strip[#{@index}].#{__method__.to_s}")
+        def B3(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.B3 = value
         end
     end
 
     class Bus
-        attr_accessor :index, :this_type
+        attr_accessor :index, :run
+
+        def run=(value)
+            @run = value
+        end
 
         def index=(value)
             @index = value
         end
 
-        def this_type=(value)
-            @this_type = value
-        end
-
-        def initialize(run, index, type)
-            @run = run
+        def initialize(run, index)
+            self.run = run
             self.index = shift(index)
-            self.this_type = type
         end
 
         def set(param, value)
-            @run.set_parameter(param, value)
+            param.chomp!('=')
+            if [false,true].include? value
+                if @run.is_bool.include? param
+                    value = (value ? 1 : 0)
+                end
+            end
+            @run.set_parameter("Bus[#{@index}].#{param}", value)
         end
 
         def get(param)
-            return @run.get_parameter(param)
+            if @run.is_bool.include? param
+                val = @run.get_parameter("Bus[#{@index}].#{param}")
+                return !val.zero?
+            end
+            @run.get_parameter("Bus[#{@index}].#{param}")
         end
 
         def shift(oldnum)
@@ -314,35 +346,39 @@ module BuildStrips
         end
 
         def mute=(value)
-            set("Bus[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def mute
-            get("Bus[#{@index}].#{__method__.to_s}")
+        def mute(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.mute = value
         end
 
         def solo=(value)
-            set("Bus[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def solo
-            get("Bus[#{@index}].#{__method__.to_s}")
+        def solo(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.solo = value
         end
         
         def mono=(value)
-            set("Bus[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def mono
-            get("Bus[#{@index}].#{__method__.to_s}")
+        def mono(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.mono = value
         end
 
         def gain=(value)
-            set("Bus[#{@index}].#{__method__.to_s}", value)
+            set(__method__.to_s, value)
         end
 
-        def gain
-            get("Bus[#{@index}].#{__method__.to_s}")
+        def gain(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.gain = value
         end
     end
 end
