@@ -92,14 +92,12 @@ class Routines
     end
 
     def param_cache=(*args)
-        if args[0][0] == "macros"
-            logical_id = args[0][1]
-            mode = args[0][2]
-            state = args[0][3]
+        type, *remaining = args[0]
+        if type == "macros"
+            logical_id, mode, state = *remaining
             @param_cache["mb_#{logical_id}_#{mode}"] = state           
-        elsif args[0][0] == "params"
-            param = args[0][1]
-            value = args[0][2]
+        elsif type == "params"
+            param, value = *remaining
             @param_cache[param] = value
         end
     end
@@ -253,11 +251,11 @@ class Routines
         if validate(@m1, @m2)
             if @param_string
                 self.ret = 
-                run_as(__method__.to_s + '_string', @param_name, @param_string)
+                run_as("#{__method__}_string", @param_name, @param_string)
                 self.param_cache = ["params", @param_name, @param_string]
             else
                 self.ret = 
-                run_as(__method__.to_s + '_float', @param_name, @param_float)
+                run_as("#{__method__}_float", @param_name, @param_float)
                 self.param_cache = ["params", @param_name, @param_float]
             end
         else
@@ -289,11 +287,11 @@ class Routines
 
         if @is_real_number.include? @m3
             c_get = FFI::MemoryPointer.new(:float, SIZE)
-            self.ret = run_as(__method__.to_s + '_float', @param_name, c_get)
+            self.ret = run_as("#{__method__}_float", @param_name, c_get)
             @val = type_return(@m3, c_get.read_float)
         else
             c_get = FFI::MemoryPointer.new(:string, BUFF, true)
-            self.ret = run_as(__method__.to_s + '_string', @param_name, c_get)
+            self.ret = run_as("#{__method__}_string", @param_name, c_get)
             @val = c_get.read_string
         end
     end
