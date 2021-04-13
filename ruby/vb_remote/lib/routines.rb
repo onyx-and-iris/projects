@@ -180,6 +180,7 @@ class Routines
         end
 
         @param_cache = Hash.new
+        build_strips(@type)
     end
 
     def runvb
@@ -201,7 +202,6 @@ class Routines
     def login
         self.logged_in = run_as(__method__)
         self.type = self.vbtype
-        build_strips(@type)
     end
 
     def logout

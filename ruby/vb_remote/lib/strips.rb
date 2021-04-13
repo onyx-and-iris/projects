@@ -117,6 +117,10 @@ module BuildStrips
             return [0,1].include? num
         elsif name == "gain"
             return num.between?(-60, 12)
+        elsif name == "comp" || name == "gate"
+            return num.between?(0, 10)
+        elsif name == "limit"
+            return num.between?(-40, 12)
         end
     end
 
@@ -127,7 +131,7 @@ module BuildStrips
             "macrobutton", "vban"
         ]
 
-        @is_float = ["gain"]
+        @is_float = ["gain", "comp", "gate", "limit"]
 
         self.is_real_number = @is_bool.|(@is_float)
     end
@@ -146,8 +150,8 @@ module BuildStrips
         end
     end
 
-    class Strip
-        attr_accessor :index, :run
+    class Channel
+        attr_accessor :run, :index
 
         def run=(value)
             @run = value
@@ -160,6 +164,39 @@ module BuildStrips
         def initialize(run, index)
             self.run = run
             self.index = @run.shift(index)
+        end
+
+        def mono=(value)
+            set(__method__.to_s, value)
+        end
+
+        def mono(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.mono = value
+        end
+
+        def mute=(value)
+            set(__method__.to_s, value)
+        end
+
+        def mute(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.mute = value
+        end
+
+        def gain=(value)
+            set(__method__.to_s, value)
+        end
+
+        def gain(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.gain = value
+        end
+    end
+
+    class Strip < Channel
+        def initialize(run, index)
+            super
         end
 
         def set(param, value)
@@ -180,15 +217,6 @@ module BuildStrips
             @run.get_parameter("Strip[#{@index}].#{param}")
         end
 
-        def mute=(value)
-            set(__method__.to_s, value)
-        end
-
-        def mute(value = nil)
-            return get(__method__.to_s) if value.nil?
-            self.mute = value
-        end
-
         def solo=(value)
             set(__method__.to_s, value)
         end
@@ -196,15 +224,6 @@ module BuildStrips
         def solo(value = nil)
             return get(__method__.to_s) if value.nil?
             self.solo = value
-        end
-
-        def mono=(value)
-            set(__method__.to_s, value)
-        end
-
-        def mono(value = nil)
-            return get(__method__.to_s) if value.nil?
-            self.mono = value
         end
 
         def mc=(value)
@@ -225,11 +244,29 @@ module BuildStrips
             self.k = value
         end
 
-        def gain=(value)
+        def comp=(value)
             set(__method__.to_s, value)
         end
 
-        def gain(value = nil)
+        def comp(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.comp = value
+        end
+
+        def gate=(value)
+            set(__method__.to_s, value)
+        end
+
+        def gate(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.gain = value
+        end
+
+        def limit=(value)
+            set(__method__.to_s, value)
+        end
+
+        def limit(value = nil)
             return get(__method__.to_s) if value.nil?
             self.gain = value
         end
@@ -305,22 +342,29 @@ module BuildStrips
             return get(__method__.to_s) if value.nil?
             self.B3 = value
         end
+
+        def B3=(value)
+            set(__method__.to_s, value)
+        end
+
+        def B3(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.B3 = value
+        end
+
+        def label=(value)
+            set(__method__.to_s, value)
+        end
+
+        def label(value = nil)
+            return get(__method__.to_s) if value.nil?
+            self.B3 = value
+        end
     end
 
-    class Bus
-        attr_accessor :index, :run
-
-        def run=(value)
-            @run = value
-        end
-
-        def index=(value)
-            @index = value
-        end
-
+    class Bus < Channel
         def initialize(run, index)
-            self.run = run
-            self.index = @run.shift(index)
+            super
         end
 
         def set(param, value)
@@ -341,15 +385,6 @@ module BuildStrips
             @run.get_parameter("Bus[#{@index}].#{param}")
         end
 
-        def mute=(value)
-            set(__method__.to_s, value)
-        end
-
-        def mute(value = nil)
-            return get(__method__.to_s) if value.nil?
-            self.mute = value
-        end
-
         def solo=(value)
             set(__method__.to_s, value)
         end
@@ -357,24 +392,6 @@ module BuildStrips
         def solo(value = nil)
             return get(__method__.to_s) if value.nil?
             self.solo = value
-        end
-        
-        def mono=(value)
-            set(__method__.to_s, value)
-        end
-
-        def mono(value = nil)
-            return get(__method__.to_s) if value.nil?
-            self.mono = value
-        end
-
-        def gain=(value)
-            set(__method__.to_s, value)
-        end
-
-        def gain(value = nil)
-            return get(__method__.to_s) if value.nil?
-            self.gain = value
         end
     end
 end
