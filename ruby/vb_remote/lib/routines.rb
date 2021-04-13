@@ -10,7 +10,6 @@ class Routines
     mixin modules
     """
     include FunctionHooks
-    include Utils
     include BuildStrips
     include Alias
 
