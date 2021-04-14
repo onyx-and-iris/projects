@@ -100,18 +100,18 @@ module BuildStrips
         Validate boundaries unless param requires none
         """
         if name == "strip"
-            num < @strip_total
+            return num < @strip_total
         elsif name == "bus"
-            num < @bus_total
+            return num < @bus_total
         elsif name == "instream" || name == "outstream"
-            num < @vban_total
+            return num < @vban_total
         elsif name == "composite" 
-            num < @composite_total
+            return num < @composite_total
         elsif name == "insert"
             return (num < @insert_total) if @type == POTATO
             raise VersionError
         elsif name == "reverb" || name == "delay"
-            return true if @type == POTATO
+            return @type == POTATO
             raise VersionError
         elsif @is_bool.include? name
             return [0,1].include? num
@@ -122,6 +122,7 @@ module BuildStrips
         elsif name == "limit"
             return num.between?(-40, 12)
         end
+        true
     end
 
     def define_types
@@ -202,9 +203,7 @@ module BuildStrips
         def set(param, value)
             param.chomp!('=')
             if [false,true].include? value
-                if @run.is_bool.include? param
-                    value = @run.bool_to_float(value)
-                end
+                value = @run.bool_to_float(value)
             end
             @run.set_parameter("Strip[#{@index}].#{param}", value)
         end
@@ -343,22 +342,13 @@ module BuildStrips
             self.B3 = value
         end
 
-        def B3=(value)
-            set(__method__.to_s, value)
-        end
-
-        def B3(value = nil)
-            return get(__method__.to_s) if value.nil?
-            self.B3 = value
-        end
-
         def label=(value)
             set(__method__.to_s, value)
         end
 
         def label(value = nil)
             return get(__method__.to_s) if value.nil?
-            self.B3 = value
+            self.label = value
         end
     end
 

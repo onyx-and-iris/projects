@@ -33,7 +33,12 @@ class Routines
     end
 
     def logged_in=(value)
-        """ login success status """
+        """ 
+        login success status 
+        1: OK but Voicemeeter Application not launched.
+        -1: cannot get client (unexpected)
+        -2: unexpected login (logout was expected before).
+        """
         if value == 1
             runvb
         elsif value < 0
@@ -62,6 +67,7 @@ class Routines
         @logged_out = value
     rescue LogoutError => error
         puts "ERROR: #{error.message}"
+        raise
     end
 
     def type=(value)
@@ -177,10 +183,11 @@ class Routines
             else
                 raise VBTypeError
             end
+            build_strips(@type)
+            create_alias
         end
 
         @param_cache = Hash.new
-        build_strips(@type)
     end
 
     def runvb
@@ -201,7 +208,11 @@ class Routines
 	
     def login
         self.logged_in = run_as(__method__)
-        self.type = self.vbtype
+        if @type.nil?
+            self.type = self.vbtype
+            build_strips(@type)
+            create_alias
+        end
     end
 
     def logout
@@ -217,7 +228,7 @@ class Routines
         self.param_cache = ["macros", logical_id, mode, state]
 
     rescue BoundsError => error
-        puts "ERROR: Logical ID out of range"
+        puts "ERROR: Macrobutton ID out of range"
         raise
     end
 
@@ -309,13 +320,10 @@ class Routines
 
     rescue ParamComError => error
         puts "ERROR: #{error.message}"
+        raise
     rescue ParamTypeError => error
         puts "ERROR: #{error.message}"
-    end
-
-    def recorder_command(name, value=1)
-        command = "recorder.#{name}"
-        self.ret = run_as('set_parameter_float', command, value.to_f)
+        raise
     end
 end
 
