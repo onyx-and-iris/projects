@@ -5,7 +5,7 @@ module BuildStrips
 
     attr_accessor :is_real_number, :is_bool, :is_float, :num, :strip, :bus, 
     :this_type, :vban_ranges
-    attr_reader :layout, :strip_total, :bus_total, :vban_total, \
+    attr_reader :layout, :strip_total, :bus_total, :vban_total,
     :composite_total, :insert_total
 
     ON = 1
@@ -154,14 +154,16 @@ module BuildStrips
 
     def strip_factory
         self.strip = []
-        (0..@strip_total).each_with_index do |num, index|
+        (1..@strip_total).each_with_index do |num, index|
+            num = index if @base_0
             @strip[num] = Strip.new(self, index)
         end
     end
 
     def bus_factory
         self.bus = []
-        (0..@bus_total).each_with_index do |num, index|
+        (1..@bus_total).each_with_index do |num, index|
+            num = index if @base_0
             @bus[num] = Bus.new(self, index)
         end
     end
@@ -179,7 +181,7 @@ module BuildStrips
 
         def initialize(run, index)
             self.run = run
-            self.index = @run.shift(index)
+            self.index = index
         end
 
         def mono=(value)

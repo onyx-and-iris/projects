@@ -13,7 +13,7 @@ class Routines
     include BuildStrips
     include Alias
 
-    attr_accessor :val, :param_cache
+    attr_accessor :val, :param_cache, :base_0
     attr_reader :ret, :type, :logged_in, :logged_out, :sp_command, \
     :param_string, :param_options, :param_float, :param_name, :instdir
 
@@ -144,7 +144,7 @@ class Routines
         value.each do |key, val|
             test_regex(/(\w+)_(\d+)/, key)
             name = @m1
-            num = shift(@m2)
+            num = shiftdn(@m2)
 
             val.each do |k, v|
                 if validate(name, num)
@@ -166,7 +166,13 @@ class Routines
         @logical_id = value
     end
 
-    def initialize(type = nil)
+    def base_0=(value)
+        @base_0 = value
+    end
+
+    def initialize(type = nil, base_0 = false)
+        self.base_0 = base_0
+
         if type
             if type == "basic" || type == 1
                 self.type = BASIC
@@ -327,9 +333,9 @@ class Remote < Routines
     Performs log in/out routines cleanly. 
     May yield a block argument otherwise simply login.
     """
-    def initialize(type = nil, logmein = false)
-        super(type)
-        self.run if logmein
+    def initialize(**opts)
+        super(opts[:type], opts[:base_0])
+        self.run if opts[:logmein]
 
     rescue VBTypeError => error
         puts "ERROR: #{error.message}"

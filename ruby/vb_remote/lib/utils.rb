@@ -21,12 +21,16 @@ module Utils
         end
     end
 
-    def shift(oldnum)
+    def shiftdn(oldnum)
         oldnum - 1
     end
 
+    def shiftup(oldnum)
+        oldnum + 1
+    end
+
     def bool_to_float(value)
-        value = (value ? 1 : 0).to_f
+        (value ? 1 : 0).to_f
     end
 
     def type_return(param, value)
