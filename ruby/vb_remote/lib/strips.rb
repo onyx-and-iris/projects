@@ -4,7 +4,7 @@ module BuildStrips
     include Utils
 
     attr_accessor :is_real_number, :is_bool, :is_float, :num, :strip, :bus, 
-    :this_type
+    :this_type, :vban_ranges
     attr_reader :layout, :strip_total, :bus_total, :vban_total, \
     :composite_total, :insert_total
 
@@ -37,6 +37,10 @@ module BuildStrips
 
     def is_real_number=(value)
         @is_real_number = value
+    end
+
+    def vban_ranges=(value)
+        @vban_ranges = value
     end
 
     def strip=(value)
@@ -121,6 +125,8 @@ module BuildStrips
             return num.between?(0, 10)
         elsif name == "limit"
             return num.between?(-40, 12)
+        elsif @vban_ranges.has_key? name
+            return num.between?(*@vban_ranges[name])
         end
         true
     end
@@ -129,12 +135,21 @@ module BuildStrips
         @is_bool = [
             "mono", "solo", "mute", "mc", "k",
             "A1", "A2", "A3", "B1", "B2", "B3",
-            "macrobutton", "vban"
+            "macrobutton"
         ]
 
         @is_float = ["gain", "comp", "gate", "limit"]
 
         self.is_real_number = @is_bool.|(@is_float)
+
+        self.vban_ranges = {
+            "on" => [0,1],
+            "port" => [0,65535],
+            "sr" => [11025,96000],
+            "channel" => [1,8],
+            "quality" => [0,4],
+            "route" => [0,8]
+        }
     end
 
     def strip_factory

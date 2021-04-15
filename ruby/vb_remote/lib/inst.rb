@@ -1,5 +1,5 @@
 require 'win32/registry'
-require 'Pathname'
+require 'pathname'
 require_relative 'errors'
 
 include Errors

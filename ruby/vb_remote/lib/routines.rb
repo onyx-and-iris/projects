@@ -115,7 +115,7 @@ class Routines
         will be no boundary testing
         """
         if test_regex(/^(\w+)\[(\d+)\].(\w+)/, value)
-        elsif test_regex(/^vban.(\w+)\[(\d+)\]/, value)
+        elsif test_regex(/^vban.(\w+)\[(\d+)\].(\w+)/, value)
         elsif test_regex(/^Fx.(\w+).On/, value)
         elsif test_regex(/^patch.(\w+)\[(\d+)\]/, value)
         end
@@ -127,13 +127,7 @@ class Routines
         if value.is_a? (String)
             @param_string = value
         else
-            if ["instream", "outstream"].include? @m1
-                param = "vban"
-            else
-                param = @m3
-            end
-
-            if validate(param, value)
+            if validate(@m3, value)
                 @param_float = value
             else
                 raise ParamValueError 
