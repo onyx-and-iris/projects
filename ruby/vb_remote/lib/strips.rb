@@ -135,6 +135,7 @@ module BuildStrips
         @is_bool = [
             "mono", "solo", "mute", "mc", "k",
             "A1", "A2", "A3", "B1", "B2", "B3",
+            "EQ.on",
             "macrobutton"
         ]
 
@@ -275,7 +276,7 @@ module BuildStrips
 
         def gate(value = nil)
             return get(__method__.to_s) if value.nil?
-            self.gain = value
+            self.gate = value
         end
 
         def limit=(value)
@@ -284,7 +285,7 @@ module BuildStrips
 
         def limit(value = nil)
             return get(__method__.to_s) if value.nil?
-            self.gain = value
+            self.limit = value
         end
 
         def A1=(value)
@@ -392,13 +393,13 @@ module BuildStrips
             @run.get_parameter("Bus[#{@index}].#{param}")
         end
 
-        def solo=(value)
-            set(__method__.to_s, value)
+        def EQ=(value)
+            set("EQ.on", value)
         end
 
-        def solo(value = nil)
-            return get(__method__.to_s) if value.nil?
-            self.solo = value
+        def EQ(value = nil)
+            return get("EQ.on") if value.nil?
+            self.EQ = value
         end
     end
 end

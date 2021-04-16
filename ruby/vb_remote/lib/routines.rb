@@ -333,8 +333,8 @@ class Remote < Routines
     Performs log in/out routines cleanly. 
     May yield a block argument otherwise simply login.
     """
-    def initialize(**opts)
-        super(opts[:type], opts[:base_0])
+    def initialize(type = nil, **opts)
+        super(type, opts[:base_0])
         self.run if opts[:logmein]
 
     rescue VBTypeError => error
