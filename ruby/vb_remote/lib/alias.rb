@@ -1,8 +1,12 @@
 module Alias
-    attr_reader :recorder, :button, :vban, :vban_in, :vban_out
+    attr_reader :recorder, :button, :vban, :vban_in, :vban_out, :command
 
     def recorder=(value)
         @recorder = value
+    end
+
+    def command=(value)
+        @command = value
     end
 
     def button=(value)
@@ -16,6 +20,10 @@ module Alias
         set_parameter("vban.Enable", value)
     end
 
+    def vban(value)
+        self.vban = value
+    end
+
     def vban_in=(value)
         @vban_in = value
     end
@@ -24,8 +32,13 @@ module Alias
         @vban_out = value
     end
 
+    def set_multi(value)
+        set_parameter_multi(value)
+    end
+
     def create_alias
         self.recorder = Recorder.new(self)
+        self.command = Command.new(self)
 
         self.button = []
         (1..70).each_with_index do |num, index|
@@ -100,18 +113,25 @@ module Alias
             self.set(value, mode=3)
         end
 
-        def trigger(set: nil)
+        def trigger
             self.get(mode=3)        
         end
     end
 
     class Recorder < Alias
+        def initialize(run)
+            super
+        end
+
         def set(command, value = nil)
             command.chomp!('=')
-            if value.nil?
-                @run.set_parameter("recorder.#{command}", 1.0)
-            else
+            if [false,true].include? value
+                value = @run.bool_to_float(value)
+            end
+            if value
                 @run.set_parameter("recorder.#{command}", value)
+            else
+                @run.set_parameter("recorder.#{command}", 1.0)
             end
         end
 
@@ -139,36 +159,68 @@ module Alias
             self.set(__method__.to_s, value)
         end
 
+        def A1(value)
+            self.A1 = value
+        end
+
         def A2=(value)
             self.set(__method__.to_s, value)
+        end
+
+        def A2(value)
+            self.A2 = value
         end
 
         def A3=(value)
             self.set(__method__.to_s, value)
         end
 
+        def A3(value)
+            self.A3 = value
+        end
+
         def A4=(value)
             self.set(__method__.to_s, value)
+        end
+
+        def A4(value)
+            self.A4 = value
         end
 
         def A5=(value)
             self.set(__method__.to_s, value)
         end
 
+        def A5(value)
+            self.A5 = value
+        end
+
         def B1=(value)
             self.set(__method__.to_s, value)
+        end
+
+        def B1(value)
+            self.B1 = value
         end
 
         def B2=(value)
             self.set(__method__.to_s, value)
         end
 
+        def B2(value)
+            self.B2 = value
+        end
+
         def B3=(value)
             self.set(__method__.to_s, value)
         end
+
+        def B3(value)
+            self.B3 = value
+        end
     end
 
-    class Vban< Alias
+    class Vban < Alias
         attr_accessor :id, :direction
 
         def id=(value)
@@ -197,8 +249,63 @@ module Alias
             self.set("on", value)
         end
 
+        def enable(value)
+            self.enable(value)
+        end
+
         def name=(value)
             self.set(__method__.to_s, value)
+        end
+    end
+
+    class Command < Alias
+        def initialize(run)
+            super
+        end
+
+        def set(command, value = nil, delay = 0.2)
+            command.chomp!('=')
+            command[0] = command[0].capitalize
+            @run.sp_command = command
+            if value.nil?
+                @run.set_parameter(@run.sp_command, 1.0)
+            else
+                @run.sp_value = value
+                @run.set_parameter(@run.sp_command, @run.sp_value)
+                sleep(delay)
+            end
+        end
+
+        def shutdown
+            self.set(__method__.to_s)
+        end
+
+        def show
+            self.set(__method__.to_s)
+        end
+
+        def restart
+            self.set(__method__.to_s)
+        end
+
+        def eject
+            self.set(__method__.to_s)
+        end
+        
+        def reset
+            self.set(__method__.to_s)
+        end
+
+        def save(value, delay = 0.2)
+            self.set(__method__.to_s, value, delay)
+        end
+
+        def load(value, delay = 0.2)
+            self.set(__method__.to_s, value, delay)
+        end
+
+        def showvbanchat
+            self.set("DialogShow.VBANCHAT")
         end
     end
 end

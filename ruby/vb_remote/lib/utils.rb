@@ -33,6 +33,10 @@ module Utils
         (value ? 1 : 0).to_f
     end
 
+    def bool_to_int(value)
+        (value ? 1 : 0)
+    end
+
     def type_return(param, value)
         return value.to_i if @is_bool.include? param
         return value.round(1) if @is_float.include? param

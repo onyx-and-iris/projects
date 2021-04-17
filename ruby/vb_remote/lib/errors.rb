@@ -47,13 +47,16 @@ module Errors
         end
     end
 
-    class ParamComError < StandardError
+    class CommandError < StandardError
         def message
             "Command not supported"
         end
     end
 
-    class ParamTypeError < StandardError
+    class ValueTypeError < StandardError
+        def message
+            "Incorrect value type"
+        end
     end
 
     class ParamValueError < StandardError
