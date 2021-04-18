@@ -5,7 +5,7 @@ require_relative 'strips'
 require_relative 'alias'
 
 class Routines
-    """ 
+    """
     define basic behaviours of API functions
     mixin modules
     """
@@ -13,71 +13,68 @@ class Routines
     include BuildStrips
     include Alias
 
-    attr_accessor :val, :param_cache, :base_0
+    attr_accessor :val, :param_cache, :base_0, :rundelay
     attr_reader :ret, :type, :logged_in, :logged_out, :sp_command, :sp_value,
     :param_string, :param_options, :param_float, :param_name, :instdir
 
     SIZE = 1
     BUFF = 512
 
-    """ Validation writer methods """
     def ret=(value)
         """ C API return value """
-        if value&.nonzero?
-            raise APIError
-        end
-        @ret = value
+        raise APIError if value&.nonzero?
 
+        @ret = value
     rescue APIError => error
-        puts "ERROR: #{error.message} #{value} in #{caller_locations[1].label}"
+        puts "#{error.class}: #{error.message} #{value} in #{caller_locations[1].label}"
         raise
     end
 
     def logged_in=(value)
-        """ 
-        login success status 
+        """
+        login success status
         1: OK but Voicemeeter Application not launched.
         -1: cannot get client (unexpected)
         -2: unexpected login (logout was expected before).
         """
-        if value == 1
+        if value == 0
+          @logged_in = value
+        elsif value == 1
             runvb
+            sleep(@rundelay)
         elsif value < 0
             raise LoginError
-        else
-            if vmr_pdirty&.nonzero?
-                clear_pdirty
-            end
-            if vmr_mdirty&.nonzero?
-                clear_mdirty
-            end
-
-            @logged_in = value
         end
+        clear_pdirty
+        clear_mdirty
 
     rescue LoginError => error
-        puts "ERROR: #{error.message} #{value}"
+        puts "#{error.class}: #{error.message} #{value}"
         raise
     end
 
     def logged_out=(value)
-        if value&.nonzero?
-            raise LogoutError
-        end
+        raise LogoutError if value&.nonzero?
+
         @logged_out = value
     rescue LogoutError => error
-        puts "ERROR: #{error.message}"
+        puts "#{error.class}: #{error.message}"
         raise
     end
 
     def type=(value)
-        """ vb type """
-        unless (1..3).include? value
+        """ Determine the Voicemeeter type """
+        if value == "basic" || value == 1
+            @type = BASIC
+        elsif value == "banana" || value == 2
+            @type = BANANA
+        elsif value == "potato" || value == 3
+            @type = POTATO
+        else
             raise VBTypeError
         end
-        @type = value    
     rescue VBTypeError => error
-        puts "ERROR: #{error.message}"
+        puts "#{error.class}: #{error.message} in #{__callee__}"
         raise
     end
 
@@ -90,17 +87,16 @@ class Routines
         @sp_command = "Command.#{value}"
 
     rescue CommandError => error
-        puts "ERROR: #{error.message} in #{__callee__}"
+        puts "#{error.class}: #{error.message} in #{__callee__}"
         raise
     end
 
     def sp_value=(value)
-        unless value.is_a? (String)
-            raise ValueTypeError
-        end
+        raise ValueTypeError unless value.is_a? (String)
+
         @sp_value = value
     rescue ValueTypeError => error
-        puts "ERROR: #{error.message} in #{__callee__}"
+        puts "#{error.class}: #{error.message} in #{__callee__}"
         raise
     end
 
@@ -108,7 +104,7 @@ class Routines
         type, *remaining = args[0]
         if type == "macros"
             logical_id, mode, state = *remaining
-            @param_cache["mb_#{logical_id}_#{mode}"] = state           
+            @param_cache["mb_#{logical_id}_#{mode}"] = state
         elsif type == "params"
             param, value = *remaining
             @param_cache[param] = value
@@ -116,7 +112,7 @@ class Routines
     end
 
     def param_name=(value)
-        """ 
+        """
         Test against available regex
         If no matches continue with assignment but there
         will be no boundary testing
@@ -134,14 +130,12 @@ class Routines
         if value.is_a? (String)
             @param_string = value
         else
-            if validate(@m3, value)
-                @param_float = value
-            else
-                raise ParamValueError 
-            end
+            raise ParamValueError unless validate(@m3, value)
+
+            @param_float = value
         end
     rescue ParamValueError => error
-        puts "ERROR: #{error.message}"
+        puts "#{error.class}: #{error.message} in #{__callee__}"
         raise
     end
 
@@ -151,7 +145,7 @@ class Routines
         value.each do |key, val|
             test_regex(/(\w+)_(\d+)/, key)
             name = @m1
-            num = shiftdn(@m2)
+            num = (@base_0 ? @m2 : shiftdn(@m2))
 
             val.each do |k, v|
                 v = bool_to_int(v) if [false,true].include? v
@@ -160,7 +154,7 @@ class Routines
                     build_str.append(
                         "#{name.capitalize}[#{num.to_s}].#{k} = #{v}"
                     )
-                    self.param_cache = 
+                    self.param_cache =
                     ["params", "#{name.capitalize}[#{num.to_s}].#{k}", v]
                 end
             end
@@ -169,9 +163,8 @@ class Routines
     end
 
     def logical_id=(value)
-        if value < 0 || value > 69
-            raise BoundsError
-        end
+        raise BoundsError unless value.between?(0,69)
+
         @logical_id = value
     end
 
@@ -179,21 +172,16 @@ class Routines
         @base_0 = value
     end
 
-    def initialize(type = nil, base_0 = false)
-        self.base_0 = base_0
+    def initialize(type = nil, opts = {})
+        self.base_0 = opts[:base_0] || false
+        self.setdelay = opts[:setdelay] || ACCESSOR_DELAY
+        self.getdelay = opts[:getdelay] || ACCESSOR_DELAY
+        self.rundelay = opts[:rundelay] || RUNDELAY
 
         if type
-            if type == "basic" || type == 1
-                self.type = BASIC
-            elsif type == "banana" || type == 2
-                self.type = BANANA
-            elsif type == "potato" || type == 3
-                self.type = POTATO
-            else
-                raise VBTypeError
-            end
+            self.type = type
             build_strips(@type)
-            create_alias
+            alias_factory
         end
 
         @param_cache = Hash.new
@@ -202,9 +190,8 @@ class Routines
     def runvb
         self.inst_exe = @type
         Open3.popen3(@inst_exe, '')
-        sleep(1)
     rescue EXENotFoundError => error
-        puts "ERROR: #{error.message}"
+        puts "#{error.class}: #{error.message} in #{__callee__}"
     end
 
     def vbtype
@@ -214,13 +201,13 @@ class Routines
         self.ret = run_as(__method__, c_get)
         c_get.read_long
     end
-	
+
     def login
         self.logged_in = run_as(__method__)
         if @type.nil?
             self.type = self.vbtype
             build_strips(@type)
-            create_alias
+            alias_factory
         end
     end
 
@@ -229,7 +216,7 @@ class Routines
     end
 
     def macro_setstatus(logical_id, state, mode=2)
-        """ 
+        """
         set macrobutton by number, state and mode
         """
         self.logical_id = logical_id
@@ -237,7 +224,7 @@ class Routines
         self.param_cache = ["macros", logical_id, mode, state]
 
     rescue BoundsError => error
-        puts "ERROR: Macrobutton ID out of range in #{__callee__}"
+        puts "#{error.class}: Macrobutton ID out of range in #{__callee__}"
         raise
     end
 
@@ -255,12 +242,12 @@ class Routines
         @val = type_return("macrobutton", c_get.read_float)
 
     rescue BoundsError => error
-        puts "ERROR: Logical ID out of range"
+        puts "#{error.class}: Logical ID out of range in #{__callee__}"
         raise
     end
 
     def set_parameter(name, value)
-        """ 
+        """
         determine if string or float parameter
         then set parameter by name, value
         """
@@ -271,21 +258,19 @@ class Routines
 
         if validate(@m1, @m2)
             if @param_string
-                self.ret = 
+                self.ret =
                 run_as("#{__method__}_string", @param_name, @param_string)
                 self.param_cache = ["params", @param_name, @param_string]
             else
-                self.ret = 
+                self.ret =
                 run_as("#{__method__}_float", @param_name, @param_float)
                 self.param_cache = ["params", @param_name, @param_float]
             end
         else
             raise BoundsError
         end
-    rescue VersionError => error
-        puts "ERROR: #{error.message}"
-    rescue BoundsError => error
-        puts "ERROR: #{error.message}"
+    rescue BoundsError, VersionError => error
+        puts "#{error.class}: #{error.message} in #{__callee__}"
     end
 
     def set_parameter_multi(param_hash)
@@ -319,18 +304,15 @@ class Routines
 end
 
 class Remote < Routines
-    """ 
+    """
     subclass to BaseRoutines.
-    Performs log in/out routines cleanly. 
+    Performs log in/out routines cleanly.
     May yield a block argument otherwise simply login.
     """
     def initialize(type = nil, **opts)
-        super(type, opts[:base_0])
-        self.run if opts[:logmein]
-
-    rescue VBTypeError => error
-        puts "ERROR: #{error.message}"
-        raise
+        logmein = opts.delete(:logmein)
+        super(type, **opts)
+        self.run if logmein
     end
 
     def run

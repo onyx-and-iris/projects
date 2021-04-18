@@ -4,7 +4,7 @@ require_relative 'inst'
 module FunctionHooks
     extend FFI::Library
 
-    attr_reader :vmr_dll, :os_bits
+    attr_reader :vmr_dll, :os_bits, :setdelay, :getdelay
 
     if ((@os_bits = get_arch) == 64)
         dll_name = "VoicemeeterRemote64.dll"
@@ -47,9 +47,22 @@ module FunctionHooks
     attach_function :vmr_set_parameter_multi, :VBVMR_SetParameters, \
     [:string], :long
 
-    DELAY = 0.001
+    ACCESSOR_DELAY = 0.001
+    RUNDELAY = 1
 
     """ Timer functions """
+    def setdelay=(value)
+        @setdelay = value
+    end
+
+    def getdelay=(value)
+        @getdelay = value
+    end
+
+    def rundelay=(value)
+        @rundelay = value
+    end
+
     def clear_pdirty
         while vmr_pdirty&.nonzero?
         end
@@ -74,7 +87,8 @@ module FunctionHooks
         torun = 'vmr_' + func.to_s
         val = send(torun, *args)
 
-        sleep(DELAY) if torun.include? 'set_'
+        sleep(@setdelay) if torun.include? 'set_'
+        sleep(@getdelay) if torun.include? 'get_'
         val
     end
 end

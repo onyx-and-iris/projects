@@ -42,4 +42,36 @@ module Utils
         return value.round(1) if @is_float.include? param
         value
     end
+
+    def validate(name, num)
+        """
+        Validate boundaries unless param requires none
+        """
+        if name == "strip"
+            return num < @strip_total
+        elsif name == "bus"
+            return num < @bus_total
+        elsif name == "instream" || name == "outstream"
+            return num < @vban_total
+        elsif name == "composite"
+            return num < @composite_total
+        elsif name == "insert"
+            return (num < @insert_total) if @type == POTATO
+            raise VersionError
+        elsif name == "reverb" || name == "delay"
+            return @type == POTATO
+            raise VersionError
+        elsif @is_bool.include? name
+            return [0,1].include? num
+        elsif name == "gain"
+            return num.between?(-60, 12)
+        elsif name == "comp" || name == "gate"
+            return num.between?(0, 10)
+        elsif name == "limit"
+            return num.between?(-40, 12)
+        elsif @vban_ranges.has_key? name
+            return num.between?(*@vban_ranges[name])
+        end
+        true
+    end
 end

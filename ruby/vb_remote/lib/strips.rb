@@ -3,7 +3,7 @@ require_relative 'utils'
 module BuildStrips
     include Utils
 
-    attr_accessor :is_real_number, :is_bool, :is_float, :num, :strip, :bus, 
+    attr_accessor :is_real_number, :is_bool, :is_float, :num, :strip, :bus,
     :this_type, :vban_ranges
     attr_reader :layout, :strip_total, :bus_total, :vban_total,
     :composite_total, :insert_total
@@ -44,7 +44,7 @@ module BuildStrips
     end
 
     def strip=(value)
-        @strip = value 
+        @strip = value
     end
 
     def bus=(value)
@@ -57,7 +57,7 @@ module BuildStrips
         if @this_type == BASIC
             blueprint({
                 :strip => {:p_in => 2, :v_in=> 1},
-                :bus => {:p_out => 2, :v_out=> 0},
+                :bus => {:p_out => 1, :v_out=> 1},
                 :in_vban => 4, :out_vban => 4,
                 :patch_insert => 0,
                 :composite => 0
@@ -68,15 +68,15 @@ module BuildStrips
                 :bus => {:p_out => 3, :v_out=> 2},
                 :in_vban => 8, :out_vban => 8,
                 :patch_insert => 22,
-                :composite => 7
+                :composite => 8
             })
         elsif @this_type == POTATO
             blueprint({
                 :strip => {:p_in => 5, :v_in=> 3},
                 :bus => {:p_out => 5, :v_out=> 3},
                 :in_vban => 8, :out_vban => 8,
-                :patch_insert => 35,
-                :composite => 7
+                :patch_insert => 34,
+                :composite => 8
             })
         end
 
@@ -91,44 +91,12 @@ module BuildStrips
         self.composite_total = @layout[:composite]
         self.insert_total = @layout[:patch_insert]
 
-        self.strip_total = 
+        self.strip_total =
         @layout[:strip][:p_in].+(@layout[:strip][:v_in])
-        self.bus_total = 
+        self.bus_total =
         @layout[:bus][:p_out].+(@layout[:bus][:v_out])
 
         define_types
-    end
-
-    def validate(name, num)
-        """ 
-        Validate boundaries unless param requires none
-        """
-        if name == "strip"
-            return num < @strip_total
-        elsif name == "bus"
-            return num < @bus_total
-        elsif name == "instream" || name == "outstream"
-            return num < @vban_total
-        elsif name == "composite" 
-            return num < @composite_total
-        elsif name == "insert"
-            return (num < @insert_total) if @type == POTATO
-            raise VersionError
-        elsif name == "reverb" || name == "delay"
-            return @type == POTATO
-            raise VersionError
-        elsif @is_bool.include? name
-            return [0,1].include? num
-        elsif name == "gain"
-            return num.between?(-60, 12)
-        elsif name == "comp" || name == "gate"
-            return num.between?(0, 10)
-        elsif name == "limit"
-            return num.between?(-40, 12)
-        elsif @vban_ranges.has_key? name
-            return num.between?(*@vban_ranges[name])
-        end
-        true
     end
 
     def define_types
@@ -336,7 +304,7 @@ module BuildStrips
         def B1=(value)
             set(__method__.to_s, value)
         end
-        
+
         def B1(value = nil)
             return get(__method__.to_s) if value.nil?
             self.B1 = value

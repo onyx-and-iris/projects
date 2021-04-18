@@ -36,7 +36,7 @@ module Alias
         set_parameter_multi(value)
     end
 
-    def create_alias
+    def alias_factory
         self.recorder = Recorder.new(self)
         self.command = Command.new(self)
 
@@ -104,7 +104,7 @@ module Alias
         def stateonly=(value)
             self.set(value, mode=2)
         end
-    
+
         def stateonly
             self.get(mode=2)
         end
@@ -114,7 +114,7 @@ module Alias
         end
 
         def trigger
-            self.get(mode=3)        
+            self.get(mode=3)
         end
     end
 
@@ -291,7 +291,7 @@ module Alias
         def eject
             self.set(__method__.to_s)
         end
-        
+
         def reset
             self.set(__method__.to_s)
         end
