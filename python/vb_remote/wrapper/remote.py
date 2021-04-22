@@ -9,7 +9,7 @@ from .output import OutputBus
 from .recorder import Recorder
 from . import kinds
 from . import profiles
-from .util import merge_dicts, p_polling, m_polling
+from .util import merge_dicts, polling
 
 from typing import Union
 
@@ -28,7 +28,6 @@ class VMRemote(abc.ABC):
         function's return value is not 0 (OK).
         """
         fn_name = 'VBVMR_' + fn
-
         retval = getattr(dll, fn_name)(*args)
         if check and retval not in expected:
             raise VMRDriverError(fn_name, retval)
@@ -81,9 +80,10 @@ class VMRemote(abc.ABC):
         val = self._call('MacroButton_IsDirty', expected=(0,1))
         return (val == 1)
  
-    @p_polling
+    @polling
     def get(self, param: str, string=False) -> Union[str, float]:
         """ Retrieves a parameter from cache if pdirty else run getter """
+        param = param.encode('ascii')
         if string:
             buf = (ct.c_wchar * 512)()
             self._call('GetParameterStringW', param, ct.byref(buf))
@@ -95,13 +95,12 @@ class VMRemote(abc.ABC):
 
     def set(self, param: str, val: Union[str, float]):
         """ Updates a parameter. Attempts to cache value """
-        p = param
         if isinstance(val, str):
             if len(val) >= 512:
                 raise VMRError('String is too long')
-            self._call('SetParameterStringW', p.encode('ascii'), ct.c_wchar_p(val))
+            self._call('SetParameterStringW', param.encode('ascii'), ct.c_wchar_p(val))
         else:
-            self._call('SetParameterFloat', p.encode('ascii'), ct.c_float(float(val)))
+            self._call('SetParameterFloat', param.encode('ascii'), ct.c_float(float(val)))
 
         self.cache[param] = [True, val]
 
@@ -139,7 +138,7 @@ class VMRemote(abc.ABC):
         except KeyError:
             raise VMRError(f'Unknown profile: {self.kind.id}/{name}')
 
-    @m_polling
+    @polling
     def button_getstatus(self, logical_id: int, mode: int) -> int:
         c_logical_id = ct.c_long(logical_id)
         c_state = ct.c_float()

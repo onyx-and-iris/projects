@@ -18,43 +18,31 @@ def merge_dicts(*srcs, dest={}):
                 target[key] = val
     return target
 
-def p_polling(func):
+def polling(func):
     """ check if recently cached was an updated value """
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
-        param = args[0]
-        if param in self.cache and self.cache[param][0]:
-            self.cache[param][0] = False
-            for i in range(self.max_polls):
-                if self.pdirty:
-                    return self.cache[param][1]
-                time.sleep(self.delay)
-        elif param in self.cache and self.pdirty:
-            return self.cache[param][1]
+    def wrapper(*args, **kwargs):
+        get = (func.__name__ == 'get')
+        mb_get = (func.__name__ == 'button_getstatus')
+        if get:
+            _remote, param, *remaining = args
+        elif mb_get:
+            _remote, logical_id, mode = args
+            param = f'mb_{logical_id}_{mode}'
 
-        res = func(self, *args, **kwargs)
-        self.cache[param] = [False, res]
+        if param in _remote.cache and _remote.cache[param][0]:
+            _remote.cache[param][0] = False
+            for i in range(_remote.max_polls):
+                if get and _remote.pdirty \
+                or mb_get and _remote.mdirty:
+                    return _remote.cache[param][1]
+                time.sleep(_remote.delay)
+        elif param in _remote.cache and get and _remote.pdirty \
+        or param in _remote.cache and mb_get and _remote.mdirty:
+            return _remote.cache[param][1]
 
-        return self.cache[param][1]
-    return wrapper
+        res = func(*args, **kwargs)
+        _remote.cache[param] = [False, res]
 
-def m_polling(func):
-    """ check if recently cached was an updated value """
-    @wraps(func)
-    def wrapper(self, *args):
-        logical_id, mode = args
-        param = f'mb_{logical_id}_{mode}'
-        if param in self.cache and self.cache[param][0]:
-            self.cache[param][0] = False
-            for i in range(self.max_polls):
-                if self.mdirty:
-                    return self.cache[param][1]
-                time.sleep(self.delay)
-        elif param in self.cache and self.mdirty:
-            return self.cache[param][1]
-
-        res = func(self, *args)
-        self.cache[f'mb_{logical_id}_{mode}'] = [False, res]
-
-        return self.cache[param][1]
+        return _remote.cache[param][1]
     return wrapper
