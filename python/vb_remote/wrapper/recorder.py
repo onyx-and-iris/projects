@@ -1,31 +1,30 @@
 import abc
-from abc import abstractmethod
 from .errors import VMRError
 
 class IRecorder(abc.ABC):
     """ Recorder Base Class """
-    @abstractmethod
+    @abc.abstractmethod
     def play(self , state: int=1):
         pass
-    @abstractmethod
+    @abc.abstractmethod
     def stop(self, state: int=1):
         pass
-    @abstractmethod  
+    @abc.abstractmethod  
     def pause(self , state: int=1):
         pass
-    @abstractmethod 
+    @abc.abstractmethod 
     def replay(self , state: int=1):
         pass
-    @abstractmethod  
+    @abc.abstractmethod  
     def record(self , state: int=1):
         pass
-    @abstractmethod  
+    @abc.abstractmethod  
     def loop(self, state: int=1):
         pass
-    @abstractmethod  
+    @abc.abstractmethod  
     def ff(self, state: int=1):
         pass
-    @abstractmethod  
+    @abc.abstractmethod  
     def rw(self, state: int=1):
         pass
 

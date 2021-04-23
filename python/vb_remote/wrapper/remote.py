@@ -7,6 +7,7 @@ from .errors import VMRError, VMRDriverError
 from .input import InputStrip
 from .output import OutputBus
 from .recorder import Recorder
+from .macrobuttons import MacroButtons
 from . import kinds
 from . import profiles
 from .util import merge_dicts, polling
@@ -146,7 +147,7 @@ class VMRemote(abc.ABC):
 
         self._call('MacroButton_GetStatus', c_logical_id, ct.byref(c_state), c_mode)
 
-        return c_state.value
+        return int(c_state.value)
 
     def button_setstatus(self, logical_id: int, state: int, mode: int):
         c_logical_id = ct.c_long(logical_id)
@@ -156,15 +157,6 @@ class VMRemote(abc.ABC):
         self._call('MacroButton_SetStatus', c_logical_id, c_state, c_mode)
         param = f'mb_{logical_id}_{mode}'
         self.cache[param] = [True, int(c_state.value)]
-      
-    def button_state(self, logical_id: int, state: int):
-        self.button_setstatus(logical_id, state, mode=1)
-      
-    def button_stateonly(self, logical_id: int, state: int):
-        self.button_setstatus(logical_id, state, mode=2)
-      
-    def button_trigger(self, logical_id: int, state: int):
-        self.button_setstatus(logical_id, state, mode=3)
       
     def show_vbanchat(self, state: int):
         if state not in (0, 1):
@@ -204,6 +196,7 @@ def _make_remote(kind) -> 'instanceof(VMRemote)':
         tuple(OutputBus.make((i < self.num_B), self, i) 
         for i in range(self.num_A + self.num_B))
         self.recorder = Recorder(self)
+        self.button = [MacroButtons(self, i) for i in range(70)]
     def get_profiles(self):
         return profiles.profiles[kind.id]
  
