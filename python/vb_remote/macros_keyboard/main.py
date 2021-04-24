@@ -1,5 +1,3 @@
-# Sendkeys for Streamlabs using this awesome package:
-# https://github.com/boppreh/keyboard
 import time
 import sys
 import keyboard
@@ -33,11 +31,9 @@ class MacroButtonRun:
         file_io.update_db(self.saved_states)
 
 def reset():
-    with voicemeeter.remote('potato') as oai:
-        reset = macrobuttons.Reset('reset', oai)
-        reset.reset(macros)
+    reset = macrobuttons.Reset('reset', oai)
+    reset.reset(macros)
     file_io.update_db(macros)
-    exit(False)
 
 def on_press(key):
     if key in options_audio:       
@@ -48,6 +44,8 @@ def on_press(key):
         with MacroButtonRun('scenes', key) as mb: 
             by_class = getattr(macrobuttons, mb.layer.capitalize())
             by_class(mb.this_macro, oai, mb.switch).run()
+    elif key == 'ctrl+F21':
+        reset()
 
 if __name__ == '__main__':
     audio = {
@@ -90,11 +88,10 @@ if __name__ == '__main__':
         'ctrl+7', 'ctrl+8'
         )
 
-
     with voicemeeter.remote('potato') as oai:
         for key in range(13, 19):
             keyboard.add_hotkey(f'F{key}', on_press, args=(f'F{key}',))
-        for key in range(13, 21):
+        for key in range(13, 22):
             keyboard.add_hotkey(f'ctrl+F{key}', on_press, args=(f'ctrl+F{key}',))
 
         for key in range(1, 7):
@@ -102,5 +99,5 @@ if __name__ == '__main__':
         for key in range(1, 9):
             keyboard.add_hotkey(f'ctrl+{key}', on_press, args=(f'ctrl+F{key + 12}',))
 
-        print("Press ENTER to stop.")
-        keyboard.wait('enter')
+        print("Press ctrl+F24 to stop.")
+        keyboard.wait('ctrl+F24')

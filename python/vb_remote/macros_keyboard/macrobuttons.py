@@ -260,5 +260,5 @@ class Reset(Macros):
                 default_macro, default_state, = default_states[layer].get(key)
                 logical_id = self.button_map[default_macro]
                     
-                self.oai.button_stateonly(logical_id, default_state)
+                self.oai.button[logical_id].stateonly = (default_state == 1)
                 print(f'resetting {default_macro} to {default_state}')
