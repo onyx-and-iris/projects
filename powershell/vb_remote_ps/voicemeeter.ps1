@@ -1,39 +1,24 @@
-Function MacroButton_SetStatus {
+Function MB_Set {
     param(
-        [int]$MODE
+        [Int64]$ID, [Single]$STATE, [Int64]$MODE
     )
-    0..2 | ForEach-Object {
-                                                         # ID,     SET          MODE
-        [Int]$retval = $vmr::VBVMR_MacroButton_SetStatus([Int64]$_, [Single]1.0, [Int64]$MODE)
-        if($retval -eq 0) { Write-Host("MB SETSTATUS SUCCESS") }
-        Start-Sleep -s 1
-        while($vmr::VBVMR_MacroButton_IsDirty() -eq 1) { Start-Sleep -s 0.01 }
+                                                     # ID,      SET          MODE
+    [Int]$retval = $vmr::VBVMR_MacroButton_SetStatus([Int64]$ID, [Single]$STATE, [Int64]$MODE)
+    if($retval -ne 0) { Write-Host("ERROR: CAPI return value: $retval") }
+}
 
-                                                         # ID,     GET          MODE
-        $ptr = [Single]0.0
-        [Int]$retval = $vmr::VBVMR_MacroButton_GetStatus([Int64]$_, [ref]$ptr, [Int64]$MODE)
-        if($retval -eq 0) { 
-            Write-Host("MB GETSTATUS SUCCESS")
-            Write-Host("MB ID:", $_, "STATE:", [Single]$ptr, "MODE:", $MODE)
-        }
+Function MB_Get {
+    param(
+        [Int64]$ID, [Int64]$MODE
+    )
+    Start-Sleep -m 50
+    while($vmr::VBVMR_MacroButton_IsDirty() -eq 1) { Start-Sleep -s 0.001 }
 
-        Start-Sleep -s 0.2
-                                                         # ID,     SET          MODE
-        [Int]$retval = $vmr::VBVMR_MacroButton_SetStatus([Int64]$_, [Single]0.0, [Int64]$MODE)
-        if($retval -eq 0) { Write-Host("MB SETSTATUS SUCCESS") }
-        Start-Sleep -s 1
-        while($vmr::VBVMR_MacroButton_IsDirty() -eq 1) { Start-Sleep -s 0.01 }
-
-                                                         # ID,     GET          MODE
-        $ptr = [Single]0.0
-        [Int]$retval = $vmr::VBVMR_MacroButton_GetStatus([Int64]$_, [ref]$ptr, [Int64]$MODE)
-        if($retval -eq 0) { 
-            Write-Host("MB GETSTATUS SUCCESS")
-            Write-Host("MB ID:", $_, "STATE:", [Single]$ptr, "MODE:", $MODE)
-        }
-
-        Start-Sleep -s 0.2
-    }
+                                                     # ID,      GET         MODE
+    $ptr = [Single]0.0
+    [Int]$retval = $vmr::VBVMR_MacroButton_GetStatus([Int64]$ID, [ref]$ptr, [Int64]$MODE)
+    if($retval -ne 0) { Write-Host("ERROR: CAPI return value: $retval") }
+    $ptr
 }
 
 
@@ -47,7 +32,7 @@ Function Login {
         if($retval -eq 0) { Write-Host("STARTING VB") }
     } else { Exit }
 
-    while($vmr::VBVMR_MacroButton_IsDirty() -eq 1) { Start-Sleep -s 0.01 }
+    while($vmr::VBVMR_MacroButton_IsDirty() -eq 1) { Start-Sleep -s 0.001 }
 
     $ptr = 0
     [Int]$retval = $vmr::VBVMR_GetVoicemeeterType([ref]$ptr)
@@ -90,9 +75,19 @@ $Handles  = @'
 
     Login
 
-    MacroButton_SetStatus -MODE 1
-    MacroButton_SetStatus -MODE 2
-    MacroButton_SetStatus -MODE 3
+    1..3 | ForEach-Object {
+        $mode = $_
+        0..2 | ForEach-Object {
+            $num = $_
+            MB_Set -ID $num -STATE 1.0 -MODE $mode
+            $res = MB_Get -ID $num -MODE $mode
+            Write-Host("id: $num mode: $mode = $res")
+
+            MB_Set -ID $num -STATE 0.0 -MODE $mode
+            $res = MB_Get -ID $num -MODE $mode
+            Write-Host("id: $num mode: $mode = $res")
+        }
+    }
 
     Logout
 }
