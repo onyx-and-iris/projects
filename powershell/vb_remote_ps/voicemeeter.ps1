@@ -43,6 +43,7 @@ Function Param_Get {
     $ptr = [Single]0.0
     [Int]$retval = $vmr::VBVMR_GetParameterFloat([String]$PARAM, [ref]$ptr)
     if($retval -ne 0) { Write-Host("ERROR: CAPI return value: $retval") }
+    $ptr
 }
 
 Function MB_Set {
@@ -113,14 +114,13 @@ if ($MyInvocation.InvocationName -ne '.')
     1..3 | ForEach-Object {
         $mode = $_
         0..2 | ForEach-Object {
-            $num = $_
-            MB_Set -ID $num -STATE 1.0 -MODE $mode
-            $res = MB_Get -ID $num -MODE $mode
-            Write-Host("id: $num mode: $mode = $res")
+            MB_Set -ID $_ -STATE 1.0 -MODE $mode
+            $res = MB_Get -ID $_ -MODE $mode
+            Write-Host("id: $_ mode: $mode = $res")
 
-            MB_Set -ID $num -STATE 0.0 -MODE $mode
-            $res = MB_Get -ID $num -MODE $mode
-            Write-Host("id: $num mode: $mode = $res")
+            MB_Set -ID $_ -STATE 0.0 -MODE $mode
+            $res = MB_Get -ID $_ -MODE $mode
+            Write-Host("id: $_ mode: $mode = $res")
         }
     }
 
@@ -128,9 +128,12 @@ if ($MyInvocation.InvocationName -ne '.')
         $num = $_
         @("Mute", "Mono", "Solo", "A1", "B1") | % {
             Param_Set -PARAM "Strip[$num].$_" -VALUE 1.0
-            Param_Get -PARAM "Strip[$num].$_"
+            $res = Param_Get -PARAM "Strip[$num].$_"
+            Write-Host("Strip[$num].$_ =", $res)
+
             Param_Set -PARAM "Strip[$num].$_" -VALUE 0.0
-            Param_Get -PARAM "Strip[$num].$_"
+            $res = Param_Get -PARAM "Strip[$num].$_"
+            Write-Host("Strip[$num].$_ =", $res)
         }
     }
 
