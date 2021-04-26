@@ -48,10 +48,10 @@ Function Param_Get {
 
 Function MB_Set {
     param(
-        [Int64]$ID, [Single]$STATE, [Int64]$MODE
+        [Int64]$ID, [Single]$SET, [Int64]$MODE
     )
                                                      # ID,      SET          MODE
-    [Int]$retval = $vmr::VBVMR_MacroButton_SetStatus([Int64]$ID, [Single]$STATE, [Int64]$MODE)
+    [Int]$retval = $vmr::VBVMR_MacroButton_SetStatus([Int64]$ID, [Single]$SET, [Int64]$MODE)
     if($retval -ne 0) { Write-Host("ERROR: CAPI return value: $retval") }
 }
 
@@ -114,11 +114,11 @@ if ($MyInvocation.InvocationName -ne '.')
     1..3 | ForEach-Object {
         $mode = $_
         0..2 | ForEach-Object {
-            MB_Set -ID $_ -STATE 1.0 -MODE $mode
+            MB_Set -ID $_ -SET 1.0 -MODE $mode
             $res = MB_Get -ID $_ -MODE $mode
             Write-Host("id: $_ mode: $mode = $res")
 
-            MB_Set -ID $_ -STATE 0.0 -MODE $mode
+            MB_Set -ID $_ -SET 0.0 -MODE $mode
             $res = MB_Get -ID $_ -MODE $mode
             Write-Host("id: $_ mode: $mode = $res")
         }
