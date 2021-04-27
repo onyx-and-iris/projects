@@ -25,66 +25,68 @@ $Handles  = @'
 
 $vmr = Add-Type -MemberDefinition $Handles -Name VMRemote -PassThru
 
+
 Function Param_Set {
     param(
         [String]$PARAM, [Single]$VALUE
     )
-    [Int]$retval = $vmr::VBVMR_SetParameterFloat([String]$PARAM, [Single]$VALUE)
-    if($retval -ne 0) { Write-Host("ERROR: CAPI return value: $retval") }
+    $retval = $vmr::VBVMR_SetParameterFloat($PARAM, $VALUE)
+    if($retval) { Throw "ERROR: CAPI return value: $retval" }
 }
+
 
 Function Param_Get {
     param(
         [String]$PARAM
     )
     Start-Sleep -m 50
-    while(P_Dirty -eq 1) { Start-Sleep -s 0.001 }
+    while(P_Dirty) { Start-Sleep -s 0.001 }
 
-    $ptr = [Single]0.0
-    [Int]$retval = $vmr::VBVMR_GetParameterFloat([String]$PARAM, [ref]$ptr)
-    if($retval -ne 0) { Write-Host("ERROR: CAPI return value: $retval") }
+    $ptr = 0.0
+    $retval = $vmr::VBVMR_GetParameterFloat($PARAM, [ref]$ptr)
+    if($retval) { Throw "ERROR: CAPI return value: $retval" }
     $ptr
 }
+
 
 Function MB_Set {
     param(
         [Int64]$ID, [Single]$SET, [Int64]$MODE
     )
-                                                     # ID,      SET          MODE
-    [Int]$retval = $vmr::VBVMR_MacroButton_SetStatus([Int64]$ID, [Single]$SET, [Int64]$MODE)
-    if($retval -ne 0) { Write-Host("ERROR: CAPI return value: $retval") }
+    $retval = $vmr::VBVMR_MacroButton_SetStatus($ID, $SET, $MODE)
+    if($retval) { Throw "ERROR: CAPI return value: $retval" }
 }
+
 
 Function MB_Get {
     param(
         [Int64]$ID, [Int64]$MODE
     )
     Start-Sleep -m 50
-    while(M_Dirty -eq 1) { Start-Sleep -s 0.001 }
+    while(M_Dirty) { Start-Sleep -s 0.001 }
 
-                                                     # ID,      GET         MODE
-    $ptr = [Single]0.0
-    [Int]$retval = $vmr::VBVMR_MacroButton_GetStatus([Int64]$ID, [ref]$ptr, [Int64]$MODE)
-    if($retval -ne 0) { Write-Host("ERROR: CAPI return value: $retval") }
+    $ptr = 0.0
+    $retval = $vmr::VBVMR_MacroButton_GetStatus($ID, [ref]$ptr, $MODE)
+    if($retval) { Throw "ERROR: CAPI return value: $retval" }
     $ptr
 }
 
 
 Function Login {
-    [Int]$retval = $vmr::VBVMR_Login()
-    if($retval -eq 0) { Write-Host("LOGGED IN") }
+    $retval = $vmr::VBVMR_Login()
+    if(-not $retval) { Write-Host("LOGGED IN") }
     elseif($retval -eq 1) { 
         Write-Host("VB NOT RUNNING")
 
-        [Int]$retval = $vmr::VBVMR_RunVoicemeeter([Int64]1)
-        if($retval -eq 0) { Write-Host("STARTING VB") }
+        $retval = $vmr::VBVMR_RunVoicemeeter([Int64]1)
+        if(-not $retval) { Write-Host("STARTING VB") }
     } else { Exit }
 
-    while(P_Dirty -eq 1 -or M_Dirty -eq 1) { Start-Sleep -s 0.001 }
+    while(P_Dirty -or M_Dirty) { Start-Sleep -s 0.001 }
 
     $ptr = 0
-    [Int]$retval = $vmr::VBVMR_GetVoicemeeterType([ref]$ptr)
-    if($retval -eq 0) { 
+    $retval = $vmr::VBVMR_GetVoicemeeterType([ref]$ptr)
+    if(-not $retval) { 
         if($ptr -eq 1) { Write-Host("VERSION:[BASIC]") }
         elseif($ptr -eq 2) { Write-Host("VERSION:[BANANA]") }
         elseif($ptr -eq 3) { Write-Host("VERSION:[POTATO]") }
@@ -94,13 +96,15 @@ Function Login {
 
 
 Function Logout {
-    [Int]$retval = $vmr::VBVMR_Logout()
-    if($retval -eq 0) { Write-Host("LOGGED OUT") }
+    $retval = $vmr::VBVMR_Logout()
+    if(-not $retval) { Write-Host("LOGGED OUT") }
 }
+
 
 Function P_Dirty {
     $vmr::VBVMR_IsParametersDirty()
 }
+
 
 Function M_Dirty {
     $vmr::VBVMR_MacroButton_IsDirty()
