@@ -5,13 +5,17 @@ Param(
 try
 {
     . ..\lib\voicemeeter.ps1
-    Login
+
+    $vmr = [Remote]::new('banana')
+
+    $vmr.Login()
+
     1..$num | ForEach-Object { 
-    Write-Host "Running test $_ of $num"
-    Invoke-Pester -Tag $tag 
+        Write-Host "Running test $_ of $num"
+        Invoke-Pester -Tag $tag 
     }
 }
 finally
 {
-    Logout
+    $vmr.Logout()
 }
