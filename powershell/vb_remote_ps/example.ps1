@@ -1,6 +1,6 @@
-try {
-    . $PSScriptRoot\lib\voicemeeter.ps1
+. $PSScriptRoot\lib\voicemeeter.ps1
 
+try {
     $vmr = [Remote]::new('potato')
 
     $vmr.Login()
