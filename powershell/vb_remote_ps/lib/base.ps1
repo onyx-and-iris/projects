@@ -31,7 +31,9 @@ $Handles  = @'
     public static extern int VBVMR_SetParameters(String param);
 '@
 
-$vmr = Add-Type -MemberDefinition $Handles -Name VMRemote -PassThru
+$lib = Add-Type -MemberDefinition $Handles -Name VMRemote -PassThru
+
+$global:layout = $null
 
 Function Param_Set_Multi {
     param(
@@ -52,7 +54,7 @@ Function Param_Set_Multi {
     [String]$cmd = $cmd.SubString(1)
     Write-Host $cmd
 
-    $retval = $vmr::VBVMR_SetParameters($cmd)
+    $retval = $lib::VBVMR_SetParameters($cmd)
     if($retval) { Throw "ERROR: CAPI return value: $retval" }
 }
 
@@ -60,7 +62,7 @@ Function Param_Set_String {
     param(
         [String]$PARAM, [String]$VALUE
     )
-    $retval = $vmr::VBVMR_SetParameterStringA($PARAM, $VALUE)
+    $retval = $lib::VBVMR_SetParameterStringA($PARAM, $VALUE)
     if($retval) { Throw "ERROR: CAPI return value: $retval" }
 }
 
@@ -73,7 +75,7 @@ Function Param_Get_String {
     while(P_Dirty) { Start-Sleep -m 1 }
 
     $BYTES = [System.Byte[]]::new(512)
-    $retval = $vmr::VBVMR_GetParameterStringA($PARAM, $BYTES)
+    $retval = $lib::VBVMR_GetParameterStringA($PARAM, $BYTES)
     if($retval) { Throw "ERROR: CAPI return value: $retval" }
 
     [System.Text.Encoding]::ASCII.GetString($BYTES).Trim([char]0)
@@ -84,7 +86,7 @@ Function Param_Set {
     param(
         [String]$PARAM, [Single]$VALUE
     )
-    $retval = $vmr::VBVMR_SetParameterFloat($PARAM, $VALUE)
+    $retval = $lib::VBVMR_SetParameterFloat($PARAM, $VALUE)
     if($retval) { Throw "ERROR: CAPI return value: $retval" }
 }
 
@@ -97,7 +99,7 @@ Function Param_Get {
     while(P_Dirty) { Start-Sleep -m 1 }
 
     $ptr = 0.0
-    $retval = $vmr::VBVMR_GetParameterFloat($PARAM, [ref]$ptr)
+    $retval = $lib::VBVMR_GetParameterFloat($PARAM, [ref]$ptr)
     if($retval) { Throw "ERROR: CAPI return value: $retval" }
     $ptr
 }
@@ -107,7 +109,7 @@ Function MB_Set {
     param(
         [Int64]$ID, [Single]$SET, [Int64]$MODE
     )
-    $retval = $vmr::VBVMR_MacroButton_SetStatus($ID, $SET, $MODE)
+    $retval = $lib::VBVMR_MacroButton_SetStatus($ID, $SET, $MODE)
     if($retval) { Throw "ERROR: CAPI return value: $retval" }
 }
 
@@ -120,48 +122,95 @@ Function MB_Get {
     while(M_Dirty) { Start-Sleep -m 1 }
 
     $ptr = 0.0
-    $retval = $vmr::VBVMR_MacroButton_GetStatus($ID, [ref]$ptr, $MODE)
+    $retval = $lib::VBVMR_MacroButton_GetStatus($ID, [ref]$ptr, $MODE)
     if($retval) { Throw "ERROR: CAPI return value: $retval" }
     $ptr
 }
 
+Function DefineVersion {
+    param(
+        [Int]$TYPE
+    )
+    $layout = @{}
+
+    if($TYPE -eq 1) {
+        $layout = @{
+           "strip" = 3
+           "bus" = 2
+        }
+    }
+    elseif($TYPE -eq 2) {
+        $layout = @{
+           "strip" = 5
+           "bus" = 5
+        }
+    }
+    elseif($TYPE -eq 3) {
+        $layout = @{
+           "strip" = 8
+           "bus" = 8
+        }
+    }
+    $global:layout = $layout
+
+    $button = Buttons
+    $strip = Strips
+    $bus = Buses
+}
+
 
 Function Login {
-    $retval = $vmr::VBVMR_Login()
+    param(
+        [String]$TYPE=$null
+    )
+    $retval = $lib::VBVMR_Login()
     if(-not $retval) { Write-Host("LOGGED IN") }
     elseif($retval -eq 1) { 
         Write-Host("VB NOT RUNNING")
 
-        $retval = $vmr::VBVMR_RunVoicemeeter([Int64]1)
-        if(-not $retval) { Write-Host("STARTING VB") }
+        if($TYPE -eq 'basic') {
+            $retval = $lib::VBVMR_RunVoicemeeter([Int64]1)
+            if(-not $retval) { Write-Host("STARTING VB") }
+        }
+        elseif($TYPE -eq 'banana') {
+            $retval = $lib::VBVMR_RunVoicemeeter([Int64]2)
+            if(-not $retval) { Write-Host("STARTING VB") }
+        }
+        elseif($TYPE -eq 'potato') {
+            $retval = $lib::VBVMR_RunVoicemeeter([Int64]3)
+            if(-not $retval) { Write-Host("STARTING VB") }
+        }
     } else { Exit }
 
     while(P_Dirty -or M_Dirty) { Start-Sleep -m 1 }
 
     $ptr = 0
-    $retval = $vmr::VBVMR_GetVoicemeeterType([ref]$ptr)
+    $retval = $lib::VBVMR_GetVoicemeeterType([ref]$ptr)
     if(-not $retval) { 
         if($ptr -eq 1) { Write-Host("VERSION:[BASIC]") }
         elseif($ptr -eq 2) { Write-Host("VERSION:[BANANA]") }
         elseif($ptr -eq 3) { Write-Host("VERSION:[POTATO]") }
         Start-Sleep -s 1
     }
+
+    DefineVersion -TYPE $ptr
 }
 
 
 Function Logout {
-    $retval = $vmr::VBVMR_Logout()
+    Start-Sleep -m 20
+    $retval = $lib::VBVMR_Logout()
     if(-not $retval) { Write-Host("LOGGED OUT") }
 }
 
 
 Function P_Dirty {
-    $vmr::VBVMR_IsParametersDirty()
+    $lib::VBVMR_IsParametersDirty()
 }
 
 
 Function M_Dirty {
-    $vmr::VBVMR_MacroButton_IsDirty()
+    $lib::VBVMR_MacroButton_IsDirty()
 }
 
 
