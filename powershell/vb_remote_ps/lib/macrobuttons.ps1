@@ -1,5 +1,3 @@
-. $PSScriptRoot\base.ps1
-
 class MacroButton {
     [int32]$id
 
@@ -14,8 +12,7 @@ class MacroButton {
     }
 
     [int] Getter($mode) {
-        $res = MB_Get -ID $this.id -MODE $mode
-        return $res
+        return MB_Get -ID $this.id -MODE $mode
     }
 
     hidden $_state = $($this | Add-Member ScriptProperty 'state' `
