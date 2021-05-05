@@ -28,19 +28,6 @@ class IRecorder(abc.ABC):
     def rw(self, state: int=1):
         pass
 
-    def output(self, out_type: str, state: int):
-        """ out_type should be 'A1', 'B2' etc """
-        out_type, number = out_type
-        if out_type not in ('A', 'B'):
-            raise VMRError('Output type must be A or B')
-        if state not in (0, 1):
-            raise VMRError('State must be 0 or 1')   
-        if out_type == 'A' and int(number) not in range(1, self._remote.num_A + 1) or \
-        out_type == 'B' and int(number) not in range(1, self._remote.num_B + 1):
-            raise VMRError('Strip/Bus out of range')
-
-        self.set(f'recorder.{out_type}{number}', state)
-
     def load(self, file: str):
         try:
             self.set('Recorder.load', file)
@@ -53,30 +40,120 @@ class Recorder(IRecorder):
     def __init__(self, remote):
         self._remote = remote
 
-    def set(self, *args: list):
+    def setter(self, *args: list):
         self._remote.set(*args)
 
+    def getter(self, *args: list):
+        return (self._remote.get(*args) == 1)
+
     def play(self , state: int=1):
-        self.set('recorder.play', state)
+        self.setter('recorder.play', state)
 
     def stop(self, state: int=1):
-        self.set('recorder.stop', state)
+        self.setter('recorder.stop', state)
 
     def pause(self , state: int=1):
-        self.set('recorder.pause', state)
+        self.setter('recorder.pause', state)
 
     def replay(self , state: int=1):
-        self.set('recorder.replay', state)
+        self.setter('recorder.replay', state)
  
     def record(self , state: int=1):
-        self.set('recorder.record', state)
+        self.setter('recorder.record', state)
 
     def loop(self, state: int=1):
-        self.set('Recorder.mode.Loop', state)
+        self.setter('Recorder.mode.Loop', state)
 
     def ff(self, state: int=1):
-        self.set('recorder.ff', state)
+        self.setter('recorder.ff', state)
 
     def rw(self, state: int=1):
-        self.set('recorder.rew', state)
+        self.setter('recorder.rew', state)
 
+    @property
+    def A1(self):
+        return self.getter(f'recorder.A1')
+
+    @A1.setter
+    def A1(self, val):
+        if isinstance(val, bool):
+            self.setter(f'recorder.A1', 1 if val else 0)
+        else:
+            raise VMRError('Error True or False expected')
+
+    @property
+    def A2(self):
+        return self.getter(f'recorder.A2')
+
+    @A2.setter
+    def A2(self, val):
+        if isinstance(val, bool):
+            self.setter(f'recorder.A2', 1 if val else 0)
+        else:
+            raise VMRError('Error True or False expected')
+
+    @property
+    def A3(self):
+        return self.getter(f'recorder.A3')
+
+    @A3.setter
+    def A3(self, val):
+        if isinstance(val, bool):
+            self.setter(f'recorder.A3', 1 if val else 0)
+        else:
+            raise VMRError('Error True or False expected')
+
+    @property
+    def A4(self):
+        return self.getter(f'recorder.A4')
+
+    @A4.setter
+    def A4(self, val):
+        if isinstance(val, bool):
+            self.setter(f'recorder.A4', 1 if val else 0)
+        else:
+            raise VMRError('Error True or False expected')
+
+    @property
+    def A5(self):
+        return self.getter(f'recorder.A5')
+
+    @A5.setter
+    def A5(self, val):
+        if isinstance(val, bool):
+            self.setter(f'recorder.A5', 1 if val else 0)
+        else:
+            raise VMRError('Error True or False expected')
+
+    @property
+    def B1(self):
+        return self.getter(f'recorder.B1')
+
+    @B1.setter
+    def B1(self, val):
+        if isinstance(val, bool):
+            self.setter(f'recorder.B1', 1 if val else 0)
+        else:
+            raise VMRError('Error True or False expected')
+
+    @property
+    def B2(self):
+        return self.getter(f'recorder.B2')
+
+    @B2.setter
+    def B2(self, val):
+        if isinstance(val, bool):
+            self.setter(f'recorder.B2', 1 if val else 0)
+        else:
+            raise VMRError('Error True or False expected')
+
+    @property
+    def B3(self):
+        return self.getter(f'recorder.B3')
+
+    @B3.setter
+    def B3(self, val):
+        if isinstance(val, bool):
+            self.setter(f'recorder.B3', 1 if val else 0)
+        else:
+            raise VMRError('Error True or False expected')

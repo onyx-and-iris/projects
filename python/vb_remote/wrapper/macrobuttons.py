@@ -26,11 +26,11 @@ class MacroButtons(IMacroButtons):
         self._remote.button_setstatus(*args)
 
     def getter(self, *args: list):
-        return self._remote.button_getstatus(*args)
+        return (self._remote.button_getstatus(*args) == 1)
 
     @property
     def state(self):
-        return (self.getter(self.index, 1) == 1)
+        return self.getter(self.index, 1)
 
     @state.setter
     def state(self, val):
@@ -41,7 +41,7 @@ class MacroButtons(IMacroButtons):
 
     @property
     def stateonly(self):
-        return (self.getter(self.index, 2) == 1)
+        return self.getter(self.index, 2)
 
     @stateonly.setter
     def stateonly(self, val):
@@ -52,7 +52,7 @@ class MacroButtons(IMacroButtons):
 
     @property
     def trigger(self):
-        return (self.getter(self.index, 3) == 1)
+        return self.getter(self.index, 3)
 
     @trigger.setter
     def trigger(self, val):
