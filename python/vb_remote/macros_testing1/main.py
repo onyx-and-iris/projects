@@ -1,16 +1,16 @@
-import duckypad
 import voicemeeter
 import keyboard
 
+from duckypad import Reset, Audio, Scene
+
 def initialize():
-    reset = duckypad.Reset('reset', oai)
-    reset.reset(macros)
+    reset.run(macros)
 
 def on_press(arg):
     for di in macros:
         if arg in macros[di]:
-            print(f'{arg} = {macros[di][arg]}')
-
+            for macro in macros[di][arg]:
+                eval(f'{di}.{macro}()')
 
 if __name__ == '__main__':
     kind = 'potato'
@@ -24,7 +24,7 @@ if __name__ == '__main__':
         'F18': {'solo_iris': False}
     }
 
-    scenes = {
+    scene = {
         'ctrl+F13': {'onyx_only': False},
         'ctrl+F14': {'iris_only': False},
         'ctrl+F15': {'dual_scene': False},
@@ -39,16 +39,17 @@ if __name__ == '__main__':
 
     macros = {}
     macros['audio'] = audio
-    macros['scenes'] = scenes
+    macros['scene'] = scene
     macros['gamecaster'] = gamecaster
 
-    reset =
-
-    initialize()
-
-    voicemeeter.launch(kind)
+    #voicemeeter.launch(kind)
 
     with voicemeeter.remote(kind) as oai:
+        reset = Reset(oai)
+        audio = Audio(oai)
+        scene = Scene(oai)
+        initialize()
+
         for key in range(13, 19):
             keyboard.add_hotkey(f'F{key}', on_press, args=(f'F{key}',))
             keyboard.add_hotkey(f'{key - 12}', on_press, args=(f'F{key}',))
