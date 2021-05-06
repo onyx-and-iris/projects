@@ -29,6 +29,7 @@ class SLOBS:
         return self
 
     def connect(self):
+        print('Attempting streamlabs connection...')
         try:
             self.socket = create_connection(self.url, timeout=5)
             self._authenticate()

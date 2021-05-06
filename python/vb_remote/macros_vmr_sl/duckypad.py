@@ -1,3 +1,4 @@
+import threading
 import custom
 
 def make(oai, sl):
@@ -241,24 +242,8 @@ class Reset(Macros):
         if init:
             print(f'Initializing states')
 
-        self.oai.apply({
-            'in-0': dict(A1=False, B1=True, mute=True, gain=0),
-            'in-1': dict(A1=False, B2=True, mute=True, gain=0),
-            'in-2': dict(A1=False, A5=True, mute=True, gain=0),
-            'in-3': dict(A1=False, A5=True, mute=True, gain=0),
-            'in-4': dict(A1=False, B3=True, mute=True, gain=0),
-            'in-5': dict(A1=False, A2=True, mute=False, gain=0),
-            'in-6': dict(A1=False, A3=True, mute=False, gain=0),
-            'in-7': dict(A1=False, A4=True, mute=False, gain=0),
-            'out-0': dict(mute=False, gain=0),
-            'out-1': dict(mute=False, gain=0),
-            'out-2': dict(mute=False, gain=0),
-            'out-3': dict(mute=False, gain=0),
-            'out-4': dict(mute=False, gain=0),
-            'out-5': dict(mute=True, gain=0),
-            'out-6': dict(mute=True, gain=0),
-            'out-7': dict(mute=False, gain=0)
-        })
+        x = threading.Thread(target=self.expensive())
+        x.start()
 
         self.oai.vban_out[0].enable = True
         self.oai.vban_out[1].enable = True
@@ -271,3 +256,40 @@ class Reset(Macros):
                     self.oai.button[id].stateonly = default_state
                     if not init:
                         print(f'resetting {macro} to {default_state}')
+
+    def expensive(self):
+        self.oai.apply({
+            'in-0': dict(A1=False, A2=False, A3=False, A4=False, A5=False,
+            B1=True, B2=False, B3=False, 
+            mono=False, solo=False, mute=True, gain=0),
+            'in-1': dict(A1=False, A2=False, A3=False, A4=False, A5=False,
+            B1=False, B2=True, B3=False, 
+            mono=False, solo=False, mute=True, gain=0),
+            'in-2': dict(A1=False, A2=False, A3=False, A4=False, A5=True,
+            B1=False, B2=False, B3=False,
+            mono=False, solo=False, mute=True, gain=0),
+            'in-3': dict(A1=False, A2=False, A3=False, A4=False, A5=True,
+            B1=False, B2=False, B3=False,
+            mono=False, solo=False, mute=True, gain=0),
+            'in-4': dict(A1=False, A2=False, A3=False, A4=False, A5=False,
+            B1=False, B2=False, B3=True, 
+            mono=False, solo=False, mute=True, gain=0),
+            'in-5': dict(A1=False, A2=True, A3=False, A4=False, A5=False,
+            B1=False, B2=False, B3=False, 
+            solo=False, mute=False, gain=0),
+            'in-6': dict(A1=False, A2=False, A3=True, A4=False, A5=False,
+            B1=False, B2=False, B3=False,
+            solo=False, mute=False, gain=0),
+            'in-7': dict(A1=False, A2=False, A3=False, A4=True, A5=False,
+            B1=False, B2=False, B3=False,
+            solo=False, mute=False, gain=0),
+
+            'out-0': dict(mono=False, mute=False, gain=0),
+            'out-1': dict(mono=False, mute=False, gain=0),
+            'out-2': dict(mono=False, mute=False, gain=0),
+            'out-3': dict(mono=False, mute=False, gain=0),
+            'out-4': dict(mono=False, mute=False, gain=0),
+            'out-5': dict(mono=False, mute=True, gain=0),
+            'out-6': dict(mono=False, mute=True, gain=0),
+            'out-7': dict(mono=False, mute=False, gain=0)
+        })
