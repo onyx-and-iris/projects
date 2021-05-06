@@ -39,21 +39,23 @@ class SLOBS:
 
     def switch_to(self, target):
         if not self.socket:
-            if self.connect():
-                self._on_close = None
-                self._sceneIDS = {}
-                self.target = target
+            self.connect()
 
-                self.send_message(8, "getScenes", {"resource": "ScenesService","args": []})
-                response = self.receive_message()
+        if self.socket:
+            self._on_close = None
+            self._sceneIDS = {}
+            self.target = target
 
-                for num in range(len(response['result'])):
-                    name = response['result'][num]['name']
-                    id = response['result'][num]['id']
+            self.send_message(8, "getScenes", {"resource": "ScenesService","args": []})
+            response = self.receive_message()
 
-                    self._sceneIDS[name] = id
+            for num in range(len(response['result'])):
+                name = response['result'][num]['name']
+                id = response['result'][num]['id']
 
-                self._make_sceneActive(self._sceneIDS[target])
+                self._sceneIDS[name] = id
+
+            self._make_sceneActive(self._sceneIDS[target])
 
     def _get_activeID(self):
         self.send_message(8, "activeScene", {"resource": "ScenesService","args": []})
