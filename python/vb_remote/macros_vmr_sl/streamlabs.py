@@ -17,6 +17,7 @@ class SLOBS:
         self.url = f"ws://localhost:59650/api/websocket"
         self.token = ''
         self.socket = None
+        self.connected = False
 
     def __enter__(self):
         try:
@@ -24,24 +25,13 @@ class SLOBS:
                 self.token = pickle.load(retrieve_tok)
         except FileNotFoundError:
             self.store_tok()
-
-        self.connect()
         return self
-
-    def connect(self):
-        print('Attempting streamlabs connection...')
-        try:
-            self.socket = create_connection(self.url, timeout=5)
-            self._authenticate()
-            return True
-        except ConnectionRefusedError as e:
-            print("ERROR: Couldn't connect, is StreamLabs OBS running?")
 
     def switch_to(self, target):
         if not self.socket:
             self.connect()
 
-        if self.socket:
+        if self.connected:    
             self._on_close = None
             self._sceneIDS = {}
             self.target = target
@@ -56,6 +46,15 @@ class SLOBS:
                 self._sceneIDS[name] = id
 
             self._make_sceneActive(self._sceneIDS[target])
+
+    def connect(self):
+        print('Attempting streamlabs connection...')
+        try:
+            self.socket = create_connection(self.url, timeout=5)
+            self._authenticate()
+            self.connected = True
+        except ConnectionRefusedError as e:
+            print("ERROR: Couldn't connect, is StreamLabs OBS running?")
 
     def _get_activeID(self):
         self.send_message(8, "activeScene", {"resource": "ScenesService","args": []})
@@ -129,13 +128,10 @@ class SLOBS:
                 save_tok = open(self.tok_file, 'x')
                 save_tok.close()
 
-    def close(self) -> None:
+    def __exit__(self, exc_type, exc_val, exc_tb):
         if self.socket:
             self.socket.close()
             self.socket = None
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
 
 if __name__ == '__main__':
   set_scene = Switchscene()
