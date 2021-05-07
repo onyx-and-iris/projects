@@ -1,4 +1,3 @@
-import threading
 import custom
 
 def make(oai, sl):
@@ -65,15 +64,15 @@ class Audio(Macros):
         out bus 2,7 off to disable disc + mics to stream
         """
         if self.enabled:
-            self.oai.vban_out[0].enable = False
-            self.oai.vban_out[1].enable = False
+            self.oai.vban_out[0].on = False
+            self.oai.vban_out[1].on = False
             self.oai.outputs[2].mute = True
             self.oai.outputs[7].mute = True
 
             print("Only discord enabled")
         else:
-            self.oai.vban_out[0].enable = True
-            self.oai.vban_out[1].enable = True
+            self.oai.vban_out[0].on = True
+            self.oai.vban_out[1].on = True
             self.oai.outputs[2].mute = False
             self.oai.outputs[7].mute = False
 
@@ -242,23 +241,18 @@ class Reset(Macros):
         if init:
             print(f'Initializing states')
 
-        x = threading.Thread(target=self.expensive())
-        x.start()
-
-        self.oai.vban_out[0].enable = True
-        self.oai.vban_out[1].enable = True
+        self.apply()
 
         for layer in macropad:
             for key in macropad[layer]:
-                for macro in macropad[layer][key]:
-                    default_state = macropad[layer][key][macro]
+                for macro, default_state in macropad[layer][key].items():
                     id = self.button_map[macro]
                     self.oai.button[id].stateonly = default_state
                     if not init:
                         print(f'resetting {macro} to {default_state}')
 
-    def expensive(self):
-        self.oai.apply({
+    def apply(self):
+        self.oai.setmulti({
             'in-0': dict(A1=False, A2=False, A3=False, A4=False, A5=False,
             B1=True, B2=False, B3=False, 
             mono=False, solo=False, mute=True, gain=0),
@@ -291,5 +285,8 @@ class Reset(Macros):
             'out-4': dict(mono=False, mute=False, gain=0),
             'out-5': dict(mono=False, mute=True, gain=0),
             'out-6': dict(mono=False, mute=True, gain=0),
-            'out-7': dict(mono=False, mute=False, gain=0)
+            'out-7': dict(mono=False, mute=False, gain=0),
+
+            'vban-out-0': dict(on=True),
+            'vban-out-1': dict(on=True)
         })

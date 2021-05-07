@@ -12,7 +12,7 @@ def on_press(arg):
         return None
     for di in macropad:
         if arg in macropad[di]:
-            for macro in macropad[di][arg]:
+            for macro in macropad[di][arg].keys():
                 eval(f'{di}.{macro}()')
 
 
