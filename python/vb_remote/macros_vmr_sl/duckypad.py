@@ -1,7 +1,7 @@
 import custom
 
 def make(oai, sl):
-    return [Reset(oai), Audio(oai), Scene(oai, sl)]
+    return (Reset(oai), Audio(oai), Scene(oai, sl))
 
 def run(func):
     def wrapper(*args):
@@ -254,10 +254,10 @@ class Reset(Macros):
     def apply(self):
         self.oai.setmulti({
             'in-0': dict(A1=False, A2=False, A3=False, A4=False, A5=False,
-            B1=True, B2=False, B3=False, 
+            B1=True, B2=False, B3=False,
             mono=False, solo=False, mute=True, gain=0),
             'in-1': dict(A1=False, A2=False, A3=False, A4=False, A5=False,
-            B1=False, B2=True, B3=False, 
+            B1=False, B2=True, B3=False,
             mono=False, solo=False, mute=True, gain=0),
             'in-2': dict(A1=False, A2=False, A3=False, A4=False, A5=True,
             B1=False, B2=False, B3=False,
@@ -266,10 +266,10 @@ class Reset(Macros):
             B1=False, B2=False, B3=False,
             mono=False, solo=False, mute=True, gain=0),
             'in-4': dict(A1=False, A2=False, A3=False, A4=False, A5=False,
-            B1=False, B2=False, B3=True, 
+            B1=False, B2=False, B3=True,
             mono=False, solo=False, mute=True, gain=0),
             'in-5': dict(A1=False, A2=True, A3=False, A4=False, A5=False,
-            B1=False, B2=False, B3=False, 
+            B1=False, B2=False, B3=False,
             solo=False, mute=False, gain=0),
             'in-6': dict(A1=False, A2=False, A3=True, A4=False, A5=False,
             B1=False, B2=False, B3=False,

@@ -31,7 +31,7 @@ class SLOBS:
         if not self.socket:
             self.connect()
 
-        if self.connected:    
+        if self.connected:
             self._on_close = None
             self._sceneIDS = {}
             self.target = target
@@ -46,6 +46,8 @@ class SLOBS:
                 self._sceneIDS[name] = id
 
             self._make_sceneActive(self._sceneIDS[target])
+
+        self.close()
 
     def connect(self):
         print('Attempting streamlabs connection...')
@@ -128,10 +130,14 @@ class SLOBS:
                 save_tok = open(self.tok_file, 'x')
                 save_tok.close()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def close(self):
         if self.socket:
             self.socket.close()
             self.socket = None
+        self.connected = False
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
 if __name__ == '__main__':
   set_scene = Switchscene()
