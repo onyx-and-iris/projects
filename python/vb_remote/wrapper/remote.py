@@ -7,7 +7,7 @@ from .errors import VMRError, VMRDriverError
 from .input import InputStrip
 from .output import OutputBus
 from .recorder import Recorder
-from .macrobuttons import MacroButtons
+from .macrobutton import MacroButtons
 from .vban import Vban
 from . import kinds
 from . import profiles
@@ -73,14 +73,12 @@ class VMRemote(abc.ABC):
 
     @property
     def pdirty(self) -> bool:
-        """ True if UI parameters have been updated. """
-        val = self._call('IsParametersDirty', expected=(0,1))
-        return (val == 1)
+        """ True iff UI parameters have been updated. """
+        return (self._call('IsParametersDirty', expected=(0,1)) == 1)
     @property
     def mdirty(self) -> bool:
-        """ True if MB parameters have been updated. """
-        val = self._call('MacroButton_IsDirty', expected=(0,1))
-        return (val == 1)
+        """ True iff MB parameters have been updated. """
+        return (self._call('MacroButton_IsDirty', expected=(0,1)) == 1)
  
     @polling
     def get(self, param: str, string=False) -> Union[str, float]:
@@ -105,6 +103,30 @@ class VMRemote(abc.ABC):
             self._call('SetParameterFloat', param.encode('ascii'), ct.c_float(float(val)))
 
         self.cache[param] = [True, val]
+
+    def setmulti(self, params: dict):
+        """ alternative set many through dict """
+        if not isinstance(params, dict):
+                raise VMRError('Error, expected a dictionary')
+
+        param_string = str()
+        for key, val in params.items():
+            m = key.split("-")
+            if m[0] == 'in':
+                identifier = f'Strip[{m[1]}]'
+            elif m[0] == 'out':
+                identifier = f'Bus[{m[1]}]'
+                val['EQ.on'] = val.pop('eq', None)
+            elif m[0] == 'vban':
+                identifier = f'{m[0]}.{m[1]}stream[{m[2]}]'
+
+            for k, v in val.items():
+                if v is not None:
+                    param_string += f'{identifier}.{k}={float(v)};'
+                    self.cache[f'{identifier}.{k}'] = [True, float(v)]
+            self._call('SetParameters', param_string.encode('ascii'))
+            param_string = str()
+
 
     def show(self):
         """ Shows Voicemeeter if it's hidden. """
@@ -158,7 +180,7 @@ class VMRemote(abc.ABC):
         self._call('MacroButton_SetStatus', c_logical_id, c_state, c_mode)
         param = f'mb_{logical_id}_{mode}'
         self.cache[param] = [True, int(c_state.value)]
-      
+  
     def show_vbanchat(self, state: int):
         if state not in (0, 1):
             raise VMRError('State must be 0 or 1')
