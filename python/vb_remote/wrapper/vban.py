@@ -69,10 +69,10 @@ class Vban(IVban):
 
     @port.setter
     def port(self, val):
-        if isinstance(val, int) and val in range(1024, 65535):
+        if isinstance(val, int) and val in range(1024, 65536):
             self.setter(f'{self.identifier}.port', val)
         else:
-            raise VMRError('Error expected value in range(1024, 65535)')
+            raise VMRError('Error expected value from 1024 to 65535')
 
     @property
     def sr(self):
@@ -100,7 +100,7 @@ class Vban(IVban):
         if isinstance(val, int) and val in range(1, 9):
             self.setter(f'{self.identifier}.channel', val)
         else:
-            raise VMRError('Error expected value in range(1, 9)')
+            raise VMRError('Error expected value from 1 to 8')
 
     @property
     def bit(self):
@@ -124,7 +124,7 @@ class Vban(IVban):
         if isinstance(val, int) and val in range(5):
             self.setter(f'{self.identifier}.quality', val)
         else:
-            raise VMRError('Error expected value in range(0, 5)')
+            raise VMRError('Error expected value from 0 to 4')
 
     @property
     def route(self):
@@ -135,5 +135,4 @@ class Vban(IVban):
         if isinstance(val, int) and val in range(9):
             self.setter(f'{self.identifier}.route', val)
         else:
-            raise VMRError('Error expected value in range(0, 9)')
-
+            raise VMRError('Error expected value from 0 to 8')
