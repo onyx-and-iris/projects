@@ -15,10 +15,12 @@ using System.Windows.Shapes;
 
 namespace MatchGame
 {
-    using System.Windows.Threading;
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+
+    using System.Windows.Threading;
+
     public partial class MainWindow : Window
     {
         DispatcherTimer timer = new DispatcherTimer();
@@ -27,7 +29,6 @@ namespace MatchGame
         public MainWindow()
         {
             InitializeComponent();
-
 
             timer.Interval = TimeSpan.FromSeconds(.1);
             timer.Tick += Timer_Tick;
@@ -41,7 +42,7 @@ namespace MatchGame
             if (matchesFound == 8)
             {
                 timer.Stop();
-                timeTextBlock.Text = timeTextBlock.Text = "Play again?";
+                timeTextBlock.Text = timeTextBlock.Text + " - Play again?";
             }
         }
 
@@ -65,6 +66,7 @@ namespace MatchGame
             {
                 if (textBlock.Name != "timeTextBlock")
                 {
+                    textBlock.Visibility = Visibility.Visible;
                     int index = random.Next(animalEmoji.Count);
                     string nextEmoji = animalEmoji[index];
                     textBlock.Text = nextEmoji;
