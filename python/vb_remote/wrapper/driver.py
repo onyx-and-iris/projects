@@ -8,13 +8,15 @@ from .errors import VMRError
 bits = 64 if sys.maxsize > 2**32 else 32
 os = platform.system()
 
-if os != 'Windows' or bits != 64:
-    raise VMRError('The vmr package only supports Windows 64-bit')
+if os != 'Windows':
+    raise VMRError('The vmr package only supports Windows')
 
 
-DLL_NAME = 'VoicemeeterRemote64.dll'
+DLL_NAME = f'VoicemeeterRemote{"64" if bits == 64 else ""}.dll'
 
-vm_base = path.join(path.expandvars('%ProgramFiles(x86)%'), 'VB', 'Voicemeeter')
+vm_base = path.join(path.expandvars(
+f'%ProgramFiles{"(x86)" if bits == 64 else ""}%'), 'VB', 'Voicemeeter'
+)
 
 def vm_subpath(*fragments):
     """ Returns a path based from Voicemeeter's install directory. """

@@ -12,6 +12,34 @@ class IVban(abc.ABC):
     def on(self):
         pass
 
+    @abc.abstractmethod
+    def name(self):
+        pass
+
+    @abc.abstractmethod
+    def ip(self):
+        pass
+
+    @abc.abstractmethod
+    def sr(self):
+        pass
+
+    @abc.abstractmethod
+    def channel(self):
+        pass
+
+    @abc.abstractmethod
+    def bit(self):
+        pass
+
+    @abc.abstractmethod
+    def quality(self):
+        pass
+
+    @abc.abstractmethod
+    def route(self):
+        pass
+
 
 class Vban(IVban):
     """ Vban Concrete Class """

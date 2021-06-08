@@ -25,7 +25,7 @@ class VMRemote(abc.ABC):
     def _call(self, fn: str, *args: list, check: bool=True, expected: tuple=(0,)) -> int:
         """
         Runs a C API function.
-        
+
         Raises an exception when check is True and the
         function's return value is not 0 (OK).
         """
@@ -40,6 +40,8 @@ class VMRemote(abc.ABC):
 
     def _login(self):
         self._call('Login')
+        while self.mdirty or self.pdirty:
+            pass
     def _logout(self):
         time.sleep(0.02)
         self._call('Logout')
@@ -79,7 +81,7 @@ class VMRemote(abc.ABC):
     def mdirty(self) -> bool:
         """ True iff MB parameters have been updated. """
         return (self._call('MacroButton_IsDirty', expected=(0,1)) == 1)
- 
+
     @polling
     def get(self, param: str, string=False) -> Union[str, float]:
         """ Retrieves a parameter from cache if pdirty else run getter """
@@ -150,7 +152,7 @@ class VMRemote(abc.ABC):
             else:
                 raise ValueError(strip)
             target.apply(submapping)
-    
+
     def apply_profile(self, name):
         try:
             profile = self.profiles[name]
@@ -180,7 +182,7 @@ class VMRemote(abc.ABC):
         self._call('MacroButton_SetStatus', c_logical_id, c_state, c_mode)
         param = f'mb_{logical_id}_{mode}'
         self.cache[param] = [True, int(c_state.value)]
-  
+
     def show_vbanchat(self, state: int):
         if state not in (0, 1):
             raise VMRError('State must be 0 or 1')
@@ -193,8 +195,6 @@ class VMRemote(abc.ABC):
 
     def __enter__(self):
         self._login()
-        while self.mdirty or self.pdirty:
-            pass
         return self
 
     def __exit__(self, type, value, traceback):
@@ -205,7 +205,7 @@ def _make_remote(kind) -> 'instanceof(VMRemote)':
     """
     Creates a new remote class and sets its number of inputs
     and outputs for a VM kind.
-    
+
     The returned class will subclass VMRemote.
     """
     def init(self, *args: list, **kwargs: dict):
@@ -213,10 +213,10 @@ def _make_remote(kind) -> 'instanceof(VMRemote)':
         self.kind = kind
         self.num_A, self.num_B = kind.layout
         self.inputs = \
-        tuple(InputStrip.make((i < self.num_A), self, i) 
+        tuple(InputStrip.make((i < self.num_A), self, i)
         for i in range(self.num_A + self.num_B))
         self.outputs = \
-        tuple(OutputBus.make((i < self.num_B), self, i) 
+        tuple(OutputBus.make((i < self.num_B), self, i)
         for i in range(self.num_A + self.num_B))
         self.recorder = Recorder(self)
         self.button = tuple(MacroButtons(self, i) for i in range(70))
@@ -225,7 +225,7 @@ def _make_remote(kind) -> 'instanceof(VMRemote)':
         self.vban_out = tuple(Vban(self, i, "out") for i in range(self.num_vban_out))
     def get_profiles(self):
         return profiles.profiles[kind.id]
- 
+
     return type(f'VMRemote{kind.name}', (VMRemote,), {
         '__init__': init,
         'profiles': property(get_profiles)

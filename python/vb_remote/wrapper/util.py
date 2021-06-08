@@ -2,7 +2,8 @@ import os
 import time
 from functools import wraps
 
-PROJECT_DIR = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+PROJECT_DIR = \
+os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 
 def project_path(*parts):
     return os.path.join(PROJECT_DIR, *parts)
@@ -30,19 +31,18 @@ def polling(func):
             _remote, logical_id, mode = args
             param = f'mb_{logical_id}_{mode}'
 
-        if param in _remote.cache and _remote.cache[param][0]:
-            _remote.cache[param][0] = False
-            for i in range(_remote.max_polls):
-                if get and _remote.pdirty \
-                or mb_get and _remote.mdirty:
-                    return _remote.cache[param][1]
-                time.sleep(_remote.delay)
-        elif param in _remote.cache and get and _remote.pdirty \
-        or param in _remote.cache and mb_get and _remote.mdirty:
-            return _remote.cache[param][1]
+        if param in _remote.cache:
+            if _remote.cache[param][0]:
+                _remote.cache[param][0] = False
+                for i in range(_remote.max_polls):
+                    if get and _remote.pdirty or mb_get and _remote.mdirty:
+                        return _remote.cache[param][1]
+                    time.sleep(_remote.delay)
+            elif get and _remote.pdirty or mb_get and _remote.mdirty:
+                return _remote.cache[param][1]
 
         res = func(*args, **kwargs)
         _remote.cache[param] = [False, res]
-
+        
         return _remote.cache[param][1]
     return wrapper
