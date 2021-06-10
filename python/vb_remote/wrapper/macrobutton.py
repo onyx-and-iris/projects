@@ -1,7 +1,7 @@
 import abc
 from .errors import VMRError
 
-class IMacroButtons(abc.ABC):
+class IMacroButton(abc.ABC):
     """ MacroButtons Base Class """
     @abc.abstractmethod
     def state(self):
@@ -16,7 +16,7 @@ class IMacroButtons(abc.ABC):
         pass
 
 
-class MacroButtons(IMacroButtons):
+class MacroButton(IMacroButton):
     """ MacroButtons Concrete Class """
     def __init__(self, remote, index):
         self._remote = remote

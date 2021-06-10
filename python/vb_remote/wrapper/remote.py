@@ -4,10 +4,10 @@ import abc
 
 from .driver import dll
 from .errors import VMRError, VMRDriverError
-from .input import InputStrip
-from .output import OutputBus
+from .strip import InputStrip
+from .bus import OutputBus
 from .recorder import Recorder
-from .macrobutton import MacroButtons
+from .macrobutton import MacroButton
 from .vban import Vban
 from . import kinds
 from . import profiles
@@ -38,11 +38,11 @@ class VMRemote(abc.ABC):
 
         return retval
 
-    def _login(self):
+    def login(self):
         self._call('Login')
         while self.mdirty or self.pdirty:
             pass
-    def _logout(self):
+    def logout(self):
         time.sleep(0.02)
         self._call('Logout')
 
@@ -194,11 +194,11 @@ class VMRemote(abc.ABC):
         self.apply_profile('base')
 
     def __enter__(self):
-        self._login()
+        self.login()
         return self
 
     def __exit__(self, type, value, traceback):
-        self._logout()
+        self.logout()
 
 
 def _make_remote(kind) -> 'instanceof(VMRemote)':
@@ -212,14 +212,14 @@ def _make_remote(kind) -> 'instanceof(VMRemote)':
         VMRemote.__init__(self, *args, **kwargs)
         self.kind = kind
         self.num_A, self.num_B = kind.layout
-        self.inputs = \
+        self.strip = \
         tuple(InputStrip.make((i < self.num_A), self, i)
         for i in range(self.num_A + self.num_B))
-        self.outputs = \
+        self.bus = \
         tuple(OutputBus.make((i < self.num_B), self, i)
         for i in range(self.num_A + self.num_B))
         self.recorder = Recorder(self)
-        self.button = tuple(MacroButtons(self, i) for i in range(70))
+        self.button = tuple(MacroButton(self, i) for i in range(70))
         self.num_vban_in, self.num_vban_out = kind.vban
         self.vban_in = tuple(Vban(self, i, "in") for i in range(self.num_vban_in))
         self.vban_out = tuple(Vban(self, i, "out") for i in range(self.num_vban_out))
