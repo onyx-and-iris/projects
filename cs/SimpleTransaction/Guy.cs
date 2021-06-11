@@ -55,7 +55,7 @@ namespace Transaction
         }
 
         /// <summary>
-        /// Validation method to ensure amount given isn't negative.
+        /// Validation method to ensure amount received isn't negative.
         /// </summary>
         /// <param name="amount">
         /// amount added to wallet.
