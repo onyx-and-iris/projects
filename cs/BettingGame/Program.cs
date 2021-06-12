@@ -67,15 +67,18 @@ namespace Betting
 
                         if (int.TryParse(amount, out int result))
                         {
-                            int pot = 2 * result;
+                            int pot = 2 * players[i].GiveCash(result);
 
                             if (random.NextDouble() > odds)
                             {
                                 players[i].TakeCash(pot);
+                                Console.WriteLine(
+                                    String.Format("Congratz player {0} you won your initial {1} bet + {2} bucks winnings!", players[i].name, result, pot / 2)
+                                    );
                             }
                             else
                             {
-                                players[i].GiveCash(result);
+                                Console.WriteLine(String.Format("Better luck next time {0}", players[i].name));
                             }
                         }
                         else
