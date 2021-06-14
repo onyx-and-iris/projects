@@ -66,15 +66,15 @@ class Audio(Macros):
         if self.enabled:
             self.oai.vban_out[0].on = False
             self.oai.vban_out[1].on = False
-            self.oai.outputs[2].mute = True
-            self.oai.outputs[7].mute = True
+            self.oai.bus[2].mute = True
+            self.oai.bus[7].mute = True
 
             print("Only discord enabled")
         else:
             self.oai.vban_out[0].on = True
             self.oai.vban_out[1].on = True
-            self.oai.outputs[2].mute = False
-            self.oai.outputs[7].mute = False
+            self.oai.bus[2].mute = False
+            self.oai.bus[7].mute = False
 
             print('Only discord disabled')
 
@@ -190,8 +190,6 @@ class Scene(Macros):
     @run
     def onyx_big(self):
         """ -3db pad on iris game pc """
-        self.oai.show()
-
         self.oai.apply({
             'in-2': dict(mute=False, gain=0),
             'in-3': dict(mute=False, gain=-3),
@@ -210,8 +208,8 @@ class Scene(Macros):
     @run
     def start(self):
         """ mute game pcs to stream for start scene """
-        self.oai.inputs[2].mute = True
-        self.oai.inputs[3].mute = True
+        self.oai.strip[2].mute = True
+        self.oai.strip[3].mute = True
 
         print('Start scene enabled.. ready to go live!')
 
@@ -227,8 +225,8 @@ class Scene(Macros):
     @run
     def end(self):
         """ mute both game pcs leave mics unmuted for byes """
-        self.oai.inputs[2].mute = True
-        self.oai.inputs[3].mute = True
+        self.oai.strip[2].mute = True
+        self.oai.strip[3].mute = True
 
         print('End scene enabled.')
 
