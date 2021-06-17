@@ -19,58 +19,29 @@ def get_arch
     end
 end
 
-def get_vbpath
-    vb_dn = 'Voicemeeter, The Virtual Mixing Console'
-    [
-        'Software\Microsoft\Windows\CurrentVersion\Uninstall',
-        'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
-    ].each do |key|
-        Win32::Registry::HKEY_LOCAL_MACHINE.open(key) do |reg|
-            reg.each_key do |key|             
-                k = reg.open(key)
+def get_vmpath(os_bits)
+    vm_key = "VB:Voicemeeter {17359A74-1236-5467}"
+    reg_key = "Software#{os_bits == 64 ? "\\WOW6432Node" : ""}\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"
 
-                displayname     = k["DisplayName"] rescue nil    
-                uninstallpath   = k["UninstallString"] rescue nil
+    Win32::Registry::HKEY_LOCAL_MACHINE.open(reg_key + vm_key) do |reg|           
+        value = reg["UninstallString"]
 
-                if(displayname && (displayname.eql? vb_dn))
-                    pn = Pathname.new(uninstallpath)
-                    return pn.dirname
-                end
-            end
-        end
+        pn = Pathname.new(value)
+        return pn.dirname
     end
-    raise DLLNotFoundError
-end
-
-def inst_exe=(value)
-    if value == BASIC
-        exe = "voicemeeter.exe"
-    elsif value == BANANA
-        exe = "voicemeeterpro.exe"
-    elsif value == POTATO
-        if @os_bits == 64
-            exe = "voicemeeter8x64.exe"
-        else
-            exe = "voicemeeter8.exe"
-        end
-    end
-    if get_vbpath.join(exe).executable?
-        @inst_exe = String(get_vbpath.join(exe))
-    else
-        raise EXENotFoundError
-    end
+    raise InstallErrors::DLLPathNotFoundError
 end
 
 def vmr_dll=(value)
     if value.file?
         @vmr_dll = value
     else
-        raise DLLNotFoundError
+        raise InstallErrors::DLLNotFoundError
     end
 end
 
 
 if __FILE__ == $PROGRAM_NAME
-    puts get_vbpath
+    puts get_vmpath(64)
     puts get_arch
 end

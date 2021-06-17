@@ -4,17 +4,17 @@ require_relative 'inst'
 module FunctionHooks
     extend FFI::Library
 
-    attr_reader :vmr_dll, :os_bits, :setdelay, :getdelay
+    attr_reader :vmr_dll, :setdelay, :getdelay, :rundelay,
+    :shutdowndelay, :saveloaddelay, :logoutdelay
+  
+    os_bits = get_arch
+    vm_path = get_vmpath(os_bits)
 
-    if ((@os_bits = get_arch) == 64)
-        dll_name = "VoicemeeterRemote64.dll"
-    elsif @os_bits == 32
-        dll_name = "VoicemeeterRemote.dll"
-    end
+    dll_name = "VoicemeeterRemote#{os_bits == 64 ? "64" : ""}.dll"
 
     begin
-        self.vmr_dll = get_vbpath.join(dll_name)
-    rescue DLLNotFoundError => error
+        self.vmr_dll = vm_path.join(dll_name)
+    rescue InstallErrors => error
         puts "ERROR: #{error.message}"
         raise
     end
@@ -49,6 +49,9 @@ module FunctionHooks
 
     ACCESSOR_DELAY = 0.001
     RUNDELAY = 1
+    LOGOUTDELAY = 0.02
+    SHUTDOWNDELAY = 0.4
+    SAVELOADDELAY = 0.2
 
     """ Timer functions """
     def setdelay=(value)
@@ -61,6 +64,18 @@ module FunctionHooks
 
     def rundelay=(value)
         @rundelay = value
+    end
+
+    def shutdowndelay=(value)
+        @shutdowndelay = value
+    end
+
+    def logoutdelay=(value)
+        @logoutdelay = value
+    end
+
+    def saveloaddelay=(value)
+        @saveloaddelay = value
     end
 
     def clear_pdirty

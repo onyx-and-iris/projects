@@ -59,6 +59,7 @@ module Alias
     end
 
     class Alias
+        include Make_Accessors
         attr_accessor :run
 
         def run=(value)
@@ -80,51 +81,35 @@ module Alias
         def initialize(run, index)
             super(run)
             self.id = index
+            self.make_accessor_buttons :state, :stateonly, :trigger
         end
 
-        def set(set, mode)
+        def setter(set, mode)
+            raise BaseErrors::ValueTypeError.new(set,'bool') unless @run.is_a_bool?(set)
             if [false,true].include? set
                 set = @run.bool_to_float(set)
             end
             @run.macro_setstatus(@id, set, mode)
+        rescue BaseErrors => error
+            puts "#{error.class}: #{error.message} in #{__callee__}"
+            raise
         end
 
-        def get(mode)
-            @run.macro_getstatus(@id, mode)
-        end
-
-        def state=(value)
-            self.set(value, mode=1)
-        end
-
-        def state
-            self.get(mode=1)
-        end
-
-        def stateonly=(value)
-            self.set(value, mode=2)
-        end
-
-        def stateonly
-            self.get(mode=2)
-        end
-
-        def trigger=(value)
-            self.set(value, mode=3)
-        end
-
-        def trigger
-            self.get(mode=3)
+        def getter(mode)
+            return !@run.macro_getstatus(@id, mode).zero?
         end
     end
 
     class Recorder < Alias
         def initialize(run)
             super
+            self.make_accessor_bool :A1, :A2, :A3, :A4, :A5, :B1, :B2, :B3
+            self.make_setter_action :play, :stop, :record, :ff, :rew
         end
 
-        def set(command, value = nil)
+        def setter(command, value = nil)
             command.chomp!('=')
+            raise BaseErrors::ValueTypeError.new(value,'bool') unless @run.is_a_bool?(value)
             if [false,true].include? value
                 value = @run.bool_to_float(value)
             end
@@ -133,90 +118,13 @@ module Alias
             else
                 @run.set_parameter("recorder.#{command}", 1.0)
             end
+        rescue BaseErrors => error
+            puts "#{error.class}: #{error.message} in #{__callee__}"
+            raise
         end
 
-        def play
-            self.set(__method__.to_s)
-        end
-
-        def stop
-            self.set(__method__.to_s)
-        end
-
-        def record
-            self.set(__method__.to_s)
-        end
-
-        def ff
-            self.set(__method__.to_s)
-        end
-
-        def rew
-            self.set(__method__.to_s)
-        end
-
-        def A1=(value)
-            self.set(__method__.to_s, value)
-        end
-
-        def A1(value)
-            self.A1 = value
-        end
-
-        def A2=(value)
-            self.set(__method__.to_s, value)
-        end
-
-        def A2(value)
-            self.A2 = value
-        end
-
-        def A3=(value)
-            self.set(__method__.to_s, value)
-        end
-
-        def A3(value)
-            self.A3 = value
-        end
-
-        def A4=(value)
-            self.set(__method__.to_s, value)
-        end
-
-        def A4(value)
-            self.A4 = value
-        end
-
-        def A5=(value)
-            self.set(__method__.to_s, value)
-        end
-
-        def A5(value)
-            self.A5 = value
-        end
-
-        def B1=(value)
-            self.set(__method__.to_s, value)
-        end
-
-        def B1(value)
-            self.B1 = value
-        end
-
-        def B2=(value)
-            self.set(__method__.to_s, value)
-        end
-
-        def B2(value)
-            self.B2 = value
-        end
-
-        def B3=(value)
-            self.set(__method__.to_s, value)
-        end
-
-        def B3(value)
-            self.B3 = value
+        def getter(command)
+            return !@run.get_parameter("recorder.#{command}").zero?
         end
     end
 
@@ -235,9 +143,12 @@ module Alias
             super(run)
             self.id = index
             self.direction = dir
+            self.make_accessor_bool :on
+            self.make_accessor_standard :name, :ip, :port, :quality, :route
+            self.make_accessor_in_is_readonly :sr, :channel, :bit
         end
 
-        def set(command, value)
+        def setter(command, value)
             command.chomp!('=')
             if [false,true].include? value
                 value = @run.bool_to_float(value)
@@ -245,25 +156,22 @@ module Alias
             @run.set_parameter("vban.#{@direction}stream[#{@id}].#{command}", value)
         end
 
-        def enable=(value)
-            self.set("on", value)
-        end
-
-        def enable(value)
-            self.enable(value)
-        end
-
-        def name=(value)
-            self.set(__method__.to_s, value)
+        def getter(command)
+            if @run.is_bool.include? command
+                val = @run.get_parameter("vban.#{@direction}stream[#{@id}].#{command}")
+                return !val.zero?
+            end
+            @run.get_parameter("vban.#{@direction}stream[#{@id}].#{command}")
         end
     end
 
     class Command < Alias
         def initialize(run)
             super
+            self.make_setter_action :show, :restart, :eject, :reset
         end
 
-        def set(command, value = nil, delay = 0.2)
+        def setter(command, value = nil, delay = @run.saveloaddelay)
             command.chomp!('=')
             command[0] = command[0].capitalize
             @run.sp_command = command
@@ -277,35 +185,20 @@ module Alias
         end
 
         def shutdown
-            self.set(__method__.to_s)
+            self.setter(__method__.to_s)
+            sleep(@run.shutdowndelay)
         end
 
-        def show
-            self.set(__method__.to_s)
+        def save(value, delay = @run.saveloaddelay)
+            self.setter(__method__.to_s, value, delay)
         end
 
-        def restart
-            self.set(__method__.to_s)
-        end
-
-        def eject
-            self.set(__method__.to_s)
-        end
-
-        def reset
-            self.set(__method__.to_s)
-        end
-
-        def save(value, delay = 0.2)
-            self.set(__method__.to_s, value, delay)
-        end
-
-        def load(value, delay = 0.2)
-            self.set(__method__.to_s, value, delay)
+        def load(value, delay = @run.saveloaddelay)
+            self.setter(__method__.to_s, value, delay)
         end
 
         def showvbanchat
-            self.set("DialogShow.VBANCHAT")
+            self.setter("DialogShow.VBANCHAT")
         end
     end
 end
