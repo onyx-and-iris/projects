@@ -19,7 +19,7 @@ class OutputBus(Channel):
         return f'Bus[{self.index}]'
 
     mute = bool_prop('Mute')
-    gain = float_prop('Gain', range=(-60,12))
+    gain = float_prop('Gain', p_range=(-60,12))
     mono = bool_prop('Mono')
     eq = bool_prop('EQ.on')
 

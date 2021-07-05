@@ -35,10 +35,14 @@ def polling(func):
             if _remote.cache[param][0]:
                 _remote.cache[param][0] = False
                 for i in range(_remote.max_polls):
-                    if get and _remote.pdirty or mb_get and _remote.mdirty:
+                    if get and _remote.pdirty:
+                        return _remote.cache[param][1]
+                    elif mb_get and _remote.mdirty:
                         return _remote.cache[param][1]
                     time.sleep(_remote.delay)
-            elif get and _remote.pdirty or mb_get and _remote.mdirty:
+            elif get and _remote.pdirty:
+                return _remote.cache[param][1]
+            elif mb_get and _remote.mdirty:
                 return _remote.cache[param][1]
 
         res = func(*args, **kwargs)

@@ -146,9 +146,9 @@ class VMRemote(abc.ABC):
             strip, index = key.split('-')
             index = int(index)
             if strip in ('in', 'input'):
-                target = self.inputs[index]
+                target = self.strip[index]
             elif strip in ('out', 'output'):
-                target = self.outputs[index]
+                target = self.bus[index]
             else:
                 raise ValueError(strip)
             target.apply(submapping)
@@ -233,7 +233,7 @@ def _make_remote(kind) -> 'instanceof(VMRemote)':
 
 _remotes = {kind.id: _make_remote(kind) for kind in kinds.all}
 
-def connect(kind_id, delay: float=.001, max_polls: int=5):
+def connect(kind_id, delay: float=.001, max_polls: int=8):
     """ Connect to Voicemeeter and sets its strip layout. """
     try:
         cls = _remotes[kind_id]
