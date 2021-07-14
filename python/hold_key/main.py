@@ -1,10 +1,10 @@
 import voicemeeter
 import keyboard
 
-def vol_up(vmr):
+def vol_up():
     vmr.strip[0].gain += 1
 
-def vol_down(vmr):
+def vol_down():
     vmr.strip[0].gain -= 1
 
 if __name__ == '__main__':
@@ -13,8 +13,8 @@ if __name__ == '__main__':
     voicemeeter.launch(kind)
 
     with voicemeeter.remote(kind) as vmr:
-        keyboard.add_hotkey('F1', vol_up, args=(vmr,))
-        keyboard.add_hotkey('F2', vol_down, args=(vmr,))
+        keyboard.add_hotkey('F1', vol_up)
+        keyboard.add_hotkey('F2', vol_down)
 
 
         print("Press CTRL+M to stop.")
